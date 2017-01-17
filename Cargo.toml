@@ -1,0 +1,9 @@
+[package]
+name = "harfbuzz_rs"
+version = "0.1.0"
+authors = ["Manuel Reinhardt <manuel.jr16@gmail.com>"]
+
+[dependencies]
+harfbuzz-sys = { git = "https://github.com/manuel-rhdt/rust-harfbuzz.git" }
+libc = "0.2.17"
+rusttype = "0.2.1"
