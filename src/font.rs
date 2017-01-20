@@ -332,22 +332,22 @@ pub trait FontFuncs {
                            -> Option<Glyph> {
         font.parent().get_variation_glyph(unicode, variation_sel)
     }
-    fn get_h_advance(&self, font: &Font, glyph: Glyph) -> Position {
+    fn get_glyph_h_advance(&self, font: &Font, glyph: Glyph) -> Position {
         font.parent_scale_x_distance(font.parent().get_glyph_h_advance(glyph))
     }
-    fn get_v_advance(&self, font: &Font, glyph: Glyph) -> Position {
+    fn get_glyph_v_advance(&self, font: &Font, glyph: Glyph) -> Position {
         font.parent_scale_y_distance(font.parent().get_glyph_v_advance(glyph))
     }
-    fn get_h_origin(&self, font: &Font, glyph: Glyph) -> Option<(Position, Position)> {
+    fn get_glyph_h_origin(&self, font: &Font, glyph: Glyph) -> Option<(Position, Position)> {
         font.parent().get_glyph_h_origin(glyph).map(|x| font.parent_scale_position(x))
     }
-    fn get_v_origin(&self, font: &Font, glyph: Glyph) -> Option<(Position, Position)> {
+    fn get_glyph_v_origin(&self, font: &Font, glyph: Glyph) -> Option<(Position, Position)> {
         font.parent().get_glyph_v_origin(glyph).map(|x| font.parent_scale_position(x))
     }
-    fn get_h_kerning(&self, font: &Font, left: Glyph, right: Glyph) -> Position {
+    fn get_glyph_h_kerning(&self, font: &Font, left: Glyph, right: Glyph) -> Position {
         font.parent_scale_x_distance(font.parent().get_glyph_h_kerning(left, right))
     }
-    fn get_v_kerning(&self, font: &Font, before: Glyph, after: Glyph) -> Position {
+    fn get_glyph_v_kerning(&self, font: &Font, before: Glyph, after: Glyph) -> Position {
         font.parent_scale_y_distance(font.parent().get_glyph_v_kerning(before, after))
     }
     fn get_glyph_extents(&self, font: &Font, glyph: Glyph) -> Option<GlyphExtents> {
@@ -379,14 +379,17 @@ pub trait FontFuncs {
 }
 
 
-extern "C" fn rust_get_font_h_extents<T: FontFuncs>(font: *mut hb::hb_font_t,
-                                                    font_data: *mut std::os::raw::c_void,
-                                                    metrics: *mut FontExtents,
-                                                    _: *mut std::os::raw::c_void)
-                                                    -> hb::hb_bool_t {
-    let funcs = unsafe { &*(font_data as *const T) };
+extern "C" fn rust_get_font_extents_closure<T, F>(font: *mut hb::hb_font_t,
+                                                  font_data: *mut std::os::raw::c_void,
+                                                  metrics: *mut FontExtents,
+                                                  closure_data: *mut std::os::raw::c_void)
+                                                  -> hb::hb_bool_t
+    where F: Fn(&Font, &T) -> Option<FontExtents>
+{
+    let font_data = unsafe { &*(font_data as *const T) };
     let font = unsafe { &Font::from_raw_referenced(font) };
-    let result = funcs.get_font_h_extents(font);
+    let closure = unsafe { &mut *(closure_data as *mut F) };
+    let result = closure(font, font_data);
 
     if let Some(extents) = result {
         unsafe { *metrics = extents };
@@ -396,35 +399,21 @@ extern "C" fn rust_get_font_h_extents<T: FontFuncs>(font: *mut hb::hb_font_t,
     }
 }
 
-extern "C" fn rust_get_font_v_extents<T: FontFuncs>(font: *mut hb::hb_font_t,
-                                                    font_data: *mut std::os::raw::c_void,
-                                                    metrics: *mut FontExtents,
-                                                    _: *mut std::os::raw::c_void)
-                                                    -> hb::hb_bool_t {
-    let funcs = unsafe { &*(font_data as *const T) };
-    let font = unsafe { &Font::from_raw_referenced(font) };
-    let result = funcs.get_font_v_extents(font);
-
-    if let Some(extents) = result {
-        unsafe { *metrics = extents };
-        1
-    } else {
-        0
-    }
-}
-
-extern "C" fn rust_get_nominal_glyph<T: FontFuncs>(font: *mut hb::hb_font_t,
+extern "C" fn rust_get_nominal_glyph_closure<T, F>(font: *mut hb::hb_font_t,
                                                    font_data: *mut std::os::raw::c_void,
                                                    unicode: hb::hb_codepoint_t,
                                                    glyph: *mut hb::hb_codepoint_t,
-                                                   _: *mut std::os::raw::c_void)
-                                                   -> hb::hb_bool_t {
-    let funcs = unsafe { &*(font_data as *const T) };
+                                                   closure_data: *mut std::os::raw::c_void)
+                                                   -> hb::hb_bool_t
+    where F: Fn(&Font, &T, char) -> Option<Glyph>
+{
+    let font_data = unsafe { &*(font_data as *const T) };
     let font = unsafe { &Font::from_raw_referenced(font) };
+    let closure = unsafe { &mut *(closure_data as *mut F) };
     let unicode = std::char::from_u32(unicode);
     match unicode {
         Some(unicode) => {
-            let result = funcs.get_nominal_glyph(font, unicode);
+            let result = closure(font, font_data, unicode);
             if let Some(result_glyph) = result {
                 unsafe { *glyph = result_glyph };
                 1
@@ -436,20 +425,23 @@ extern "C" fn rust_get_nominal_glyph<T: FontFuncs>(font: *mut hb::hb_font_t,
     }
 }
 
-extern "C" fn rust_get_variation_glyph<T: FontFuncs>(font: *mut hb::hb_font_t,
+extern "C" fn rust_get_variation_glyph_closure<T, F>(font: *mut hb::hb_font_t,
                                                      font_data: *mut std::os::raw::c_void,
                                                      unicode: hb::hb_codepoint_t,
                                                      variation_selector: hb::hb_codepoint_t,
                                                      glyph: *mut hb::hb_codepoint_t,
-                                                     _: *mut std::os::raw::c_void)
-                                                     -> hb::hb_bool_t {
-    let funcs = unsafe { &*(font_data as *const T) };
+                                                     closure_data: *mut std::os::raw::c_void)
+                                                     -> hb::hb_bool_t
+    where F: Fn(&Font, &T, char, char) -> Option<Glyph>
+{
+    let font_data = unsafe { &*(font_data as *const T) };
     let font = unsafe { &Font::from_raw_referenced(font) };
+    let closure = unsafe { &mut *(closure_data as *mut F) };
     let unicode = std::char::from_u32(unicode);
     let variation_selector = std::char::from_u32(variation_selector);
     match (unicode, variation_selector) {
         (Some(unicode), Some(variation_selector)) => {
-            let result = funcs.get_variation_glyph(font, unicode, variation_selector);
+            let result = closure(font, font_data, unicode, variation_selector);
             if let Some(result_glyph) = result {
                 unsafe { *glyph = result_glyph };
                 1
@@ -461,37 +453,32 @@ extern "C" fn rust_get_variation_glyph<T: FontFuncs>(font: *mut hb::hb_font_t,
     }
 }
 
-extern "C" fn rust_get_glyph_h_advance<T: FontFuncs>(font: *mut hb::hb_font_t,
-                                                     font_data: *mut std::os::raw::c_void,
-                                                     glyph: hb::hb_codepoint_t,
-                                                     _: *mut std::os::raw::c_void)
-                                                     -> Position {
-    let funcs = unsafe { &*(font_data as *const T) };
+extern "C" fn rust_get_glyph_advance_closure<T, F>(font: *mut hb::hb_font_t,
+                                                   font_data: *mut std::os::raw::c_void,
+                                                   glyph: hb::hb_codepoint_t,
+                                                   closure_data: *mut std::os::raw::c_void)
+                                                   -> Position
+    where F: Fn(&Font, &T, Glyph) -> Position
+{
+    let font_data = unsafe { &*(font_data as *const T) };
     let font = unsafe { &Font::from_raw_referenced(font) };
-    let result = funcs.get_h_advance(font, glyph);
-    result
+    let closure = unsafe { &mut *(closure_data as *mut F) };
+    closure(font, font_data, glyph)
 }
 
-extern "C" fn rust_get_glyph_v_advance<T: FontFuncs>(font: *mut hb::hb_font_t,
-                                                     font_data: *mut std::os::raw::c_void,
-                                                     glyph: hb::hb_codepoint_t,
-                                                     _: *mut std::os::raw::c_void)
-                                                     -> Position {
-    let funcs = unsafe { &*(font_data as *const T) };
+extern "C" fn rust_get_glyph_origin_closure<T, F>(font: *mut hb::hb_font_t,
+                                                  font_data: *mut std::os::raw::c_void,
+                                                  glyph: hb::hb_codepoint_t,
+                                                  x: *mut Position,
+                                                  y: *mut Position,
+                                                  closure_data: *mut std::os::raw::c_void)
+                                                  -> hb::hb_bool_t
+    where F: Fn(&Font, &T, Glyph) -> Option<(Position, Position)>
+{
+    let font_data = unsafe { &*(font_data as *const T) };
     let font = unsafe { &Font::from_raw_referenced(font) };
-    funcs.get_v_advance(font, glyph)
-}
-
-extern "C" fn rust_get_glyph_h_origin<T: FontFuncs>(font: *mut hb::hb_font_t,
-                                                    font_data: *mut std::os::raw::c_void,
-                                                    glyph: hb::hb_codepoint_t,
-                                                    x: *mut Position,
-                                                    y: *mut Position,
-                                                    _: *mut std::os::raw::c_void)
-                                                    -> hb::hb_bool_t {
-    let funcs = unsafe { &*(font_data as *const T) };
-    let font = unsafe { &Font::from_raw_referenced(font) };
-    if let Some((x_origin, y_origin)) = funcs.get_h_origin(font, glyph) {
+    let closure = unsafe { &mut *(closure_data as *mut F) };
+    if let Some((x_origin, y_origin)) = closure(font, font_data, glyph) {
         unsafe { *x = x_origin };
         unsafe { *y = y_origin };
         1
@@ -500,55 +487,32 @@ extern "C" fn rust_get_glyph_h_origin<T: FontFuncs>(font: *mut hb::hb_font_t,
     }
 }
 
-extern "C" fn rust_get_glyph_v_origin<T: FontFuncs>(font: *mut hb::hb_font_t,
-                                                    font_data: *mut std::os::raw::c_void,
-                                                    glyph: hb::hb_codepoint_t,
-                                                    x: *mut Position,
-                                                    y: *mut Position,
-                                                    _: *mut std::os::raw::c_void)
-                                                    -> hb::hb_bool_t {
-    let funcs = unsafe { &*(font_data as *const T) };
+extern "C" fn rust_get_glyph_kerning_closure<T, F>(font: *mut hb::hb_font_t,
+                                                   font_data: *mut std::os::raw::c_void,
+                                                   before: hb::hb_codepoint_t,
+                                                   after: hb::hb_codepoint_t,
+                                                   closure_data: *mut std::os::raw::c_void)
+                                                   -> Position
+    where F: Fn(&Font, &T, Glyph, Glyph) -> Position
+{
+    let font_data = unsafe { &*(font_data as *const T) };
     let font = unsafe { &Font::from_raw_referenced(font) };
-    if let Some((x_origin, y_origin)) = funcs.get_v_origin(font, glyph) {
-        unsafe { *x = x_origin };
-        unsafe { *y = y_origin };
-        1
-    } else {
-        0
-    }
+    let closure = unsafe { &mut *(closure_data as *mut F) };
+    closure(font, font_data, before, after)
 }
 
-extern "C" fn rust_get_glyph_h_kerning<T: FontFuncs>(font: *mut hb::hb_font_t,
-                                                     font_data: *mut std::os::raw::c_void,
-                                                     left: hb::hb_codepoint_t,
-                                                     right: hb::hb_codepoint_t,
-                                                     _: *mut std::os::raw::c_void)
-                                                     -> Position {
-    let funcs = unsafe { &*(font_data as *const T) };
-    let font = unsafe { &Font::from_raw_referenced(font) };
-    funcs.get_h_kerning(font, left, right)
-}
-
-extern "C" fn rust_get_glyph_v_kerning<T: FontFuncs>(font: *mut hb::hb_font_t,
-                                                     font_data: *mut std::os::raw::c_void,
-                                                     left: hb::hb_codepoint_t,
-                                                     right: hb::hb_codepoint_t,
-                                                     _: *mut std::os::raw::c_void)
-                                                     -> Position {
-    let funcs = unsafe { &*(font_data as *const T) };
-    let font = unsafe { &Font::from_raw_referenced(font) };
-    funcs.get_v_kerning(font, left, right)
-}
-
-extern "C" fn rust_get_glyph_extents<T: FontFuncs>(font: *mut hb::hb_font_t,
+extern "C" fn rust_get_glyph_extents_closure<T, F>(font: *mut hb::hb_font_t,
                                                    font_data: *mut std::os::raw::c_void,
                                                    glyph: hb::hb_codepoint_t,
                                                    extents: *mut hb::hb_glyph_extents_t,
-                                                   _: *mut std::os::raw::c_void)
-                                                   -> hb::hb_bool_t {
-    let funcs = unsafe { &*(font_data as *const T) };
+                                                   closure_data: *mut std::os::raw::c_void)
+                                                   -> hb::hb_bool_t
+    where F: Fn(&Font, &T, Glyph) -> Option<GlyphExtents>
+{
+    let font_data = unsafe { &*(font_data as *const T) };
     let font = unsafe { &Font::from_raw_referenced(font) };
-    match funcs.get_glyph_extents(font, glyph) {
+    let closure = unsafe { &mut *(closure_data as *mut F) };
+    match closure(font, font_data, glyph) {
         Some(result) => {
             unsafe { *extents = result };
             1
@@ -557,17 +521,20 @@ extern "C" fn rust_get_glyph_extents<T: FontFuncs>(font: *mut hb::hb_font_t,
     }
 }
 
-extern "C" fn rust_get_glyph_contour_point<T: FontFuncs>(font: *mut hb::hb_font_t,
+extern "C" fn rust_get_glyph_contour_point_closure<T, F>(font: *mut hb::hb_font_t,
                                                          font_data: *mut std::os::raw::c_void,
                                                          glyph: hb::hb_codepoint_t,
                                                          point: u32,
                                                          x: *mut Position,
                                                          y: *mut Position,
-                                                         _: *mut std::os::raw::c_void)
-                                                         -> hb::hb_bool_t {
-    let funcs = unsafe { &*(font_data as *const T) };
+                                                         closure_data: *mut std::os::raw::c_void)
+                                                         -> hb::hb_bool_t
+    where F: Fn(&Font, &T, Glyph, u32) -> Option<(Position, Position)>
+{
+    let font_data = unsafe { &*(font_data as *const T) };
     let font = unsafe { &Font::from_raw_referenced(font) };
-    if let Some((x_origin, y_origin)) = funcs.get_glyph_contour_point(font, glyph, point) {
+    let closure = unsafe { &mut *(closure_data as *mut F) };
+    if let Some((x_origin, y_origin)) = closure(font, font_data, glyph, point) {
         unsafe { *x = x_origin };
         unsafe { *y = y_origin };
         1
@@ -576,17 +543,20 @@ extern "C" fn rust_get_glyph_contour_point<T: FontFuncs>(font: *mut hb::hb_font_
     }
 }
 
-extern "C" fn rust_get_glyph_name<T: FontFuncs>(font: *mut hb::hb_font_t,
+extern "C" fn rust_get_glyph_name_closure<T, F>(font: *mut hb::hb_font_t,
                                                 font_data: *mut std::os::raw::c_void,
                                                 glyph: hb::hb_codepoint_t,
                                                 name: *mut std::os::raw::c_char,
                                                 size: u32,
-                                                _: *mut std::os::raw::c_void)
-                                                -> hb::hb_bool_t {
-    let funcs = unsafe { &*(font_data as *const T) };
+                                                closure_data: *mut std::os::raw::c_void)
+                                                -> hb::hb_bool_t
+    where F: Fn(&Font, &T, Glyph) -> Option<String>
+{
+    let font_data = unsafe { &*(font_data as *const T) };
     let font = unsafe { &Font::from_raw_referenced(font) };
+    let closure = unsafe { &mut *(closure_data as *mut F) };
     let mut name = unsafe { std::slice::from_raw_parts_mut(name as *mut u8, size as usize) };
-    let result = funcs.get_glyph_name(font, glyph)
+    let result = closure(font, font_data, glyph)
         .and_then(|string| CString::new(string).ok())
         .and_then(|cstr| name.write_all(cstr.as_bytes_with_nul()).ok());
     if result.is_some() {
@@ -598,15 +568,18 @@ extern "C" fn rust_get_glyph_name<T: FontFuncs>(font: *mut hb::hb_font_t,
     }
 }
 
-extern "C" fn rust_get_glyph_from_name<T: FontFuncs>(font: *mut hb::hb_font_t,
+extern "C" fn rust_get_glyph_from_name_closure<T, F>(font: *mut hb::hb_font_t,
                                                      font_data: *mut std::os::raw::c_void,
                                                      name: *const std::os::raw::c_char,
                                                      size: i32,
                                                      glyph: *mut hb::hb_codepoint_t,
-                                                     _: *mut std::os::raw::c_void)
-                                                     -> hb::hb_bool_t {
-    let funcs = unsafe { &*(font_data as *const T) };
+                                                     closure_data: *mut std::os::raw::c_void)
+                                                     -> hb::hb_bool_t
+    where F: Fn(&Font, &T, &str) -> Option<Glyph>
+{
+    let font_data = unsafe { &*(font_data as *const T) };
     let font = unsafe { &Font::from_raw_referenced(font) };
+    let closure = unsafe { &mut *(closure_data as *mut F) };
     let string = match size {
         // `name` is null-terminated
         -1 => unsafe { CStr::from_ptr(name).to_str().ok() },
@@ -616,7 +589,7 @@ extern "C" fn rust_get_glyph_from_name<T: FontFuncs>(font: *mut hb::hb_font_t,
         },
         _ => None,
     };
-    if let Some(result_glyph) = string.and_then(|x| funcs.get_glyph_from_name(font, x)) {
+    if let Some(result_glyph) = string.and_then(|x| closure(font, font_data, x)) {
         unsafe { *glyph = result_glyph };
         1
     } else {
@@ -687,7 +660,7 @@ unsafe impl<T> Sync for FontFuncsImpl<T> {}
 ///    value: i32,
 /// }
 /// impl FontFuncs for MyFontData {
-///     fn get_h_advance(&self, _: &Font, _: Glyph) -> Position {
+///     fn get_glyph_h_advance(&self, _: &Font, _: Glyph) -> Position {
 ///         self.value
 ///     }
 ///     // implement other trait functions...
@@ -703,26 +676,6 @@ unsafe impl<T> Sync for FontFuncsImpl<T> {}
 pub struct FontFuncsBuilder<T> {
     raw: *mut hb::hb_font_funcs_t,
     phantom: PhantomData<T>,
-}
-
-extern "C" fn rust_get_font_extents_closure<T, F>(font: *mut hb::hb_font_t,
-                                                  font_data: *mut std::os::raw::c_void,
-                                                  metrics: *mut FontExtents,
-                                                  closure_data: *mut std::os::raw::c_void)
-                                                  -> hb::hb_bool_t
-    where F: Fn(&Font, &T) -> Option<FontExtents>
-{
-    let font_data = unsafe { &*(font_data as *const T) };
-    let font = unsafe { &Font::from_raw_referenced(font) };
-    let closure = unsafe { &mut *(closure_data as *mut F) };
-    let result = closure(font, font_data);
-
-    if let Some(extents) = result {
-        unsafe { *metrics = extents };
-        1
-    } else {
-        0
-    }
 }
 
 impl<T> FontFuncsBuilder<T> {
@@ -769,62 +722,184 @@ impl<T> FontFuncsBuilder<T> {
                                                       Some(destroy_box::<F>));
         }
     }
+
+    pub fn set_nominal_glyph_func<F>(&mut self, func: F)
+        where F: Fn(&Font, &T, char) -> Option<Glyph>
+    {
+        let user_data = Box::new(func);
+        unsafe {
+            hb::hb_font_funcs_set_nominal_glyph_func(self.raw,
+                                                     Some(rust_get_nominal_glyph_closure::<T, F>),
+                                                     Box::into_raw(user_data) as *mut _,
+                                                     Some(destroy_box::<F>));
+        }
+    }
+
+    pub fn set_variation_glyph_func<F>(&mut self, func: F)
+        where F: Fn(&Font, &T, char, char) -> Option<Glyph>
+    {
+        let user_data = Box::new(func);
+        unsafe {
+            hb::hb_font_funcs_set_variation_glyph_func(self.raw,
+                                                       Some(rust_get_variation_glyph_closure::<T,
+                                                                                               F>),
+                                                       Box::into_raw(user_data) as *mut _,
+                                                       Some(destroy_box::<F>));
+        }
+    }
+
+    pub fn set_glyph_h_advance_func<F>(&mut self, func: F)
+        where F: Fn(&Font, &T, Glyph) -> Position
+    {
+        let user_data = Box::new(func);
+        unsafe {
+            hb::hb_font_funcs_set_glyph_h_advance_func(self.raw,
+                                                       Some(rust_get_glyph_advance_closure::<T,
+                                                                                             F>),
+                                                       Box::into_raw(user_data) as *mut _,
+                                                       Some(destroy_box::<F>));
+        }
+    }
+
+    pub fn set_glyph_v_advance_func<F>(&mut self, func: F)
+        where F: Fn(&Font, &T, Glyph) -> Position
+    {
+        let user_data = Box::new(func);
+        unsafe {
+            hb::hb_font_funcs_set_glyph_v_advance_func(self.raw,
+                                                       Some(rust_get_glyph_advance_closure::<T,
+                                                                                             F>),
+                                                       Box::into_raw(user_data) as *mut _,
+                                                       Some(destroy_box::<F>));
+        }
+    }
+
+    pub fn set_glyph_h_origin_func<F>(&mut self, func: F)
+        where F: Fn(&Font, &T, Glyph) -> Option<(Position, Position)>
+    {
+        let user_data = Box::new(func);
+        unsafe {
+            hb::hb_font_funcs_set_glyph_h_origin_func(self.raw,
+                                                      Some(rust_get_glyph_origin_closure::<T, F>),
+                                                      Box::into_raw(user_data) as *mut _,
+                                                      Some(destroy_box::<F>));
+        }
+    }
+
+    pub fn set_glyph_v_origin_func<F>(&mut self, func: F)
+        where F: Fn(&Font, &T, Glyph) -> Option<(Position, Position)>
+    {
+        let user_data = Box::new(func);
+        unsafe {
+            hb::hb_font_funcs_set_glyph_v_origin_func(self.raw,
+                                                      Some(rust_get_glyph_origin_closure::<T, F>),
+                                                      Box::into_raw(user_data) as *mut _,
+                                                      Some(destroy_box::<F>));
+        }
+    }
+
+    pub fn set_glyph_h_kerning_func<F>(&mut self, func: F)
+        where F: Fn(&Font, &T, Glyph, Glyph) -> Position
+    {
+        let user_data = Box::new(func);
+        unsafe {
+            hb::hb_font_funcs_set_glyph_h_kerning_func(self.raw,
+                                                       Some(rust_get_glyph_kerning_closure::<T,
+                                                                                             F>),
+                                                       Box::into_raw(user_data) as *mut _,
+                                                       Some(destroy_box::<F>));
+        }
+    }
+
+    pub fn set_glyph_v_kerning_func<F>(&mut self, func: F)
+        where F: Fn(&Font, &T, Glyph, Glyph) -> Position
+    {
+        let user_data = Box::new(func);
+        unsafe {
+            hb::hb_font_funcs_set_glyph_v_kerning_func(self.raw,
+                                                       Some(rust_get_glyph_kerning_closure::<T,
+                                                                                             F>),
+                                                       Box::into_raw(user_data) as *mut _,
+                                                       Some(destroy_box::<F>));
+        }
+    }
+
+    pub fn set_glyph_extents_func<F>(&mut self, func: F)
+        where F: Fn(&Font, &T, Glyph) -> Option<GlyphExtents>
+    {
+        let user_data = Box::new(func);
+        unsafe {
+            hb::hb_font_funcs_set_glyph_extents_func(self.raw,
+                                                     Some(rust_get_glyph_extents_closure::<T, F>),
+                                                     Box::into_raw(user_data) as *mut _,
+                                                     Some(destroy_box::<F>));
+        }
+    }
+
+    pub fn set_glyph_contour_point_func<F>(&mut self, func: F)
+        where F: Fn(&Font, &T, Glyph, u32) -> Option<(Position, Position)>
+    {
+        let user_data = Box::new(func);
+        unsafe {
+            hb::hb_font_funcs_set_glyph_contour_point_func(
+                self.raw,
+                Some(rust_get_glyph_contour_point_closure::<T, F>),
+                Box::into_raw(user_data) as *mut _,
+                Some(destroy_box::<F>)
+            );
+        }
+    }
+
+    pub fn set_glyph_name_func<F>(&mut self, func: F)
+        where F: Fn(&Font, &T, Glyph) -> Option<String>
+    {
+        let user_data = Box::new(func);
+        unsafe {
+            hb::hb_font_funcs_set_glyph_name_func(self.raw,
+                                                  Some(rust_get_glyph_name_closure::<T, F>),
+                                                  Box::into_raw(user_data) as *mut _,
+                                                  Some(destroy_box::<F>));
+        }
+    }
+
+    pub fn set_glyph_from_name_func<F>(&mut self, func: F)
+        where F: Fn(&Font, &T, &str) -> Option<Glyph>
+    {
+        let user_data = Box::new(func);
+        unsafe {
+            hb::hb_font_funcs_set_glyph_from_name_func(self.raw,
+                                                       Some(rust_get_glyph_from_name_closure::<T,
+                                                                                               F>),
+                                                       Box::into_raw(user_data) as *mut _,
+                                                       Some(destroy_box::<F>));
+        }
+    }
 }
 
 impl<T: FontFuncs> FontFuncsBuilder<T> {
     pub fn set_trait_impl(&mut self) {
-        unsafe {
-            self.set_font_h_extents_func(|font, data| data.get_font_h_extents(font));
-            self.set_font_v_extents_func(|font, data| data.get_font_v_extents(font));
-            hb::hb_font_funcs_set_nominal_glyph_func(self.raw,
-                                                     Some(rust_get_nominal_glyph::<T>),
-                                                     std::ptr::null_mut(),
-                                                     None);
-            hb::hb_font_funcs_set_variation_glyph_func(self.raw,
-                                                       Some(rust_get_variation_glyph::<T>),
-                                                       std::ptr::null_mut(),
-                                                       None);
-            hb::hb_font_funcs_set_glyph_h_advance_func(self.raw,
-                                                       Some(rust_get_glyph_h_advance::<T>),
-                                                       std::ptr::null_mut(),
-                                                       None);
-            hb::hb_font_funcs_set_glyph_v_advance_func(self.raw,
-                                                       Some(rust_get_glyph_v_advance::<T>),
-                                                       std::ptr::null_mut(),
-                                                       None);
-            hb::hb_font_funcs_set_glyph_h_origin_func(self.raw,
-                                                      Some(rust_get_glyph_h_origin::<T>),
-                                                      std::ptr::null_mut(),
-                                                      None);
-            hb::hb_font_funcs_set_glyph_v_origin_func(self.raw,
-                                                      Some(rust_get_glyph_v_origin::<T>),
-                                                      std::ptr::null_mut(),
-                                                      None);
-            hb::hb_font_funcs_set_glyph_h_kerning_func(self.raw,
-                                                       Some(rust_get_glyph_h_kerning::<T>),
-                                                       std::ptr::null_mut(),
-                                                       None);
-            hb::hb_font_funcs_set_glyph_v_kerning_func(self.raw,
-                                                       Some(rust_get_glyph_v_kerning::<T>),
-                                                       std::ptr::null_mut(),
-                                                       None);
-            hb::hb_font_funcs_set_glyph_extents_func(self.raw,
-                                                     Some(rust_get_glyph_extents::<T>),
-                                                     std::ptr::null_mut(),
-                                                     None);
-            hb::hb_font_funcs_set_glyph_contour_point_func(self.raw,
-                                                           Some(rust_get_glyph_contour_point::<T>),
-                                                           std::ptr::null_mut(),
-                                                           None);
-            hb::hb_font_funcs_set_glyph_name_func(self.raw,
-                                                  Some(rust_get_glyph_name::<T>),
-                                                  std::ptr::null_mut(),
-                                                  None);
-            hb::hb_font_funcs_set_glyph_from_name_func(self.raw,
-                                                       Some(rust_get_glyph_from_name::<T>),
-                                                       std::ptr::null_mut(),
-                                                       None);
-        }
+        self.set_font_h_extents_func(|font, data| data.get_font_h_extents(font));
+        self.set_font_v_extents_func(|font, data| data.get_font_v_extents(font));
+        self.set_nominal_glyph_func(|font, data, chr| data.get_nominal_glyph(font, chr));
+        self.set_variation_glyph_func(|font, data, chr, var| {
+            data.get_variation_glyph(font, chr, var)
+        });
+        self.set_glyph_h_advance_func(|font, data, glyph| data.get_glyph_h_advance(font, glyph));
+        self.set_glyph_v_advance_func(|font, data, glyph| data.get_glyph_v_advance(font, glyph));
+        self.set_glyph_h_origin_func(|font, data, glyph| data.get_glyph_h_origin(font, glyph));
+        self.set_glyph_v_origin_func(|font, data, glyph| data.get_glyph_v_origin(font, glyph));
+        self.set_glyph_h_kerning_func(|font, data, before, after| {
+            data.get_glyph_h_kerning(font, before, after)
+        });
+        self.set_glyph_v_kerning_func(|font, data, before, after| {
+            data.get_glyph_v_kerning(font, before, after)
+        });
+        self.set_glyph_extents_func(|font, data, glyph| data.get_glyph_extents(font, glyph));
+        self.set_glyph_contour_point_func(|font, data, glyph, index| {
+            data.get_glyph_contour_point(font, glyph, index)
+        });
+        self.set_glyph_name_func(|font, data, glyph| data.get_glyph_name(font, glyph));
+        self.set_glyph_from_name_func(|font, data, name| data.get_glyph_from_name(font, name));
     }
 }
 

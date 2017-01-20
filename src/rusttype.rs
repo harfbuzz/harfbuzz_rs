@@ -55,7 +55,7 @@ impl<'a> RustTypeFontFuncs<'a> {
 }
 
 impl<'a> FontFuncs for RustTypeFontFuncs<'a> {
-    fn get_h_advance(&self, font: &font::Font, glyph: GlyphIndex) -> Position {
+    fn get_glyph_h_advance(&self, font: &font::Font, glyph: GlyphIndex) -> Position {
         let glyph = self.font.glyph(GlyphId(glyph));
         if let Some(glyph) = glyph {
             let (scale_x, scale_y) = font.scale();
