@@ -75,7 +75,7 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
         let glyph = self.font.glyph(GlyphId(glyph));
         if let Some(glyph) = glyph {
             let glyph = glyph.scaled(self.scale);
-            glyph.h_metrics().advance_width.round() as i32
+            (glyph.h_metrics().advance_width * 64.0).round() as i32
         } else {
             0
         }
@@ -106,12 +106,12 @@ mod tests {
         println!("upem: {:?}", upem);
         let mut font = face.create_font();
 
-        font.set_scale(100, 100);
+        font.set_scale(15*64, 15*64);
 
         let before = font.get_glyph_h_advance(47);
         font_set_rusttype_funcs(&mut font);
         let after = font.get_glyph_h_advance(47);
         println!("{:?} == {:?}", before, after);
-        assert_eq!(before, after);
+        assert!((before - after).abs() < 2);
     }
 }
