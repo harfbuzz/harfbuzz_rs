@@ -2,6 +2,7 @@ use hb;
 use std;
 
 use font::Font;
+use common::HarfbuzzObject;
 
 pub type GlyphPosition = hb::hb_glyph_position_t;
 pub type GlyphInfo = hb::hb_glyph_info_t;
@@ -158,6 +159,15 @@ impl UnicodeBuffer {
         self
     }
 
+    fn get_string(&self) -> String {
+        let mut result = String::with_capacity(self.len());
+        for info in self.0.get_glyph_infos() {
+            let chr = std::char::from_u32(info.codepoint).unwrap();
+            result.push(chr)
+        }
+        result
+    }
+
     /// Sets the text direction of the `Buffer`'s contents.
     pub fn set_direction(mut self, direction: hb::hb_direction_t) -> UnicodeBuffer {
         self.0.set_direction(direction);
@@ -197,7 +207,7 @@ impl UnicodeBuffer {
 impl std::fmt::Debug for UnicodeBuffer {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         fmt.debug_struct("Buffer")
-            .field("len", &self.len())
+            .field("content", &self.get_string())
             .field("direction", &self.get_direction())
             .field("language", &self.get_language().to_owned())
             .finish()

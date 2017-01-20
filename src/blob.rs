@@ -7,6 +7,8 @@ use std::path::Path;
 use std::fs::File;
 use std::io::Read;
 
+use common::HarfbuzzObject;
+
 /// A `Blob` manages raw data like e.g. file contents. It refers to a slice of bytes that can be
 /// either owned by the `Blob` or not.
 ///
@@ -64,28 +66,6 @@ impl<'a> Blob<'a> {
         }
     }
 
-    /// Make a `Blob` from a raw harfbuzz pointer. Transfers ownership. It is illegal to use the
-    /// original pointer after this.
-    pub unsafe fn from_raw(blob: *mut hb::hb_blob_t) -> Blob<'a> {
-        Blob {
-            hb_blob: blob,
-            _marker: PhantomData,
-        }
-    }
-
-    /// Get the underlying harfbuzz blob pointer. The caller must ensure, that this pointer is not
-    /// used after the `Blob`'s destruction.
-    pub fn get_raw(&self) -> *mut hb::hb_blob_t {
-        self.hb_blob
-    }
-
-    /// Convert the `Blob` into a raw harfbuzz pointer. This references the underlying harfbuzz
-    /// blob. The resulting pointer has to be manually destroyed using `hb_blob_destroy` or
-    /// be converted back into a `Blob` using the `from_raw` function.
-    pub fn get_raw_referenced(&self) -> *mut hb::hb_blob_t {
-        unsafe { hb::hb_blob_reference(self.hb_blob) }
-    }
-
     /// Get a slice of the `Blob`'s bytes.
     pub fn get_data(&self) -> &'a [u8] {
         unsafe {
@@ -136,10 +116,25 @@ impl<'a> Blob<'a> {
     }
 }
 
+impl<'a> HarfbuzzObject for Blob<'a> {
+    type Raw = *mut hb::hb_blob_t;
+
+    unsafe fn from_raw(val: Self::Raw) -> Self {
+        Blob {
+            hb_blob: val,
+            _marker: PhantomData,
+        }
+    }
+
+    fn as_raw(&self) -> Self::Raw {
+        self.hb_blob
+    }
+}
+
 impl<'a> Clone for Blob<'a> {
     /// Creates a new reference to the blob's shared data. Does not copy the data inside the blob.
     fn clone(&self) -> Self {
-        let hb_blob = self.get_raw_referenced();
+        let hb_blob = self.as_raw_referenced();
         Blob {
             hb_blob: hb_blob,
             _marker: PhantomData,
@@ -210,7 +205,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn vec_to_blob_test() {
+    fn test_vec_to_blob_conversion() {
         let a_vec: Vec<u8> = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
         let blob: Blob = a_vec.into();
 
@@ -225,7 +220,7 @@ mod tests {
 
     use std::rc::Rc;
     #[test]
-    fn rc_to_blob_test() {
+    fn test_rc_to_blob_conversion() {
         let rc_bytes: Rc<[u8]> = Rc::new([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
         let blob: Blob<'static> = rc_bytes.into();
 

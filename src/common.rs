@@ -41,6 +41,48 @@ impl Debug for Tag {
     }
 }
 
+/// All trait all wrappers for harfbuzz objects implement. It exposes common functionality for
+/// converting from and to the underlying raw harfbuzz pointers.
+pub trait HarfbuzzObject: Clone {
+    /// Type of the raw harfbuzz object pointer;
+    type Raw;
+
+    /// Creates a value safely wrapping the raw harfbuzz pointer. Transfers ownership. _Use of the
+    /// original pointer is now forbidden!_ Unsafe because a dereference of a raw pointer is
+    /// necesarry.
+    unsafe fn from_raw(val: Self::Raw) -> Self;
+
+    /// Creates a value safely wrapping the raw harfbuzz pointer and references it immediately so
+    /// that the existing pointer can still be used as normal. Unsafe because a dereference of a
+    /// raw pointer is necesarry.
+    unsafe fn from_raw_referenced(val: Self::Raw) -> Self {
+        let result = Self::from_raw(val);
+        std::mem::forget(result.clone()); // increase reference count
+        result
+    }
+
+    /// Returns the underlying harfbuzz object pointer. The caller must ensure, that this pointer is
+    /// not used after the `self`'s destruction.
+    fn as_raw(&self) -> Self::Raw;
+
+    /// Returns the underlying harfbuzz object pointer after referencing the object. The resulting
+    /// pointer has to be manually destroyed using `hb_TYPE_destroy` or be converted back into the
+    /// wrapper using the `from_raw` function.
+    fn as_raw_referenced(&self) -> Self::Raw {
+        std::mem::forget(self.clone()); // increase reference count
+        self.as_raw()
+    }
+
+    /// Converts `self` into the underlying harfbuzz object pointer value. The resulting pointer
+    /// has to be manually destroyed using `hb_TYPE_destroy` or be converted back into the wrapper
+    /// using the `from_raw` function.
+    fn into_raw(self) -> Self::Raw {
+        let result = self.as_raw();
+        std::mem::forget(self);
+        result
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

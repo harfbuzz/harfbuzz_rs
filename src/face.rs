@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 
 use blob::Blob;
 use font::Font;
-use common::Tag;
+use common::{Tag, HarfbuzzObject};
 
 /// A wrapper around the harfbuzz `hb_face_t`.
 pub struct Face<'a> {
@@ -18,7 +18,7 @@ impl<'a> Face<'a> {
     /// Create a new `Face` from the data in `bytes`.
     pub fn new<'b, T: Into<Blob<'b>>>(bytes: T, index: u32) -> Face<'b> {
         let blob = bytes.into();
-        let hb_face = unsafe { hb::hb_face_create(blob.get_raw(), index) };
+        let hb_face = unsafe { hb::hb_face_create(blob.into_raw(), index) };
         Face {
             hb_face: hb_face,
             _marker: PhantomData,
@@ -31,21 +31,13 @@ impl<'a> Face<'a> {
         Ok(Face::new(blob, index))
     }
 
-    pub unsafe fn from_raw<'b>(raw_face: *mut hb::hb_face_t) -> Face<'b> {
-        Face {
-            hb_face: raw_face,
-            _marker: PhantomData,
-        }
-    }
-
-    pub fn as_raw(&self) -> *mut hb::hb_face_t {
-        self.hb_face
-    }
-
-    /// Create a `Font` of this face.
+    /// Create a `Font` of this face. By default this will use harfbuzz' included opentype font
+    /// funcs for shaping and have no scale value set so that the returned values will be in font
+    /// space.
     pub fn create_font(&self) -> Font<'a> {
         unsafe {
             let raw_font = hb::hb_font_create(self.hb_face);
+            hb::hb_ot_font_set_funcs(raw_font);
             Font::from_raw(raw_font)
         }
     }
@@ -75,6 +67,21 @@ impl<'a> Face<'a> {
 
     pub fn glyph_count(&self) -> u32 {
         unsafe { hb::hb_face_get_glyph_count(self.hb_face) }
+    }
+}
+
+impl<'a> HarfbuzzObject for Face<'a> {
+    type Raw = *mut hb::hb_face_t;
+
+    unsafe fn from_raw(raw: *mut hb::hb_face_t) -> Self {
+        Face {
+            hb_face: raw,
+            _marker: PhantomData,
+        }
+    }
+
+    fn as_raw(&self) -> *mut hb::hb_face_t {
+        self.hb_face
     }
 }
 
@@ -124,7 +131,7 @@ mod tests {
     use common::Tag;
 
     #[test]
-    fn face_coherence_test() {
+    fn test_face_wrapper() {
         let font_bytes = include_bytes!("../testfiles/MinionPro-Regular.otf");
         let face = Face::new(&font_bytes[..], 0);
         let blob = face.reference_blob();

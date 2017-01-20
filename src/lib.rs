@@ -25,9 +25,8 @@
 //! let index = 0;
 //! # let path = "testfiles/MinionPro-Regular.otf";
 //! let mut font = Face::from_file(path, index).unwrap().create_font();
-//! font_set_harfbuzz_opentype_funcs(&mut font);
 //!
-//! let output = Buffer::new().add_str("Hello World!").shape(&font, &[]);
+//! let output = UnicodeBuffer::new().add_str("Hello World!").shape(&font, &[]);
 //! ```
 //!
 //! The results of the shaping operation are stored in the buffer that was also used as input to
@@ -39,9 +38,8 @@
 //! # let index = 0;
 //! # let path = "testfiles/MinionPro-Regular.otf";
 //! # let mut font = Face::from_file(path, index).unwrap().create_font();
-//! # font_set_harfbuzz_opentype_funcs(&mut font);
 //! #
-//! # let output = Buffer::new().add_str("Hello World!").shape(&font, &[]);
+//! # let output = UnicodeBuffer::new().add_str("Hello World!").shape(&font, &[]);
 //! let positions = output.get_glyph_positions();
 //! let infos = output.get_glyph_infos();
 //!
@@ -53,6 +51,7 @@
 //!     let x_offset = position.x_offset;
 //!     let y_offset = position.y_offset;
 //!
+//!     // Here you would usually draw the glyphs.
 //!     println!("gid{:?}={:?}@{:?},{:?}+{:?}", gid, cluster, x_advance, x_offset, y_offset);
 //! }
 //! ```
@@ -75,9 +74,14 @@
 #![allow(doc_markdown)]
 #![feature(specialization)]
 #![allow(unknown_lints)]
+#![feature(test)]
+
 
 extern crate harfbuzz_sys as hb;
 extern crate libc;
+
+#[macro_use]
+extern crate lazy_static;
 
 mod font;
 mod blob;
@@ -90,6 +94,7 @@ pub use font::*;
 pub use face::*;
 pub use blob::*;
 pub use buffer::*;
+pub use common::*;
 
 #[cfg(test)]
 mod tests {
