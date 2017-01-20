@@ -5,7 +5,7 @@ extern crate rusttype;
 extern crate glfw_window;
 
 use harfbuzz_rs::{Face, UnicodeBuffer};
-use harfbuzz_rs::rusttype::{rusttype_font_from_face, rusttype_scale_for_point_size};
+use harfbuzz_rs::rusttype::{rusttype_font_from_face, rusttype_scale_from_hb_font};
 
 use piston_window::*;
 use piston_image::{ImageBuffer, Rgba};
@@ -48,7 +48,7 @@ fn shape<T: Window>(win: &mut PistonWindow<T>) -> Vec<(Image, G2dTexture)> {
     font.set_ppem(96 * 64, 96 * 64);
 
     let rt_font = rusttype_font_from_face(&font.face());
-    let scale = rusttype_scale_for_point_size(&font, fontsize as f32, fontsize as f32);
+    let scale = rusttype_scale_from_hb_font(&font);
 
     // Create a buffer with some text and shape it...
     let result = UnicodeBuffer::new().add_str("Hello World! fi fl ff").shape(&font, &[]);

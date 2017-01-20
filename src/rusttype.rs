@@ -3,7 +3,7 @@
 extern crate rusttype;
 
 lazy_static! {
-    static ref RT_FONT_FUNCS: FontFuncsImpl<RustTypeFontFuncs<'static>> = {
+    static ref RT_FONT_FUNCS: FontFuncsImpl<ScaledRusttypeFont<'static>> = {
         FontFuncsImpl::from_trait_impl()
     };
 }
@@ -11,10 +11,11 @@ lazy_static! {
 use std::str::FromStr;
 
 use self::rusttype::{GlyphId, Scale, Codepoint};
+use self::rusttype::Font as RTFont;
 
 use font;
 use face;
-use font::{FontFuncs, Glyph as GlyphIndex, Position, FontFuncsImpl};
+use font::{FontFuncs, Glyph as GlyphIndex, Position, FontFuncsImpl, Font as HBFont};
 use face::FontTableAccess;
 use common::Tag;
 
@@ -28,56 +29,52 @@ fn get_font_height(font: &font::Font) -> i32 {
             let ascent = i16::from_be(*ascent_ptr);
             let descent_ptr = (&hhea_table)[6..8].as_ptr() as *const i16;
             let descent = i16::from_be(*descent_ptr);
-            ascent as i32 - descent as i32
+            (ascent as i32 - descent as i32) * font.scale().1 / font.face().upem() as i32
         }
     } else {
         0
     }
 }
 
-pub fn rusttype_font_from_face<'a>(face: &face::Face<'a>) -> rusttype::Font<'a> {
+pub fn rusttype_font_from_face<'a>(face: &face::Face<'a>) -> RTFont<'a> {
     let font_blob = face.reference_blob();
     let index = face.index();
     let collection = rusttype::FontCollection::from_bytes(font_blob.get_data());
     collection.font_at(index as usize).unwrap()
 }
 
-pub fn rusttype_scale_for_point_size(font: &font::Font, x: f32, y: f32) -> rusttype::Scale {
-    let font_height = get_font_height(font);
-    let factor = font_height as f32 / font.face().upem() as f32;
-    Scale { x: x*factor, y: y*factor }
+pub fn rusttype_scale_from_hb_font(font: &font::Font) -> Scale {
+    let font_height = get_font_height(font) as f32 / 64.0;
+    let em_scale = font.scale();
+    let x_scale = em_scale.0 as f32 / 64.0;
+    let y_scale = em_scale.1 as f32 / 64.0;
+    Scale {
+        x: font_height * x_scale / y_scale,
+        y: font_height,
+    }
 }
 
-pub struct RustTypeFontFuncs<'a> {
-    font: rusttype::Font<'a>,
-    font_height: f32,
+pub struct ScaledRusttypeFont<'a> {
+    pub font: rusttype::Font<'a>,
+    pub scale: Scale,
 }
 
-impl<'a> RustTypeFontFuncs<'a> {
-    pub fn new_from_font<'b>(hb_font: &font::Font<'b>) -> RustTypeFontFuncs<'b> {
-        let font_blob = hb_font.face().reference_blob();
-        let index = hb_font.face().index();
-        let collection = rusttype::FontCollection::from_bytes(font_blob.get_data());
-        let font = collection.font_at(index as usize).unwrap();
-        let font_height = get_font_height(hb_font);
-        RustTypeFontFuncs {
+impl<'a> ScaledRusttypeFont<'a> {
+    pub fn from_hb_font(hb_font: &font::Font<'a>) -> ScaledRusttypeFont<'a> {
+        let font = rusttype_font_from_face(&hb_font.face());
+        let scale = rusttype_scale_from_hb_font(hb_font);
+        ScaledRusttypeFont {
             font: font,
-            font_height: font_height as f32,
+            scale: scale,
         }
     }
 }
 
-impl<'a> FontFuncs for RustTypeFontFuncs<'a> {
-    fn get_glyph_h_advance(&self, font: &font::Font, glyph: GlyphIndex) -> Position {
+impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
+    fn get_glyph_h_advance(&self, _: &HBFont, glyph: GlyphIndex) -> Position {
         let glyph = self.font.glyph(GlyphId(glyph));
         if let Some(glyph) = glyph {
-            let (scale_x, scale_y) = font.scale();
-            let scale_x = scale_x as f32 * self.font_height as f32 / font.face().upem() as f32;
-            let scale_y = scale_y as f32 * self.font_height as f32 / font.face().upem() as f32;
-            let glyph = glyph.scaled(Scale {
-                x: scale_x,
-                y: scale_y,
-            });
+            let glyph = glyph.scaled(self.scale);
             glyph.h_metrics().advance_width.round() as i32
         } else {
             0
@@ -92,14 +89,8 @@ impl<'a> FontFuncs for RustTypeFontFuncs<'a> {
 /// Let a font use rusttype's font API for getting information like the advance width of some
 /// glyph or its extents.
 pub fn font_set_rusttype_funcs(font: &mut font::Font) {
-    let font_data = RustTypeFontFuncs::new_from_font(font);
+    let font_data = ScaledRusttypeFont::from_hb_font(font);
     font.set_font_funcs(&RT_FONT_FUNCS, font_data);
-}
-
-pub fn font_set_rusttype_funcs2(font: &mut font::Font) {
-    let font_data = RustTypeFontFuncs::new_from_font(font);
-    let ffuncs = FontFuncsImpl::from_trait_impl();
-    font.set_font_funcs(&ffuncs, font_data);
 }
 
 #[cfg(test)]
