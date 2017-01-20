@@ -296,7 +296,9 @@ impl<'a> Drop for Font<'a> {
     }
 }
 
-/// This Trait specifies the font callbacks that harfbuzz uses. No function in this trait need to
+/// This Trait specifies the font callbacks that harfbuzz uses.
+///
+/// No function in this trait need to
 /// be implemented, the default implementations simply return the parent font's implementation. If
 /// a `Font` is created directly from a face, its parent is the empty `Font` which returns null
 /// values for every font func.
@@ -603,6 +605,8 @@ pub struct FontFuncsImpl<T> {
 }
 
 impl<T> FontFuncsImpl<T> {
+    /// Returns an empty `FontFuncsImpl`. Every font func of the returned `FontFuncsImpl` gives
+    /// a null value regardless of its input.
     pub fn empty() -> FontFuncsImpl<T> {
         let raw = unsafe { hb::hb_font_funcs_get_empty() };
         FontFuncsImpl {
@@ -613,6 +617,36 @@ impl<T> FontFuncsImpl<T> {
 }
 
 impl<T: FontFuncs> FontFuncsImpl<T> {
+    /// Create a new `FontFuncsImpl` from the `FontFuncs`-trait implementation of `T`.
+    ///
+    /// # Examples
+    ///
+    /// Supposing `MyFontData` is a struct that implements `FontFuncs`.
+    ///
+    /// ```
+    /// use harfbuzz_rs::*;
+    ///
+    /// # // Dummy struct implementing FontFuncs
+    /// # struct MyFontData {
+    /// #    value: i32,
+    /// # }
+    /// # impl FontFuncs for MyFontData {
+    /// #     fn get_glyph_h_advance(&self, _: &Font, _: Glyph) -> Position {
+    /// #         self.value
+    /// #     }
+    /// #     // implement other trait functions...
+    /// # }
+    /// #
+    /// # fn main() {
+    /// let font_funcs: FontFuncsImpl<MyFontData> = FontFuncsImpl::from_trait_impl();
+    ///
+    /// // this is equal to
+    /// let mut font_funcs_builder = FontFuncsBuilder::new();
+    /// font_funcs_builder.set_trait_impl();
+    /// let font_funcs2: FontFuncsImpl<MyFontData> = font_funcs_builder.finish();
+    /// # }
+    /// ```
+    ///
     pub fn from_trait_impl() -> FontFuncsImpl<T> {
         let mut builder = FontFuncsBuilder::new();
         builder.set_trait_impl();
