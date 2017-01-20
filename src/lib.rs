@@ -72,9 +72,7 @@
 //! gid2=11@276,0+0
 //! ```
 #![allow(doc_markdown)]
-#![feature(specialization)]
 #![allow(unknown_lints)]
-#![feature(test)]
 
 
 extern crate harfbuzz_sys as hb;

@@ -159,16 +159,11 @@ impl<'a> Deref for Blob<'a> {
 // }
 
 use std::convert::From;
-impl<'a> From<&'a [u8]> for Blob<'a> {
-    fn from(slice: &[u8]) -> Blob {
-        Blob::with_bytes(slice)
-    }
-}
 
 impl<T> From<T> for Blob<'static>
     where T: AsRef<[u8]>
 {
-    default fn from(bytes: T) -> Blob<'static> {
+    fn from(bytes: T) -> Blob<'static> {
         let len = bytes.as_ref().len();
         let ptr = bytes.as_ref().as_ptr();
 

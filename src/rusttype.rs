@@ -1,6 +1,5 @@
 //! This module allows you to use rusttype to provide the font operations that harfbuzz needs.
 
-extern crate test;
 extern crate rusttype;
 
 lazy_static! {
@@ -14,6 +13,7 @@ use std::str::FromStr;
 use self::rusttype::{GlyphId, Scale, Codepoint};
 
 use font;
+use face;
 use font::{FontFuncs, Glyph as GlyphIndex, Position, FontFuncsImpl};
 use face::FontTableAccess;
 use common::Tag;
@@ -33,6 +33,19 @@ fn get_font_height(font: &font::Font) -> i32 {
     } else {
         0
     }
+}
+
+pub fn rusttype_font_from_face<'a>(face: &face::Face<'a>) -> rusttype::Font<'a> {
+    let font_blob = face.reference_blob();
+    let index = face.index();
+    let collection = rusttype::FontCollection::from_bytes(font_blob.get_data());
+    collection.font_at(index as usize).unwrap()
+}
+
+pub fn rusttype_scale_for_point_size(font: &font::Font, x: f32, y: f32) -> rusttype::Scale {
+    let font_height = get_font_height(font);
+    let factor = font_height as f32 / font.face().upem() as f32;
+    Scale { x: x*factor, y: y*factor }
 }
 
 pub struct RustTypeFontFuncs<'a> {
@@ -109,47 +122,5 @@ mod tests {
         let after = font.get_glyph_h_advance(47);
         println!("{:?} == {:?}", before, after);
         assert_eq!(before, after);
-    }
-
-    use self::test::Bencher;
-    #[bench]
-    fn bench_rusttype(b: &mut Bencher) {
-        let font_bytes = include_bytes!("../testfiles/Optima.ttc");
-        let face = Face::new(&font_bytes[..], 0);
-        let mut font = face.create_font();
-        font.set_scale(100, 100);
-        font_set_rusttype_funcs(&mut font);
-        b.iter(|| {
-            for i in 1..10 {
-                font.get_glyph_h_advance(i);
-            }
-        });
-    }
-
-    #[bench]
-    fn bench_rusttype2(b: &mut Bencher) {
-        let font_bytes = include_bytes!("../testfiles/Optima.ttc");
-        let face = Face::new(&font_bytes[..], 0);
-        let mut font = face.create_font();
-        font.set_scale(100, 100);
-        font_set_rusttype_funcs2(&mut font);
-        b.iter(|| {
-            for i in 1..10 {
-                font.get_glyph_h_advance(i);
-            }
-        });
-    }
-
-    #[bench]
-    fn bench_rusttype3(b: &mut Bencher) {
-        let font_bytes = include_bytes!("../testfiles/Optima.ttc");
-        let face = Face::new(&font_bytes[..], 0);
-        let mut font = face.create_font();
-        font.set_scale(100, 100);
-        b.iter(|| {
-            for i in 1..10 {
-                font.get_glyph_h_advance(i);
-            }
-        });
     }
 }
