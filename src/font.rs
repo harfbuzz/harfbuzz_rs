@@ -620,6 +620,27 @@ impl<T: FontFuncs> FontFuncsImpl<T> {
     }
 }
 
+impl<T> Clone for FontFuncsImpl<T> {
+    fn clone(&self) -> Self {
+        unsafe { hb::hb_font_funcs_reference(self.raw) };
+        FontFuncsImpl { raw: self.raw, _marker: PhantomData }
+    }
+}
+
+impl<T> HarfbuzzObject for FontFuncsImpl<T> {
+    type Raw = *mut hb::hb_font_funcs_t;
+    unsafe fn from_raw(val: Self::Raw) -> Self {
+        FontFuncsImpl {
+            raw: val,
+            _marker: PhantomData,
+        }
+    }
+
+    fn as_raw(&self) -> Self::Raw {
+        self.raw
+    }
+}
+
 impl<T> Drop for FontFuncsImpl<T> {
     fn drop(&mut self) {
         unsafe { hb::hb_font_funcs_destroy(self.raw) };
