@@ -68,8 +68,7 @@ impl<'a> Font<'a> {
     pub fn face(&self) -> Face<'a> {
         unsafe {
             let raw_face = hb::hb_font_get_face(self.hb_font);
-            hb::hb_face_reference(raw_face);
-            Face::from_raw(raw_face)
+            Face::from_raw_referenced(raw_face)
         }
     }
 
@@ -103,14 +102,14 @@ impl<'a> Font<'a> {
             MaybeOwned::Owned(font_data) => unsafe {
                 let font_data = Box::new(font_data);
                 hb::hb_font_set_funcs(self.hb_font,
-                                      funcs.raw,
+                                      funcs.as_raw(),
                                       Box::into_raw(font_data) as *mut _,
                                       Some(destroy_box::<T>));
             },
             // TODO: this may be unsafe because we cannot ensure that font_data lives long enough
             MaybeOwned::Ref(font_data) => unsafe {
                 hb::hb_font_set_funcs(self.hb_font,
-                                      funcs.raw,
+                                      funcs.as_raw(),
                                       font_data as *const T as *mut _,
                                       None);
             },
