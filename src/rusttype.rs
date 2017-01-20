@@ -15,7 +15,7 @@ use self::rusttype::Font as RTFont;
 
 use font;
 use face;
-use font::{FontFuncs, Glyph as GlyphIndex, Position, FontFuncsImpl, Font as HBFont};
+use font::{FontFuncs, Glyph as GlyphIndex, Position, FontFuncsImpl, Font as HBFont, GlyphExtents};
 use face::FontTableAccess;
 use common::Tag;
 
@@ -79,6 +79,19 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
         } else {
             0
         }
+    }
+
+    fn get_glyph_extents(&self, _: &HBFont, glyph: GlyphIndex) -> Option<GlyphExtents> {
+        let glyph = self.font.glyph(GlyphId(glyph));
+        glyph.and_then(|glyph| {
+            let glyph = glyph.scaled(self.scale);
+            glyph.exact_bounding_box().map(|bbox| GlyphExtents {
+                x_bearing: (bbox.min.x * 64.0).round() as i32,
+                y_bearing: (bbox.min.y * 64.0).round() as i32,
+                width: ((bbox.max.x - bbox.min.x) * 64.0).round() as i32,
+                height: ((bbox.max.y - bbox.min.y) * 64.0).round() as i32,
+            })
+        })
     }
 
     fn get_nominal_glyph(&self, _: &font::Font, unicode: char) -> Option<GlyphIndex> {
