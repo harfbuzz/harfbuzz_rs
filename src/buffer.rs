@@ -2,7 +2,7 @@ use hb;
 use std;
 
 use font::Font;
-use common::HarfbuzzObject;
+use common::{HarfbuzzObject, Tag};
 
 pub type GlyphPosition = hb::hb_glyph_position_t;
 pub type GlyphInfo = hb::hb_glyph_info_t;
@@ -56,9 +56,21 @@ impl BufferRaw {
         unsafe { hb::hb_buffer_get_direction(self.hb_buffer) }
     }
 
+    fn set_language(&mut self, lang: hb::hb_language_t) {
+        unsafe { hb::hb_buffer_set_language(self.hb_buffer, lang) }
+    }
+
     fn get_language(&self) -> &'static str {
         let lang = unsafe { hb::hb_buffer_get_language(self.hb_buffer) };
         language_to_string(lang)
+    }
+
+    fn set_script(&mut self, script: hb::hb_script_t) {
+        unsafe { hb::hb_buffer_set_script(self.hb_buffer, script) }
+    }
+
+    fn get_script(&self) -> hb::hb_script_t {
+        unsafe { hb::hb_buffer_get_script(self.hb_buffer) }
     }
 
     fn guess_segment_properties(&mut self) {
@@ -177,6 +189,15 @@ impl UnicodeBuffer {
     /// Returns the `Buffer`'s text direction.
     pub fn get_direction(&self) -> hb::hb_direction_t {
         self.0.get_direction()
+    }
+
+    pub fn set_script(mut self, script: Tag) -> UnicodeBuffer {
+        self.0.set_script(script.0);
+        self
+    }
+
+    pub fn get_script(&self) -> Tag {
+        Tag(self.0.get_script())
     }
 
     pub fn get_language(&self) -> &'static str {
