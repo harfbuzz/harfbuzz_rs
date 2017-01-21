@@ -43,7 +43,7 @@ fn shape<T: Window>(win: &mut PistonWindow<T>) -> Vec<(Image, G2dTexture)> {
 
 
     let s_factor: f64 = 0.5;
-    let fontsize = 30.0 / s_factor;
+    let fontsize = 80.0;
     font.set_scale(fontsize as i32 * 64, fontsize as i32 * 64);
     font.set_ppem(96 * 64, 96 * 64);
 
@@ -51,13 +51,13 @@ fn shape<T: Window>(win: &mut PistonWindow<T>) -> Vec<(Image, G2dTexture)> {
     let scale = rusttype_scale_from_hb_font(&font);
 
     // Create a buffer with some text and shape it...
-    let result = UnicodeBuffer::new().add_str("Hello World! fi fl ff").shape(&font, &[]);
+    let result = UnicodeBuffer::new().add_str("Hello World! iiiiiiiiiiiiiiiiii").shape(&font, &[]);
 
     // ... and get the results.
     let positions = result.get_glyph_positions();
     let infos = result.get_glyph_infos();
 
-    let mut cursor = (0, 0);
+    let mut cursor = (10*64, 100*64);
     let mut vec = Vec::with_capacity(result.len());
     // iterate over the shaped glyphs
     for (position, info) in positions.iter().zip(infos) {
@@ -69,6 +69,13 @@ fn shape<T: Window>(win: &mut PistonWindow<T>) -> Vec<(Image, G2dTexture)> {
         let x_pos: f64 = (cursor.0 + x_offset) as f64 / 64.0;
         let y_pos: f64 = (cursor.1 + y_offset) as f64 / 64.0;
 
+        // separate x_pos and y_pos into integral an fractional parts for subpixel positioning.
+        let x_pos_int = x_pos.trunc();
+        let x_pos_frac = x_pos.fract();
+        let y_pos_int = y_pos.trunc();
+        let y_pos_frac = y_pos.fract();
+
+        // no metrics hinting
         cursor.0 += x_advance;
 
         let glyph = match rt_font.glyph(rusttype::GlyphId(gid)) {
@@ -77,18 +84,17 @@ fn shape<T: Window>(win: &mut PistonWindow<T>) -> Vec<(Image, G2dTexture)> {
         };
 
         let glyph = glyph.scaled(scale).positioned(rusttype::Point {
-            x: x_pos as f32,
-            y: y_pos as f32,
+            x: x_pos_frac as f32,
+            y: y_pos_frac as f32,
         });
         let bbox = match glyph.pixel_bounding_box() {
             Some(bbox) => bbox,
             None => continue,
         };
-
         let image_buffer = draw_glyph(&glyph);
 
-        let x_origin = bbox.min.x as f64 * s_factor;
-        let y_origin = (100.0 + bbox.min.y as f64) * s_factor;
+        let x_origin = (x_pos_int + bbox.min.x as f64) * s_factor;
+        let y_origin = (y_pos_int + bbox.min.y as f64) * s_factor;
         let width = (bbox.max.x - bbox.min.x) as f64 * s_factor;
         let height = (bbox.max.y - bbox.min.y) as f64 * s_factor;
         let image = Image::new().rect([x_origin, y_origin, width, height]);
