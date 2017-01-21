@@ -3,7 +3,9 @@
 extern crate rusttype;
 
 lazy_static! {
-    static ref RT_FONT_FUNCS: FontFuncsImpl<ScaledRusttypeFont<'static>> = {
+    /// This is a global static that derefs into a `FontFuncsImpl` and can be used when you want
+    /// rusttype to provide the font funcs for harfbuzz.
+    pub static ref RT_FONT_FUNCS: FontFuncsImpl<ScaledRusttypeFont<'static>> = {
         FontFuncsImpl::from_trait_impl()
     };
 }
@@ -85,11 +87,13 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
         let glyph = self.font.glyph(GlyphId(glyph));
         glyph.and_then(|glyph| {
             let glyph = glyph.scaled(self.scale);
-            glyph.exact_bounding_box().map(|bbox| GlyphExtents {
-                x_bearing: (bbox.min.x * 64.0).round() as i32,
-                y_bearing: (bbox.min.y * 64.0).round() as i32,
-                width: ((bbox.max.x - bbox.min.x) * 64.0).round() as i32,
-                height: ((bbox.max.y - bbox.min.y) * 64.0).round() as i32,
+            glyph.exact_bounding_box().map(|bbox| {
+                GlyphExtents {
+                    x_bearing: (bbox.min.x * 64.0).round() as i32,
+                    y_bearing: (bbox.min.y * 64.0).round() as i32,
+                    width: ((bbox.max.x - bbox.min.x) * 64.0).round() as i32,
+                    height: ((bbox.max.y - bbox.min.y) * 64.0).round() as i32,
+                }
             })
         })
     }
@@ -119,7 +123,7 @@ mod tests {
         println!("upem: {:?}", upem);
         let mut font = face.create_font();
 
-        font.set_scale(15*64, 15*64);
+        font.set_scale(15 * 64, 15 * 64);
 
         let before = font.get_glyph_h_advance(47);
         font_set_rusttype_funcs(&mut font);
