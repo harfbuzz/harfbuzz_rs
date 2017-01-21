@@ -5,7 +5,7 @@ extern crate rusttype;
 extern crate glfw_window;
 
 use harfbuzz_rs::{Face, UnicodeBuffer};
-use harfbuzz_rs::rusttype::{rusttype_font_from_face, rusttype_scale_from_hb_font};
+use harfbuzz_rs::rusttype::ScaledRusttypeFont;
 
 use piston_window::*;
 use piston_image::{ImageBuffer, Rgba};
@@ -37,21 +37,20 @@ fn main() {
 fn shape<T: Window>(win: &mut PistonWindow<T>) -> Vec<(Image, G2dTexture)> {
     let index = 0;
     let path = "testfiles/Optima.ttc";
-    let mut font = Face::from_file(path, index)
+    let mut hb_font = Face::from_file(path, index)
         .expect("Error reading font file.")
         .create_font();
 
 
     let s_factor: f64 = 0.5;
-    let fontsize = 80.0;
-    font.set_scale(fontsize as i32 * 64, fontsize as i32 * 64);
-    font.set_ppem(96 * 64, 96 * 64);
+    let fontsize: f64 = 80.0;
+    hb_font.set_scale(fontsize as i32 * 64, fontsize as i32 * 64);
+    hb_font.set_ppem(96 * 64, 96 * 64);
 
-    let rt_font = rusttype_font_from_face(&font.face());
-    let scale = rusttype_scale_from_hb_font(&font);
+    let rt_font = ScaledRusttypeFont::from_hb_font(&hb_font);
 
     // Create a buffer with some text and shape it...
-    let result = UnicodeBuffer::new().add_str("Hello World! iiiiiiiiiiiiiiiiii").shape(&font, &[]);
+    let result = UnicodeBuffer::new().add_str("Hello World! iiiiiiiiiiiiiiiiii").shape(&hb_font, &[]);
 
     // ... and get the results.
     let positions = result.get_glyph_positions();
@@ -78,12 +77,12 @@ fn shape<T: Window>(win: &mut PistonWindow<T>) -> Vec<(Image, G2dTexture)> {
         // no metrics hinting
         cursor.0 += x_advance;
 
-        let glyph = match rt_font.glyph(rusttype::GlyphId(gid)) {
+        let glyph = match rt_font.font.glyph(rusttype::GlyphId(gid)) {
             Some(glyph) => glyph,
             None => continue,
         };
 
-        let glyph = glyph.scaled(scale).positioned(rusttype::Point {
+        let glyph = glyph.scaled(rt_font.scale).positioned(rusttype::Point {
             x: x_pos_frac as f32,
             y: y_pos_frac as f32,
         });
