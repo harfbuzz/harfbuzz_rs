@@ -46,7 +46,7 @@ extern "C" fn destroy_box<U>(ptr: *mut std::os::raw::c_void) {
     unsafe { Box::from_raw(ptr as *mut U) };
 }
 
-/// A font.
+/// A font is the most important concept in harfbuzz.
 ///
 /// A font can be created either as a subfont of an existing font or directly from a `Face` using
 /// the `create_font` function.
@@ -57,6 +57,8 @@ pub struct Font<'a> {
 }
 
 impl<'a> Font<'a> {
+    /// Create a new sub font from the current font that by default inherits its parent font's
+    /// face, scale, ppem and font funcs.
     pub fn create_sub_font(&self) -> Font<'a> {
         unsafe { Font::from_raw(hb::hb_font_create_sub_font(self.hb_font)) }
     }
@@ -295,12 +297,12 @@ impl<'a> Drop for Font<'a> {
     }
 }
 
-/// This Trait specifies the font callbacks that harfbuzz uses.
+/// This Trait specifies the font callbacks that harfbuzz uses for its shaping. You shouldn't
+/// call these functions yourself. They are exposed through the `Font` wrapper.
 ///
-/// No function in this trait need to
-/// be implemented, the default implementations simply return the parent font's implementation. If
-/// a `Font` is created directly from a face, its parent is the empty `Font` which returns null
-/// values for every font func.
+/// No function in this trait need to be implemented, the default implementations simply return the
+/// parent font's implementation. If a `Font` is created directly from a face, its parent is the
+/// empty `Font` which returns null values for every font func.
 #[allow(unused_variables)]
 pub trait FontFuncs {
     fn get_font_h_extents(&self, font: &Font) -> Option<FontExtents> {
@@ -598,13 +600,15 @@ extern "C" fn rust_get_glyph_from_name_closure<T, F>(font: *mut hb::hb_font_t,
     }
 }
 
+/// A `FontFuncsImpl` contains implementations of the font callbacks that harfbuzz uses. Once
+/// created a `FontFuncsImpl` is immutable.
 pub struct FontFuncsImpl<T> {
     raw: *mut hb::hb_font_funcs_t,
     _marker: PhantomData<T>,
 }
 
 impl<T> FontFuncsImpl<T> {
-    /// Returns an empty `FontFuncsImpl`. Every font func of the returned `FontFuncsImpl` gives
+    /// Returns an empty `FontFuncsImpl`. Every font callback of the returned `FontFuncsImpl` gives
     /// a null value regardless of its input.
     pub fn empty() -> FontFuncsImpl<T> {
         let raw = unsafe { hb::hb_font_funcs_get_empty() };
