@@ -10,32 +10,17 @@ lazy_static! {
     };
 }
 
-use std::str::FromStr;
-
 use self::rusttype::{GlyphId, Scale, Codepoint};
 use self::rusttype::Font as RTFont;
 
 use font;
 use face;
 use font::{FontFuncs, Glyph as GlyphIndex, Position, FontFuncsImpl, Font as HBFont, GlyphExtents};
-use face::FontTableAccess;
-use common::Tag;
 
 // Work around weird rusttype scaling by reading the hhea table.
 fn get_font_height(font: &font::Font) -> i32 {
-    let face = font.face();
-    let hhea_table = face.table_with_tag(Tag::from_str("hhea").unwrap()).unwrap();
-    if hhea_table.len() >= 8 {
-        unsafe {
-            let ascent_ptr = (&hhea_table)[4..6].as_ptr() as *const i16;
-            let ascent = i16::from_be(*ascent_ptr);
-            let descent_ptr = (&hhea_table)[6..8].as_ptr() as *const i16;
-            let descent = i16::from_be(*descent_ptr);
-            (ascent as i32 - descent as i32) * font.scale().1 / font.face().upem() as i32
-        }
-    } else {
-        0
-    }
+    let extents = font.get_font_h_extents().unwrap_or_default();
+    extents.ascender - extents.descender
 }
 
 pub fn rusttype_font_from_face<'a>(face: &face::Face<'a>) -> RTFont<'a> {
@@ -130,5 +115,17 @@ mod tests {
         let after = font.get_glyph_h_advance(47);
         println!("{:?} == {:?}", before, after);
         assert!((before - after).abs() < 2);
+    }
+
+    #[test]
+    fn test_get_font_height() {
+        let font_bytes = include_bytes!("../testfiles/Optima.ttc");
+        let mut font = Face::new(&font_bytes[..], 0).create_font();
+
+        use super::get_font_height;
+        assert_eq!(1187, get_font_height(&font));
+
+        font.set_scale(12 * 64, 12 *64);
+        assert!((911 - get_font_height(&font)).abs() < 2);
     }
 }
