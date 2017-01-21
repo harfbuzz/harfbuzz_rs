@@ -285,7 +285,17 @@ impl GlyphBuffer {
     }
 }
 
+impl std::fmt::Debug for GlyphBuffer {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fmt.debug_struct("Buffer")
+            .field("glyph positions", &self.get_glyph_positions())
+            .field("glyph infos", &self.get_glyph_infos())
+            .finish()
+    }
+}
+
+#[derive(Debug)]
 pub enum Buffer {
-    Unicode(UnicodeBuffer),
-    Glyph(GlyphBuffer),
+    UnicodeBuffer(UnicodeBuffer),
+    GlyphBuffer(GlyphBuffer),
 }
