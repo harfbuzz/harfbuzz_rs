@@ -62,10 +62,14 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
         let glyph = self.font.glyph(GlyphId(glyph));
         if let Some(glyph) = glyph {
             let glyph = glyph.scaled(self.scale);
-            (glyph.h_metrics().advance_width * 64.0).round() as i32
+            (glyph.h_metrics().advance_width * 64.0).round() as Position
         } else {
             0
         }
+    }
+
+    fn get_glyph_h_kerning(&self, _: &HBFont, left: GlyphIndex, right: GlyphIndex) -> Position {
+        (self.font.pair_kerning(self.scale, GlyphId(left), GlyphId(right)) * 64.0).round() as Position
     }
 
     fn get_glyph_extents(&self, _: &HBFont, glyph: GlyphIndex) -> Option<GlyphExtents> {
