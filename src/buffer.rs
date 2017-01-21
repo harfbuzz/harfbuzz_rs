@@ -284,3 +284,8 @@ impl GlyphBuffer {
         UnicodeBuffer(self.0)
     }
 }
+
+pub enum Buffer {
+    Unicode(UnicodeBuffer),
+    Glyph(GlyphBuffer),
+}
