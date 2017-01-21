@@ -5,7 +5,7 @@ extern crate rusttype;
 extern crate glfw_window;
 
 use harfbuzz_rs::{Face, UnicodeBuffer};
-use harfbuzz_rs::rusttype::ScaledRusttypeFont;
+use harfbuzz_rs::rusttype::{ScaledRusttypeFont, RT_FONT_FUNCS};
 
 use piston_window::*;
 use piston_image::{ImageBuffer, Rgba};
@@ -37,6 +37,7 @@ fn main() {
 fn shape<T: Window>(win: &mut PistonWindow<T>) -> Vec<(Image, G2dTexture)> {
     let index = 0;
     let path = "testfiles/Optima.ttc";
+    let rt_font; // declare here so that there are no lifetime issues.
     let mut hb_font = Face::from_file(path, index)
         .expect("Error reading font file.")
         .create_font();
@@ -47,7 +48,8 @@ fn shape<T: Window>(win: &mut PistonWindow<T>) -> Vec<(Image, G2dTexture)> {
     hb_font.set_scale(fontsize as i32 * 64, fontsize as i32 * 64);
     hb_font.set_ppem(96 * 64, 96 * 64);
 
-    let rt_font = ScaledRusttypeFont::from_hb_font(&hb_font);
+    rt_font = ScaledRusttypeFont::from_hb_font(&hb_font);
+    hb_font.set_font_funcs(&RT_FONT_FUNCS, &rt_font);
 
     // Create a buffer with some text and shape it...
     let result = UnicodeBuffer::new().add_str("Hello World! iiiiiiiiiiiiiiiiii").shape(&hb_font, &[]);
