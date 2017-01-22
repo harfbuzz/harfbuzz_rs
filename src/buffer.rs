@@ -265,6 +265,11 @@ impl GlyphBuffer {
         self.0.len()
     }
 
+    /// Returns a pointer to the underlying raw harfbuzz buffer.
+    pub fn as_raw(&self) -> *mut hb::hb_buffer_t {
+        self.0.as_raw()
+    }
+
     /// Returns `true` if the buffer contains no elements.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
