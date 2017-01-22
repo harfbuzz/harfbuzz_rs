@@ -130,6 +130,15 @@ impl BufferRaw {
     }
 }
 
+impl Clone for BufferRaw {
+    fn clone(&self) -> Self {
+        unsafe {
+            hb::hb_buffer_reference(self.hb_buffer);
+        }
+        BufferRaw { hb_buffer: self.hb_buffer }
+    }
+}
+
 impl Drop for BufferRaw {
     fn drop(&mut self) {
         unsafe {
@@ -139,6 +148,7 @@ impl Drop for BufferRaw {
 }
 
 /// A `UnicodeBuffer` can be filled with unicode text and corresponding
+#[derive(Clone)]
 pub struct UnicodeBuffer(BufferRaw);
 #[allow(dead_code)]
 impl UnicodeBuffer {
@@ -243,6 +253,7 @@ impl std::default::Default for UnicodeBuffer {
 
 /// A `GlyphBuffer` is obtained through the `shape` function of a `UnicodeBuffer`. It contains
 /// the resulting output information of the shaping process.
+#[derive(Clone)]
 pub struct GlyphBuffer(BufferRaw);
 
 impl GlyphBuffer {
@@ -294,7 +305,7 @@ impl std::fmt::Debug for GlyphBuffer {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Buffer {
     UnicodeBuffer(UnicodeBuffer),
     GlyphBuffer(GlyphBuffer),
