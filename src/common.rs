@@ -4,9 +4,27 @@ use hb;
 /// A type to represent an opentype feature tag
 pub struct Tag(pub hb::hb_tag_t);
 
+impl Tag {
+    /// Create a `Tag` from its four-char textual representation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use harfbuzz_rs::Tag;
+    /// let cmap_tag = Tag::new('c', 'm', 'a', 'p');
+    /// ```
+    ///
+    pub fn new(a: char, b: char, c: char, d: char) -> Self {
+        Tag(((a as u32) << 24) | ((b as u32) << 16) | ((c as u32) << 8) | (d as u32))
+    }
+}
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+/// An Error generated when a `Tag` fails to parse from a `&str` with the `from_str` function.
 pub enum TagFromStrErr {
+    /// The string has a length != 4.
     WrongLength,
+    /// The string contains non-ASCII characters.
     NonAscii
 }
 
@@ -16,6 +34,18 @@ use std::ascii::AsciiExt;
 
 impl FromStr for Tag {
     type Err = TagFromStrErr;
+    /// Parses a `Tag` from a `&str` that contains exactly four ASCII characters.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use harfbuzz_rs::Tag;
+    /// use std::str::FromStr;
+    /// let tag1 = Tag::from_str("ABCD").unwrap();
+    /// let tag2 = Tag::new('A', 'B', 'C', 'D');
+    /// assert_eq!(tag1, tag2);
+    /// ```
+    ///
     fn from_str(s: &str) -> Result<Tag, TagFromStrErr> {
         if s.is_ascii() == false {
             return Err(TagFromStrErr::NonAscii);
