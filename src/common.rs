@@ -1,7 +1,11 @@
 use hb;
 
+/// A type to represent 4 byte tags that are used in many font formats for naming font tables,
+/// font features and similar.
+///
+/// The user-facing representation is a 4-character ASCII string. `Tag` provides methods to create
+/// `Tag`s from such a representation and to get the string representation from a `Tag`.
 #[derive(Copy, Clone, Hash, PartialEq, Eq)]
-/// A type to represent an opentype feature tag
 pub struct Tag(pub hb::hb_tag_t);
 
 impl Tag {
@@ -12,20 +16,48 @@ impl Tag {
     /// ```
     /// use harfbuzz_rs::Tag;
     /// let cmap_tag = Tag::new('c', 'm', 'a', 'p');
+    /// assert_eq!(cmap_tag.to_string(), "cmap")
     /// ```
     ///
     pub fn new(a: char, b: char, c: char, d: char) -> Self {
         Tag(((a as u32) << 24) | ((b as u32) << 16) | ((c as u32) << 8) | (d as u32))
+    }
+
+    fn tag_to_string(self) -> String {
+        let mut buf: [u8; 4] = [0; 4];
+        unsafe { hb::hb_tag_to_string(self.0, buf.as_mut_ptr() as *mut _) };
+        String::from_utf8_lossy(&buf).into()
+    }
+}
+
+use std::fmt;
+use std::fmt::{Debug, Display, Formatter};
+impl Debug for Tag {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        let string = self.tag_to_string();
+        let mut chars = string.chars().chain(std::iter::repeat('\u{FFFD}'));
+        write!(f,
+               "Tag({:?}, {:?}, {:?}, {:?})",
+               chars.next().unwrap(),
+               chars.next().unwrap(),
+               chars.next().unwrap(),
+               chars.next().unwrap())
+    }
+}
+
+impl Display for Tag {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "{}", self.tag_to_string())
     }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// An Error generated when a `Tag` fails to parse from a `&str` with the `from_str` function.
 pub enum TagFromStrErr {
-    /// The string has a length != 4.
-    WrongLength,
     /// The string contains non-ASCII characters.
-    NonAscii
+    NonAscii,
+    /// The string has length zero.
+    ZeroLengthString,
 }
 
 use std;
@@ -34,7 +66,9 @@ use std::ascii::AsciiExt;
 
 impl FromStr for Tag {
     type Err = TagFromStrErr;
-    /// Parses a `Tag` from a `&str` that contains exactly four ASCII characters.
+    /// Parses a `Tag` from a `&str` that contains four or less ASCII characters. When the string's
+    /// length is smaller than 4 it is extended with `' '` (Space) characters. The remaining bytes
+    /// of strings longer than 4 bytes are ignored.
     ///
     /// # Examples
     ///
@@ -50,24 +84,11 @@ impl FromStr for Tag {
         if s.is_ascii() == false {
             return Err(TagFromStrErr::NonAscii);
         }
-        if s.len() != 4 {
-            return Err(TagFromStrErr::WrongLength);
+        if s.len() == 0 {
+            return Err(TagFromStrErr::ZeroLengthString);
         }
-        unsafe {
-            Ok(Tag(hb::hb_tag_from_string(s.as_ptr() as *mut _, 4)))
-        }
-    }
-}
-
-use std::fmt::{Debug, Formatter, Error};
-
-impl Debug for Tag {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error>  {
-        let Tag(ref tag) = *self;
-        let mut bytes: [u8; 4] = [0, 0, 0, 0];
-        unsafe { hb::hb_tag_to_string(*tag, bytes.as_mut_ptr() as *mut _) };
-        let string = std::str::from_utf8(&bytes).expect("UTF8 error while decoding opentype tag.");
-        f.write_str(string)
+        let len = std::cmp::max(s.len(), 4) as i32;
+        unsafe { Ok(Tag(hb::hb_tag_from_string(s.as_ptr() as *mut _, len))) }
     }
 }
 
@@ -121,13 +142,15 @@ mod tests {
     #[test]
     fn test_tag_debugging() {
         let tag = Tag::from_str("ABCD").unwrap();
-        assert_eq!("ABCD", format!("{:?}", tag));
+        assert_eq!("ABCD", format!("{}", tag));
+        assert_eq!("Tag('A', 'B', 'C', 'D')", format!("{:?}", tag));
     }
 
     #[test]
     fn test_tag_creation() {
-        assert!(Tag::from_str("ABCDE").is_err());
         assert!(Tag::from_str("∞BCD").is_err());
-        assert!(Tag::from_str("abWd").is_ok());
+        assert!(Tag::from_str("").is_err());
+        assert_eq!(Tag::from_str("ABCDE"), Tag::from_str("ABCD"));
+        assert_eq!(Tag::from_str("abWd").unwrap(), Tag::new('a', 'b', 'W', 'd'));
     }
 }
