@@ -31,6 +31,35 @@ impl<'a> Face<'a> {
         Ok(Face::new(blob, index))
     }
 
+    pub fn from_table_func<'b, F>(func: F) -> Face<'b>
+        where F: FnMut(Tag) -> Option<Blob<'b>>
+    {
+        extern "C" fn destroy_box<U>(ptr: *mut std::os::raw::c_void) {
+            unsafe { Box::from_raw(ptr as *mut U) };
+        }
+        extern "C" fn table_func<'b, F>(_: *mut hb::hb_face_t,
+                                        tag: hb::hb_tag_t,
+                                        user_data: *mut std::os::raw::c_void)
+                                        -> *mut hb::hb_blob_t
+            where F: FnMut(Tag) -> Option<Blob<'b>>
+        {
+            let tag = Tag(tag);
+            let closure = unsafe { &mut *(user_data as *mut F) };
+            let blob = closure(tag);
+            match blob {
+                Some(blob) => blob.as_raw(),
+                None => std::ptr::null_mut(),
+            }
+        }
+        let boxed_closure = Box::new(func);
+        unsafe {
+            let face = hb::hb_face_create_for_tables(Some(table_func::<'b, F>),
+                                                     Box::into_raw(boxed_closure) as *mut _,
+                                                     Some(destroy_box::<F>));
+            Face::from_raw(face)
+        }
+    }
+
     /// Create a `Font` of this face. By default this will use harfbuzz' included opentype font
     /// funcs for shaping and have no scale value set so that the returned values will be in font
     /// space.
@@ -42,10 +71,22 @@ impl<'a> Face<'a> {
         }
     }
 
-    pub fn reference_blob(&self) -> Blob<'a> {
+    pub fn face_data(&self) -> &'a [u8] {
         unsafe {
             let raw_blob = hb::hb_face_reference_blob(self.hb_face);
-            Blob::from_raw(raw_blob)
+            Blob::from_raw(raw_blob).get_data()
+        }
+    }
+
+    pub fn table_with_tag(&self, tag: Tag) -> Option<&[u8]> {
+        unsafe {
+            let raw_blob = hb::hb_face_reference_table(self.hb_face, tag.0);
+            if raw_blob.is_null() {
+                None
+            } else {
+                let blob = Blob::from_raw(raw_blob);
+                if blob.is_empty() { None } else { Some(blob.get_data()) }
+            }
         }
     }
 
@@ -85,24 +126,6 @@ impl<'a> HarfbuzzObject for Face<'a> {
     }
 }
 
-impl<'a> FontTableAccess for Face<'a> {
-    fn table_with_tag(&self, tag: Tag) -> Option<Blob> {
-        unsafe {
-            let raw_blob = hb::hb_face_reference_table(self.hb_face, tag.0);
-            if raw_blob.is_null() {
-                None
-            } else {
-                let blob = Blob::from_raw(raw_blob);
-                if blob.is_empty() {
-                    None
-                } else {
-                    Some(blob)
-                }
-            }
-        }
-    }
-}
-
 
 impl<'a> Clone for Face<'a> {
     fn clone(&self) -> Self {
@@ -120,10 +143,6 @@ impl<'a> Drop for Face<'a> {
     }
 }
 
-pub trait FontTableAccess {
-    fn table_with_tag(&self, tag: Tag) -> Option<Blob>;
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -134,11 +153,11 @@ mod tests {
     fn test_face_wrapper() {
         let font_bytes = include_bytes!("../testfiles/MinionPro-Regular.otf");
         let face = Face::new(&font_bytes[..], 0);
-        let blob = face.reference_blob();
+        let blob = face.face_data();
         let maxp_table = face.table_with_tag(Tag::from_str("maxp").unwrap()).unwrap();
 
-        assert_eq!(&maxp_table as &[u8], [0x00, 0x00, 0x50, 0x00, 0x06, 0x96]);
-        assert_eq!(&blob as &[u8], &font_bytes[..]);
+        assert_eq!(maxp_table, [0x00, 0x00, 0x50, 0x00, 0x06, 0x96]);
+        assert_eq!(blob, &font_bytes[..]);
         assert_eq!(face.upem(), 1000);
         assert_eq!(face.glyph_count(), 1686);
     }

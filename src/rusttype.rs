@@ -24,9 +24,9 @@ fn get_font_height(font: &font::Font) -> i32 {
 }
 
 pub fn rusttype_font_from_face<'a>(face: &face::Face<'a>) -> RTFont<'a> {
-    let font_blob = face.reference_blob();
+    let font_blob = face.face_data();
     let index = face.index();
-    let collection = rusttype::FontCollection::from_bytes(font_blob.get_data());
+    let collection = rusttype::FontCollection::from_bytes(font_blob);
     collection.font_at(index as usize).unwrap()
 }
 
