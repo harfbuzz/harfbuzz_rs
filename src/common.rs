@@ -119,12 +119,13 @@ impl Display for Language {
     }
 }
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct InvalidLanguage;
 
 impl FromStr for Language {
     type Err = InvalidLanguage;
     fn from_str(s: &str) -> Result<Language, InvalidLanguage> {
-        let len = std::cmp::max(s.len(), std::i32::MAX as _) as i32;
+        let len = std::cmp::min(s.len(), std::i32::MAX as _) as i32;
         let lang = unsafe { hb::hb_language_from_string(s.as_ptr() as *mut _, len) };
         if lang.is_null() {
             Err(InvalidLanguage {})
@@ -195,5 +196,13 @@ mod tests {
         assert!(Tag::from_str("").is_err());
         assert_eq!(Tag::from_str("ABCDE"), Tag::from_str("ABCD"));
         assert_eq!(Tag::from_str("abWd").unwrap(), Tag::new('a', 'b', 'W', 'd'));
+    }
+
+    #[test]
+    fn test_language() {
+        assert_eq!(Language::default().to_string(), "c");
+        assert_eq!(Language::from_str("ger").unwrap().to_string(), "ger");
+        assert_eq!(Language::from_str("ge!").unwrap().to_string(), "ge");
+        assert_eq!(Language::from_str("German").unwrap().to_string(), "german");
     }
 }
