@@ -2,17 +2,11 @@ use hb;
 use std;
 
 use font::Font;
-use common::{HarfbuzzObject, Tag};
+use common::{HarfbuzzObject, Tag, Language};
 
 pub type GlyphPosition = hb::hb_glyph_position_t;
 pub type GlyphInfo = hb::hb_glyph_info_t;
 pub type Feature = hb::hb_feature_t;
-
-fn language_to_string(tag: hb::hb_language_t) -> &'static str {
-    let lang_string_ptr = unsafe { hb::hb_language_to_string(tag) };
-    let cstring = unsafe { std::ffi::CStr::from_ptr(lang_string_ptr) };
-    cstring.to_str().expect("harfbuzz error: language string is not valid utf-8!")
-}
 
 struct BufferRaw {
     hb_buffer: *mut hb::hb_buffer_t,
@@ -56,13 +50,12 @@ impl BufferRaw {
         unsafe { hb::hb_buffer_get_direction(self.hb_buffer) }
     }
 
-    fn set_language(&mut self, lang: hb::hb_language_t) {
-        unsafe { hb::hb_buffer_set_language(self.hb_buffer, lang) }
+    fn set_language(&mut self, lang: Language) {
+        unsafe { hb::hb_buffer_set_language(self.hb_buffer, lang.0) }
     }
 
-    fn get_language(&self) -> &'static str {
-        let lang = unsafe { hb::hb_buffer_get_language(self.hb_buffer) };
-        language_to_string(lang)
+    fn get_language(&self) -> Language {
+        Language(unsafe { hb::hb_buffer_get_language(self.hb_buffer) })
     }
 
     fn set_script(&mut self, script: hb::hb_script_t) {
@@ -147,7 +140,7 @@ impl Drop for BufferRaw {
     }
 }
 
-/// A `UnicodeBuffer` can be filled with unicode text and corresponding
+/// A `UnicodeBuffer` can be filled with unicode text and corresponding cluster indices.
 #[derive(Clone)]
 pub struct UnicodeBuffer(BufferRaw);
 #[allow(dead_code)]
@@ -210,7 +203,12 @@ impl UnicodeBuffer {
         Tag(self.0.get_script())
     }
 
-    pub fn get_language(&self) -> &'static str {
+    pub fn set_language(mut self, lang: Language) -> UnicodeBuffer {
+        self.0.set_language(lang);
+        self
+    }
+
+    pub fn get_language(&self) -> Language {
         self.0.get_language()
     }
 
@@ -240,7 +238,8 @@ impl std::fmt::Debug for UnicodeBuffer {
         fmt.debug_struct("Buffer")
             .field("content", &self.get_string())
             .field("direction", &self.get_direction())
-            .field("language", &self.get_language().to_owned())
+            .field("language", &self.get_language())
+            .field("script", &self.get_script())
             .finish()
     }
 }

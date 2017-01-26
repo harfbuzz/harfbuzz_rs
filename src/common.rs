@@ -92,7 +92,7 @@ impl FromStr for Tag {
     }
 }
 
-pub struct Language(hb::hb_language_t);
+pub struct Language(pub hb::hb_language_t);
 
 impl Default for Language {
     fn default() -> Language {
