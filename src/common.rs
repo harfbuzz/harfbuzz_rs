@@ -92,6 +92,49 @@ impl FromStr for Tag {
     }
 }
 
+pub struct Language(hb::hb_language_t);
+
+impl Default for Language {
+    fn default() -> Language {
+        Language(unsafe { hb::hb_language_get_default() })
+    }
+}
+
+impl Debug for Language {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "Language(\"{}\")", self)
+    }
+}
+
+use std::ffi::CStr;
+impl Display for Language {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        let string = unsafe {
+            let char_ptr = hb::hb_language_to_string(self.0);
+            CStr::from_ptr(char_ptr)
+                .to_str()
+                .expect("String representation of language is not valid utf8.")
+        };
+        write!(f, "{}", string)
+    }
+}
+
+pub struct InvalidLanguage;
+
+impl FromStr for Language {
+    type Err = InvalidLanguage;
+    fn from_str(s: &str) -> Result<Language, InvalidLanguage> {
+        let len = std::cmp::max(s.len(), std::i32::MAX as _) as i32;
+        let lang = unsafe { hb::hb_language_from_string(s.as_ptr() as *mut _, len) };
+        if lang.is_null() {
+            Err(InvalidLanguage {})
+        } else {
+            Ok(Language(lang))
+        }
+    }
+}
+
+
 /// All trait all wrappers for harfbuzz objects implement. It exposes common functionality for
 /// converting from and to the underlying raw harfbuzz pointers.
 pub trait HarfbuzzObject: Clone {
