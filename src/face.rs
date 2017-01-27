@@ -47,7 +47,7 @@ impl<'a> Face<'a> {
             let closure = unsafe { &mut *(user_data as *mut F) };
             let blob = closure(tag);
             match blob {
-                Some(blob) => blob.as_raw(),
+                Some(blob) => blob.into_raw(),
                 None => std::ptr::null_mut(),
             }
         }
@@ -160,5 +160,19 @@ mod tests {
         assert_eq!(blob, &font_bytes[..]);
         assert_eq!(face.upem(), 1000);
         assert_eq!(face.glyph_count(), 1686);
+    }
+
+    #[test]
+    fn test_face_from_table_func() {
+        let face = Face::from_table_func(|table_tag| {
+            let content = format!("{}-table", table_tag);
+            Some(content.into_bytes().into())
+        });
+
+        let maxp_table = face.table_with_tag(Tag::new('m', 'a', 'x', 'p')).unwrap();
+        assert_eq!(maxp_table, b"maxp-table");
+
+        let maxp_table = face.table_with_tag(Tag::new('h', 'h', 'e', 'a')).unwrap();
+        assert_eq!(maxp_table, b"hhea-table");
     }
 }
