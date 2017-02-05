@@ -19,7 +19,7 @@ use font::{FontFuncs, Glyph as GlyphIndex, Position, FontFuncsImpl, Font as HBFo
 
 // Work around weird rusttype scaling by reading the hhea table.
 fn get_font_height(font: &font::Font) -> i32 {
-    let extents = font.get_font_h_extents().unwrap_or_default();
+    let extents = font.get_font_h_extents().unwrap_or(unsafe { ::std::mem::zeroed() });
     extents.ascender - extents.descender
 }
 
@@ -31,10 +31,10 @@ pub fn rusttype_font_from_face<'a>(face: &face::Face<'a>) -> RTFont<'a> {
 }
 
 pub fn rusttype_scale_from_hb_font(font: &font::Font) -> Scale {
-    let font_height = get_font_height(font) as f32 / 64.0;
+    let font_height = get_font_height(font) as f32;
     let em_scale = font.scale();
-    let x_scale = em_scale.0 as f32 / 64.0;
-    let y_scale = em_scale.1 as f32 / 64.0;
+    let x_scale = em_scale.0 as f32;
+    let y_scale = em_scale.1 as f32;
     Scale {
         x: font_height * x_scale / y_scale,
         y: font_height,
@@ -62,14 +62,14 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
         let glyph = self.font.glyph(GlyphId(glyph));
         if let Some(glyph) = glyph {
             let glyph = glyph.scaled(self.scale);
-            (glyph.h_metrics().advance_width * 64.0).round() as Position
+            glyph.h_metrics().advance_width.round() as Position
         } else {
             0
         }
     }
 
     fn get_glyph_h_kerning(&self, _: &HBFont, left: GlyphIndex, right: GlyphIndex) -> Position {
-        (self.font.pair_kerning(self.scale, GlyphId(left), GlyphId(right)) * 64.0).round() as Position
+        self.font.pair_kerning(self.scale, GlyphId(left), GlyphId(right)).round() as Position
     }
 
     fn get_glyph_extents(&self, _: &HBFont, glyph: GlyphIndex) -> Option<GlyphExtents> {
@@ -78,10 +78,10 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
             let glyph = glyph.scaled(self.scale);
             glyph.exact_bounding_box().map(|bbox| {
                 GlyphExtents {
-                    x_bearing: (bbox.min.x * 64.0).round() as i32,
-                    y_bearing: (bbox.min.y * 64.0).round() as i32,
-                    width: ((bbox.max.x - bbox.min.x) * 64.0).round() as i32,
-                    height: ((bbox.max.y - bbox.min.y) * 64.0).round() as i32,
+                    x_bearing: bbox.min.x.round() as i32,
+                    y_bearing: bbox.min.y.round() as i32,
+                    width: (bbox.max.x - bbox.min.x).round() as i32,
+                    height: (bbox.max.y - bbox.min.y).round() as i32,
                 }
             })
         })

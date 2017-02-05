@@ -36,7 +36,7 @@ fn main() {
 
 fn shape<T: Window>(win: &mut PistonWindow<T>) -> Vec<(Image, G2dTexture)> {
     let index = 0;
-    let path = "testfiles/Optima.ttc";
+    let path = "testfiles/DejaVuSans.ttf";
     let rt_font; // declare here so that there are no lifetime issues.
     let mut hb_font = Face::from_file(path, index)
         .expect("Error reading font file.")
@@ -52,7 +52,7 @@ fn shape<T: Window>(win: &mut PistonWindow<T>) -> Vec<(Image, G2dTexture)> {
     hb_font.set_font_funcs(&RT_FONT_FUNCS, &rt_font);
 
     // Create a buffer with some text and shape it...
-    let result = UnicodeBuffer::new().add_str("Hello World! iiiiiiiiiiiiiiiiii").shape(&hb_font, &[]);
+    let result = UnicodeBuffer::new().add_str("صِف خَلقَ خَودِ كَمِثلِ الشَمسِ").shape(&hb_font, &[]);
 
     // ... and get the results.
     let positions = result.get_glyph_positions();
@@ -84,7 +84,7 @@ fn shape<T: Window>(win: &mut PistonWindow<T>) -> Vec<(Image, G2dTexture)> {
             None => continue,
         };
 
-        let glyph = glyph.scaled(rt_font.scale).positioned(rusttype::Point {
+        let glyph = glyph.scaled(/* TODO find proper scale*/).positioned(rusttype::Point {
             x: x_pos_frac as f32,
             y: y_pos_frac as f32,
         });

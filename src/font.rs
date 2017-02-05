@@ -969,7 +969,6 @@ impl<T> Drop for FontFuncsBuilder<T> {
 
 #[cfg(test)]
 mod tests {
-    use std::default::Default;
     use super::*;
     use face::Face;
 
@@ -979,7 +978,7 @@ mod tests {
     }
     impl FontFuncs for MyFontData {
         fn get_font_h_extents(&self, _: &Font) -> Option<FontExtents> {
-            let extents = FontExtents { ascender: self.ascender, ..Default::default() };
+            let extents = FontExtents { ascender: self.ascender, ..unsafe { std::mem::zeroed() } };
             Some(extents)
         }
     }
@@ -1013,11 +1012,11 @@ mod tests {
         let font_funcs = {
             let mut font_funcs = FontFuncsBuilder::new();
             font_funcs.set_font_h_extents_func(|_, _| {
-                Some(FontExtents { ascender: 1313, ..Default::default() })
+                Some(FontExtents { ascender: 1313, ..unsafe { std::mem::zeroed() } })
             });
             font_funcs.set_font_v_extents_func(|_, _| {
                 let MyFontData { ascender } = font_data;
-                Some(FontExtents { ascender: ascender, ..Default::default() })
+                Some(FontExtents { ascender: ascender, ..unsafe { std::mem::zeroed() } })
             });
             font_funcs.finish()
         };

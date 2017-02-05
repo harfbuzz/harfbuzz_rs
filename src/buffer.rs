@@ -195,12 +195,12 @@ impl UnicodeBuffer {
     }
 
     pub fn set_script(mut self, script: Tag) -> UnicodeBuffer {
-        self.0.set_script(script.0);
+        self.0.set_script(unsafe { hb::hb_script_from_iso15924_tag(script.0) });
         self
     }
 
     pub fn get_script(&self) -> Tag {
-        Tag(self.0.get_script())
+        Tag(unsafe { hb::hb_script_to_iso15924_tag(self.0.get_script()) })
     }
 
     pub fn set_language(mut self, lang: Language) -> UnicodeBuffer {
