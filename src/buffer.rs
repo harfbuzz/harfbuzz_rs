@@ -54,8 +54,13 @@ impl BufferRaw {
         unsafe { hb::hb_buffer_set_language(self.hb_buffer, lang.0) }
     }
 
-    fn get_language(&self) -> Language {
-        Language(unsafe { hb::hb_buffer_get_language(self.hb_buffer) })
+    fn get_language(&self) -> Option<Language> {
+        let raw_lang = unsafe { hb::hb_buffer_get_language(self.hb_buffer) };
+        if raw_lang.is_null() {
+            None
+        } else {
+            Some(Language(raw_lang))
+        }
     }
 
     fn set_script(&mut self, script: hb::hb_script_t) {
@@ -205,7 +210,7 @@ impl UnicodeBuffer {
         self
     }
 
-    pub fn get_language(&self) -> Language {
+    pub fn get_language(&self) -> Option<Language> {
         self.0.get_language()
     }
 
