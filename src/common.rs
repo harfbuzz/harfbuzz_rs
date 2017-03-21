@@ -111,6 +111,9 @@ impl Display for Language {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let string = unsafe {
             let char_ptr = hb::hb_language_to_string(self.0);
+            if char_ptr.is_null() {
+                panic!("hb::hb_language_to_string returned null-pointer");
+            }
             CStr::from_ptr(char_ptr)
                 .to_str()
                 .expect("String representation of language is not valid utf8.")
