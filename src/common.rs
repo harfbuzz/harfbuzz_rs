@@ -112,7 +112,7 @@ impl Display for Language {
         let string = unsafe {
             let char_ptr = hb::hb_language_to_string(self.0);
             if char_ptr.is_null() {
-                panic!("hb::hb_language_to_string returned null-pointer");
+                return Err(fmt::Error)
             }
             CStr::from_ptr(char_ptr)
                 .to_str()
