@@ -91,21 +91,21 @@ impl BufferRaw {
         unsafe { hb::hb_buffer_clear_contents(self.hb_buffer) };
     }
 
-    fn get_glyph_positions(&self) -> &mut [GlyphPosition] {
+    fn get_glyph_positions(&self) -> &[GlyphPosition] {
         unsafe {
             let mut length: u32 = 0;
             let glyph_pos = hb::hb_buffer_get_glyph_positions(self.hb_buffer,
                                                               &mut length as *mut u32);
-            std::slice::from_raw_parts_mut(glyph_pos, length as usize)
+            std::slice::from_raw_parts(glyph_pos, length as usize)
         }
     }
 
-    fn get_glyph_infos(&self) -> &mut [GlyphInfo] {
+    fn get_glyph_infos(&self) -> &[GlyphInfo] {
         unsafe {
             let mut length: u32 = 0;
             let glyph_infos = hb::hb_buffer_get_glyph_infos(self.hb_buffer,
                                                             &mut length as *mut u32);
-            std::slice::from_raw_parts_mut(glyph_infos, length as usize)
+            std::slice::from_raw_parts(glyph_infos, length as usize)
         }
     }
 
@@ -117,9 +117,7 @@ impl BufferRaw {
     /// Reverse the `Buffer`'s contents in the range from `start` to `end`.
     fn reverse_range(&mut self, start: usize, end: usize) {
         assert!(start <= self.len(), end <= self.len());
-        unsafe {
-            hb::hb_buffer_reverse_range(self.hb_buffer, start as u32, end as u32)
-        }
+        unsafe { hb::hb_buffer_reverse_range(self.hb_buffer, start as u32, end as u32) }
     }
 }
 
@@ -175,12 +173,11 @@ impl UnicodeBuffer {
     }
 
     fn get_string(&self) -> String {
-        let mut result = String::with_capacity(self.len());
-        for info in self.0.get_glyph_infos() {
-            let chr = std::char::from_u32(info.codepoint).unwrap();
-            result.push(chr)
-        }
-        result
+        self.0
+            .get_glyph_infos()
+            .iter()
+            .map(|info| std::char::from_u32(info.codepoint).unwrap())
+            .collect()
     }
 
     /// Sets the text direction of the `Buffer`'s contents.
@@ -274,11 +271,11 @@ impl GlyphBuffer {
         self.0.is_empty()
     }
 
-    pub fn get_glyph_positions(&self) -> &mut [GlyphPosition] {
+    pub fn get_glyph_positions(&self) -> &[GlyphPosition] {
         self.0.get_glyph_positions()
     }
 
-    pub fn get_glyph_infos(&self) -> &mut [GlyphInfo] {
+    pub fn get_glyph_infos(&self) -> &[GlyphInfo] {
         self.0.get_glyph_infos()
     }
 
