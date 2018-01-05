@@ -25,9 +25,6 @@ fn main() {
     let mut font = Font::new(face);
     font_set_rusttype_funcs(&mut font);
 
-    font.set_scale(20 * 64, 20 * 64);
-    font.set_ppem(72 * 64, 72 * 64);
-
     // Create a buffer with some text and shape it...
     let result = UnicodeBuffer::new().add_str("Hello World!").shape(&font, &[]);
 
