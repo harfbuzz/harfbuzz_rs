@@ -12,7 +12,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! harfbuzz_rs = "0.1"
+//! harfbuzz_rs = "^0.1"
 //! ```
 //!
 //! To shape a simple string of text you just create a `Font` from a font file, fill a `Buffer`
@@ -23,7 +23,7 @@
 //!
 //! let path = "path/to/some/font_file.otf";
 //! let index = 0;
-//! # let path = "testfiles/MinionPro-Regular.otf";
+//! # let path = "testfiles/SourceSansVariable-Roman.ttf";
 //! let face = Face::from_file(path, index).unwrap();
 //! let mut font = Font::new(face);
 //!
@@ -37,7 +37,7 @@
 //! # use harfbuzz_rs::*;
 //! #
 //! # let index = 0;
-//! # let path = "testfiles/MinionPro-Regular.otf";
+//! # let path = "testfiles/SourceSansVariable-Roman.ttf";
 //! # let face = Face::from_file(path, index).unwrap();
 //! # let mut font = Font::new(face);
 //! #
@@ -73,9 +73,6 @@
 //! gid69=10@528,0+0
 //! gid2=11@276,0+0
 //! ```
-#![allow(unknown_lints)]
-
-
 extern crate harfbuzz_sys as hb;
 extern crate libc;
 
