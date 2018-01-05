@@ -114,9 +114,3 @@ pub fn font_set_rusttype_funcs(font: &mut font::Font) {
     font.set_font_funcs(RT_FONT_FUNCS.clone(), font_data);
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use font::Font;
-    use face::Face;
-}

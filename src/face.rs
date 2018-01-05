@@ -143,7 +143,6 @@ impl<'a> HarfbuzzObject for Face<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::str::FromStr;
     use common::Tag;
 
     #[test]
