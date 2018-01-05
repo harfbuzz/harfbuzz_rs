@@ -119,31 +119,4 @@ mod tests {
     use super::*;
     use font::Font;
     use face::Face;
-
-    // #[test]
-    // fn test_basic_rusttype() {
-    //     let font_bytes = include_bytes!("../testfiles/Optima.ttc");
-    //     let face = Face::new(&font_bytes[..], 0);
-    //     let upem = face.upem();
-    //     println!("upem: {:?}", upem);
-    //     let mut font = Font::new(face);
-
-    //     font.set_scale(15 * 64, 15 * 64);
-
-    //     let before = font.get_glyph_h_advance(47);
-    //     font_set_rusttype_funcs(&mut font);
-    //     let after = font.get_glyph_h_advance(47);
-    //     println!("{:?} == {:?}", before, after);
-    //     assert!((before - after).abs() < 2);
-    // }
-
-    #[test]
-    fn test_get_font_height() {
-        let font_bytes = include_bytes!("../testfiles/Optima.ttc");
-        let face = Face::new(&font_bytes[..], 0);
-        let mut font = Font::new(face);
-
-        use super::get_font_height;
-        assert_eq!(1187, get_font_height(&font));
-    }
 }
