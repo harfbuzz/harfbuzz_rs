@@ -2,24 +2,26 @@
 
 extern crate rusttype;
 
-lazy_static! {
-    /// This is a global static that derefs into a `FontFuncsImpl` and can be used when you want
-    /// rusttype to provide the font funcs for harfbuzz.
-    pub static ref RT_FONT_FUNCS: FontFuncsImpl<ScaledRusttypeFont<'static>> = {
-        FontFuncsImpl::from_trait_impl()
-    };
-}
-
 use self::rusttype::{GlyphId, Scale, Codepoint};
 use self::rusttype::Font as RTFont;
 
 use font;
 use face;
 use font::{FontFuncs, Glyph as GlyphIndex, Position, FontFuncsImpl, Font as HBFont, GlyphExtents};
+use common::{HbArc, HbRef};
+
+lazy_static! {
+    /// This is a global static that derefs into a `FontFuncsImpl` and can be used when you want
+    /// rusttype to provide the font funcs for harfbuzz.
+    pub static ref RT_FONT_FUNCS: HbArc<FontFuncsImpl<ScaledRusttypeFont<'static>>> = {
+        FontFuncsImpl::from_trait_impl().into()
+    };
+}
 
 // Work around weird rusttype scaling by reading the hhea table.
 fn get_font_height(font: &font::Font) -> i32 {
-    let extents = font.get_font_h_extents().unwrap_or(unsafe { ::std::mem::zeroed() });
+    let extents =
+        font.get_font_h_extents().expect("Could not get font height for rusttype scaling");
     extents.ascender - extents.descender
 }
 
@@ -30,7 +32,7 @@ pub fn rusttype_font_from_face<'a>(face: &face::Face<'a>) -> RTFont<'a> {
     collection.font_at(index as usize).unwrap()
 }
 
-pub fn rusttype_scale_from_hb_font(font: &font::Font) -> Scale {
+fn rusttype_scale_from_hb_font(font: &font::Font) -> Scale {
     let font_height = get_font_height(font) as f32;
     let em_scale = font.scale();
     let x_scale = em_scale.0 as f32;
@@ -58,7 +60,7 @@ impl<'a> ScaledRusttypeFont<'a> {
 }
 
 impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
-    fn get_glyph_h_advance(&self, _: &HBFont, glyph: GlyphIndex) -> Position {
+    fn get_glyph_h_advance(&self, _: HbRef<HBFont>, glyph: GlyphIndex) -> Position {
         let glyph = self.font.glyph(GlyphId(glyph));
         if let Some(glyph) = glyph {
             let glyph = glyph.scaled(self.scale);
@@ -68,26 +70,26 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
         }
     }
 
-    fn get_glyph_h_kerning(&self, _: &HBFont, left: GlyphIndex, right: GlyphIndex) -> Position {
+    fn get_glyph_h_kerning(&self, _: HbRef<HBFont>, left: GlyphIndex, right: GlyphIndex) -> Position {
         self.font.pair_kerning(self.scale, GlyphId(left), GlyphId(right)).round() as Position
     }
 
-    fn get_glyph_extents(&self, _: &HBFont, glyph: GlyphIndex) -> Option<GlyphExtents> {
+    fn get_glyph_extents(&self, _: HbRef<HBFont>, glyph: GlyphIndex) -> Option<GlyphExtents> {
         let glyph = self.font.glyph(GlyphId(glyph));
         glyph.and_then(|glyph| {
             let glyph = glyph.scaled(self.scale);
             glyph.exact_bounding_box().map(|bbox| {
-                GlyphExtents {
-                    x_bearing: bbox.min.x.round() as i32,
-                    y_bearing: bbox.min.y.round() as i32,
-                    width: (bbox.max.x - bbox.min.x).round() as i32,
-                    height: (bbox.max.y - bbox.min.y).round() as i32,
-                }
-            })
+                                               GlyphExtents {
+                                                   x_bearing: bbox.min.x.round() as i32,
+                                                   y_bearing: bbox.min.y.round() as i32,
+                                                   width: (bbox.max.x - bbox.min.x).round() as i32,
+                                                   height: (bbox.max.y - bbox.min.y).round() as i32,
+                                               }
+                                           })
         })
     }
 
-    fn get_nominal_glyph(&self, _: &font::Font, unicode: char) -> Option<GlyphIndex> {
+    fn get_nominal_glyph(&self, _: HbRef<font::Font>, unicode: char) -> Option<GlyphIndex> {
         self.font.glyph(Codepoint(unicode as u32)).map(|glyph| glyph.id().0)
     }
 }
@@ -96,12 +98,13 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
 /// glyph or its extents.
 pub fn font_set_rusttype_funcs(font: &mut font::Font) {
     let font_data = ScaledRusttypeFont::from_hb_font(font);
-    font.set_font_funcs(&RT_FONT_FUNCS, font_data);
+    font.set_font_funcs(RT_FONT_FUNCS.clone(), font_data);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use font::Font;
     use face::Face;
 
     #[test]
@@ -110,7 +113,7 @@ mod tests {
         let face = Face::new(&font_bytes[..], 0);
         let upem = face.upem();
         println!("upem: {:?}", upem);
-        let mut font = face.create_font();
+        let mut font = Font::new(face);
 
         font.set_scale(15 * 64, 15 * 64);
 
@@ -124,12 +127,13 @@ mod tests {
     #[test]
     fn test_get_font_height() {
         let font_bytes = include_bytes!("../testfiles/Optima.ttc");
-        let mut font = Face::new(&font_bytes[..], 0).create_font();
+        let face = Face::new(&font_bytes[..], 0);
+        let mut font = Font::new(face);
 
         use super::get_font_height;
         assert_eq!(1187, get_font_height(&font));
 
-        font.set_scale(12 * 64, 12 *64);
+        font.set_scale(12 * 64, 12 * 64);
         assert!((911 - get_font_height(&font)).abs() < 2);
     }
 }

@@ -3,10 +3,10 @@ use hb;
 use std::marker::PhantomData;
 
 use blob::Blob;
-use font::Font;
-use common::{Tag, HarfbuzzObject};
+use common::{Tag, HarfbuzzObject, HbArc, HbBox};
 
-/// A wrapper around the harfbuzz `hb_face_t`.
+/// A wrapper around `hb_face_t`.
+#[derive(Debug)]
 pub struct Face<'a> {
     hb_face: *mut hb::hb_face_t,
     _marker: PhantomData<&'a [u8]>,
@@ -16,23 +16,21 @@ use std::path::Path;
 
 impl<'a> Face<'a> {
     /// Create a new `Face` from the data in `bytes`.
-    pub fn new<'b, T: Into<Blob<'b>>>(bytes: T, index: u32) -> Face<'b> {
+    pub fn new<'b, T: Into<HbArc<Blob<'b>>>>(bytes: T, index: u32) -> HbBox<Face<'b>> {
         let blob = bytes.into();
         let hb_face = unsafe { hb::hb_face_create(blob.into_raw(), index) };
-        Face {
-            hb_face: hb_face,
-            _marker: PhantomData,
-        }
+        unsafe { HbBox::from_raw(hb_face) }
     }
 
     /// Create a new face from the contents of the file at `path`.
-    pub fn from_file<P: AsRef<Path>>(path: P, index: u32) -> std::io::Result<Face<'static>> {
+    pub fn from_file<P: AsRef<Path>>(path: P, index: u32) -> std::io::Result<HbBox<Face<'static>>> {
         let blob = Blob::from_file(path)?;
         Ok(Face::new(blob, index))
     }
 
-    pub fn from_table_func<'b, F>(func: F) -> Face<'b>
-        where F: FnMut(Tag) -> Option<Blob<'b>>
+    /// Create a new face from a closure that returns a raw [`Blob`](struct.Blob.html) of table
+    pub fn from_table_func<'b, F>(func: F) -> HbBox<Face<'b>>
+        where F: FnMut(Tag) -> Option<HbArc<Blob<'b>>>
     {
         extern "C" fn destroy_box<U>(ptr: *mut std::os::raw::c_void) {
             unsafe { Box::from_raw(ptr as *mut U) };
@@ -41,7 +39,7 @@ impl<'a> Face<'a> {
                                         tag: hb::hb_tag_t,
                                         user_data: *mut std::os::raw::c_void)
                                         -> *mut hb::hb_blob_t
-            where F: FnMut(Tag) -> Option<Blob<'b>>
+            where F: FnMut(Tag) -> Option<HbArc<Blob<'b>>>
         {
             let tag = Tag(tag);
             let closure = unsafe { &mut *(user_data as *mut F) };
@@ -56,20 +54,18 @@ impl<'a> Face<'a> {
             let face = hb::hb_face_create_for_tables(Some(table_func::<'b, F>),
                                                      Box::into_raw(boxed_closure) as *mut _,
                                                      Some(destroy_box::<F>));
-            Face::from_raw(face)
+            HbBox::from_raw(face)
         }
     }
 
-    /// Create a `Font` of this face. By default this will use harfbuzz' included opentype font
-    /// funcs for shaping and have no scale value set so that the returned values will be in font
-    /// space.
-    pub fn create_font(&self) -> Font<'a> {
-        unsafe {
-            let raw_font = hb::hb_font_create(self.hb_face);
-            hb::hb_ot_font_set_funcs(raw_font);
-            Font::from_raw(raw_font)
-        }
-    }
+    //    /// Create a `Font` of this face. By default this will use harfbuzz' included opentype
+    // font
+    //    /// funcs for shaping and have no scale value set so that the returned values will be in
+    // font
+    //    /// space.
+    //    pub fn create_font(self) -> HbBox<Font<'a>> {
+    //        Font::new(self)
+    //    }
 
     pub fn face_data(&self) -> &'a [u8] {
         unsafe {
@@ -85,7 +81,11 @@ impl<'a> Face<'a> {
                 None
             } else {
                 let blob = Blob::from_raw(raw_blob);
-                if blob.is_empty() { None } else { Some(blob.get_data()) }
+                if blob.is_empty() {
+                    None
+                } else {
+                    Some(blob.get_data())
+                }
             }
         }
     }
@@ -124,22 +124,17 @@ impl<'a> HarfbuzzObject for Face<'a> {
     fn as_raw(&self) -> *mut hb::hb_face_t {
         self.hb_face
     }
-}
 
-
-impl<'a> Clone for Face<'a> {
-    fn clone(&self) -> Self {
-        let hb_face = unsafe { hb::hb_face_reference(self.hb_face) };
+    unsafe fn reference(&self) -> Self {
+        let hb_face = hb::hb_face_reference(self.hb_face);
         Face {
             hb_face: hb_face,
             _marker: PhantomData,
         }
     }
-}
 
-impl<'a> Drop for Face<'a> {
-    fn drop(&mut self) {
-        unsafe { hb::hb_face_destroy(self.hb_face) }
+    unsafe fn dereference(&self) {
+        hb::hb_face_destroy(self.hb_face);
     }
 }
 
@@ -165,9 +160,9 @@ mod tests {
     #[test]
     fn test_face_from_table_func() {
         let face = Face::from_table_func(|table_tag| {
-            let content = format!("{}-table", table_tag);
-            Some(content.into_bytes().into())
-        });
+                                             let content = format!("{}-table", table_tag);
+                                             Some(content.into_bytes().into())
+                                         });
 
         let maxp_table = face.table_with_tag(Tag::new('m', 'a', 'x', 'p')).unwrap();
         assert_eq!(maxp_table, b"maxp-table");

@@ -24,7 +24,8 @@
 //! let path = "path/to/some/font_file.otf";
 //! let index = 0;
 //! # let path = "testfiles/MinionPro-Regular.otf";
-//! let mut font = Face::from_file(path, index).unwrap().create_font();
+//! let face = Face::from_file(path, index).unwrap();
+//! let mut font = Font::new(face);
 //!
 //! let output = UnicodeBuffer::new().add_str("Hello World!").shape(&font, &[]);
 //! ```
@@ -37,7 +38,8 @@
 //! #
 //! # let index = 0;
 //! # let path = "testfiles/MinionPro-Regular.otf";
-//! # let mut font = Face::from_file(path, index).unwrap().create_font();
+//! # let face = Face::from_file(path, index).unwrap();
+//! # let mut font = Font::new(face);
 //! #
 //! # let output = UnicodeBuffer::new().add_str("Hello World!").shape(&font, &[]);
 //! let positions = output.get_glyph_positions();
@@ -71,7 +73,6 @@
 //! gid69=10@528,0+0
 //! gid2=11@276,0+0
 //! ```
-#![allow(doc_markdown)]
 #![allow(unknown_lints)]
 
 
@@ -82,6 +83,7 @@ extern crate libc;
 extern crate lazy_static;
 
 mod font;
+mod font_funcs;
 mod blob;
 mod face;
 pub mod rusttype;
@@ -97,6 +99,5 @@ pub use common::*;
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-    }
+    fn it_works() {}
 }

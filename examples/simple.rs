@@ -1,13 +1,12 @@
 extern crate harfbuzz_rs;
 
-use harfbuzz_rs::{Face, UnicodeBuffer};
+use harfbuzz_rs::{Face, Font, UnicodeBuffer};
 
 fn main() {
     let index = 0;
     let path = "testfiles/Optima.ttc";
-    let mut font = Face::from_file(path, index)
-        .expect("Error reading font file.")
-        .create_font();
+    let face = Face::from_file(path, index).expect("Error reading font file.");
+    let mut font = Font::new(face);
 
     font.set_scale(20 * 64, 20 * 64);
     font.set_ppem(72 * 64, 72 * 64);
