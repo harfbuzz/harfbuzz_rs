@@ -147,19 +147,6 @@ mod tests {
     use common::Tag;
 
     #[test]
-    fn test_face_wrapper() {
-        let font_bytes = include_bytes!("../testfiles/MinionPro-Regular.otf");
-        let face = Face::new(&font_bytes[..], 0);
-        let blob = face.face_data();
-        let maxp_table = face.table_with_tag(Tag::from_str("maxp").unwrap()).unwrap();
-
-        assert_eq!(maxp_table, [0x00, 0x00, 0x50, 0x00, 0x06, 0x96]);
-        assert_eq!(blob, &font_bytes[..]);
-        assert_eq!(face.upem(), 1000);
-        assert_eq!(face.glyph_count(), 1686);
-    }
-
-    #[test]
     fn test_face_from_table_func() {
         let face = Face::from_table_func(|table_tag| {
                                              let content = format!("{}-table", table_tag);

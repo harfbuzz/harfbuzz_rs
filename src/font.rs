@@ -308,30 +308,6 @@ mod tests {
     use super::*;
     use face::Face;
 
-    #[test]
-    fn test_font_reference_counting() {
-        let font_bytes = include_bytes!("../testfiles/MinionPro-Regular.otf");
-        let face = Face::new(&font_bytes[..], 0);
-        let font = Font::new(face);
-        let font = Font::create_sub_font(font);
-
-        {
-            let parent = font.parent();
-            println!("{:?}, scale: {:?}, face: {:?}",
-                     parent,
-                     parent.scale(),
-                     parent.face());
-        }
-        {
-            // this could cause a double free if reference counting is incorrect
-            let parent = font.parent();
-            println!("{:?}, scale: {:?}, face: {:?}",
-                     parent,
-                     parent.scale(),
-                     parent.face());
-        }
-    }
-
     #[derive(Debug)]
     struct MyFontData {
         ascender: i32,
@@ -352,51 +328,6 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_font_func_trait_impl() {
-        let font_bytes = include_bytes!("../testfiles/MinionPro-Regular.otf");
-        let face = Face::new(&font_bytes[..], 0);
-        let font = Font::new(face);
-
-        let mut subfont = Font::create_sub_font(font);
-        let my_funcs = FontFuncsImpl::<MyFontData>::from_trait_impl();
-        subfont.set_font_funcs(my_funcs, MyFontData { ascender: 1212 });
-
-        println!("{:?}", subfont.get_font_h_extents());
-        assert_eq!(1212, subfont.get_font_h_extents().unwrap().ascender);
-    }
-
-    #[test]
-    fn test_font_func_closure() {
-        let font_bytes = include_bytes!("../testfiles/MinionPro-Regular.otf");
-        let face = Face::new(&font_bytes[..], 0);
-        let mut font = Font::new(face);
-
-        let mut font_data = MyFontData { ascender: 0 };
-        let mut font_funcs = FontFuncsImpl::new();
-        font_funcs.set_font_h_extents_func(|_, _| {
-                                               Some(FontExtents {
-                                                        ascender: 1313,
-                                                        ..unsafe { std::mem::zeroed() }
-                                                    })
-                                           });
-        font_funcs.set_font_v_extents_func(|_, _| {
-                                               let MyFontData { ascender } = font_data;
-                                               Some(FontExtents {
-                                                        ascender: ascender,
-                                                        ..unsafe { std::mem::zeroed() }
-                                                    })
-                                           });
-
-        font.set_font_funcs(font_funcs, ());
-
-        for i in 1..1000 {
-            font_data.ascender += 1;
-            assert_eq!(1313, font.get_font_h_extents().unwrap().ascender);
-            assert_eq!(i, font.get_font_v_extents().unwrap().ascender);
-        }
-    }
-
     struct GlyphNameFuncProvider {}
 
     impl FontFuncs for GlyphNameFuncProvider {
@@ -409,31 +340,4 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_glyph_get_name_func() {
-        let font_bytes = include_bytes!("../testfiles/MinionPro-Regular.otf");
-        let face = Face::new(&font_bytes[..], 0);
-        let mut font = Font::new(face);
-        let glyph_name_funcs = FontFuncsImpl::from_trait_impl();
-        font.set_font_funcs(glyph_name_funcs, GlyphNameFuncProvider {});
-
-        println!("{:?}", font.get_glyph_name(12));
-        for i in 1..1000 {
-            assert_eq!(format!("My Glyph Code is: {:?}", i),
-                       font.get_glyph_name(i).unwrap());
-        }
-    }
-
-    #[test]
-    fn test_glyph_from_name_func() {
-        let font_bytes = include_bytes!("../testfiles/MinionPro-Regular.otf");
-        let face = Face::new(&font_bytes[..], 0);
-        let mut font = Font::new(face);
-        let glyph_name_funcs = FontFuncsImpl::from_trait_impl();
-        font.set_font_funcs(glyph_name_funcs, GlyphNameFuncProvider {});
-
-        for i in 1..1000 {
-            assert_eq!(i, font.get_glyph_from_name(&format!("{:?}", i)).unwrap());
-        }
-    }
 }
