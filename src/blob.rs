@@ -1,4 +1,5 @@
 use hb;
+use libc::c_void;
 
 use std;
 use std::marker::PhantomData;
@@ -161,7 +162,7 @@ impl<'a, T> From<T> for HbArc<Blob<'a>>
 
         let data = Box::into_raw(Box::new(container));
 
-        extern "C" fn destroy<U>(ptr: *mut std::os::raw::c_void) {
+        extern "C" fn destroy<U>(ptr: *mut c_void) {
             unsafe { Box::from_raw(ptr as *mut U) };
         }
 

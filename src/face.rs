@@ -1,5 +1,7 @@
 use std;
 use hb;
+use libc::c_void;
+
 use std::marker::PhantomData;
 
 use blob::Blob;
@@ -32,12 +34,12 @@ impl<'a> Face<'a> {
     pub fn from_table_func<'b, F>(func: F) -> HbBox<Face<'b>>
         where F: FnMut(Tag) -> Option<HbArc<Blob<'b>>>
     {
-        extern "C" fn destroy_box<U>(ptr: *mut std::os::raw::c_void) {
+        extern "C" fn destroy_box<U>(ptr: *mut c_void) {
             unsafe { Box::from_raw(ptr as *mut U) };
         }
         extern "C" fn table_func<'b, F>(_: *mut hb::hb_face_t,
                                         tag: hb::hb_tag_t,
-                                        user_data: *mut std::os::raw::c_void)
+                                        user_data: *mut c_void)
                                         -> *mut hb::hb_blob_t
             where F: FnMut(Tag) -> Option<HbArc<Blob<'b>>>
         {

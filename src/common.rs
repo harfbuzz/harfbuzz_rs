@@ -65,7 +65,6 @@ pub enum TagFromStrErr {
 
 use std;
 use std::str::FromStr;
-use std::ascii::AsciiExt;
 
 impl FromStr for Tag {
     type Err = TagFromStrErr;

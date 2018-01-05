@@ -6,6 +6,7 @@
 use {Font, FontExtents, Glyph, GlyphExtents, HarfbuzzObject, HbArc, HbBox, HbRef, Position};
 use font::destroy_box;
 
+use libc::c_void;
 use hb;
 
 use std;
@@ -106,9 +107,9 @@ pub trait FontFuncs {
 
 extern "C" fn rust_get_font_extents_closure<T, F>(
     font: *mut hb::hb_font_t,
-    font_data: *mut std::os::raw::c_void,
+    font_data: *mut c_void,
     metrics: *mut FontExtents,
-    closure_data: *mut std::os::raw::c_void,
+    closure_data: *mut c_void,
 ) -> hb::hb_bool_t
 where
     F: Fn(HbRef<Font>, &T) -> Option<FontExtents>,
@@ -128,10 +129,10 @@ where
 
 extern "C" fn rust_get_nominal_glyph_closure<T, F>(
     font: *mut hb::hb_font_t,
-    font_data: *mut std::os::raw::c_void,
+    font_data: *mut c_void,
     unicode: hb::hb_codepoint_t,
     glyph: *mut hb::hb_codepoint_t,
-    closure_data: *mut std::os::raw::c_void,
+    closure_data: *mut c_void,
 ) -> hb::hb_bool_t
 where
     F: Fn(HbRef<Font>, &T, char) -> Option<Glyph>,
@@ -156,11 +157,11 @@ where
 
 extern "C" fn rust_get_variation_glyph_closure<T, F>(
     font: *mut hb::hb_font_t,
-    font_data: *mut std::os::raw::c_void,
+    font_data: *mut c_void,
     unicode: hb::hb_codepoint_t,
     variation_selector: hb::hb_codepoint_t,
     glyph: *mut hb::hb_codepoint_t,
-    closure_data: *mut std::os::raw::c_void,
+    closure_data: *mut c_void,
 ) -> hb::hb_bool_t
 where
     F: Fn(HbRef<Font>, &T, char, char) -> Option<Glyph>,
@@ -186,9 +187,9 @@ where
 
 extern "C" fn rust_get_glyph_advance_closure<T, F>(
     font: *mut hb::hb_font_t,
-    font_data: *mut std::os::raw::c_void,
+    font_data: *mut c_void,
     glyph: hb::hb_codepoint_t,
-    closure_data: *mut std::os::raw::c_void,
+    closure_data: *mut c_void,
 ) -> Position
 where
     F: Fn(HbRef<Font>, &T, Glyph) -> Position,
@@ -201,11 +202,11 @@ where
 
 extern "C" fn rust_get_glyph_origin_closure<T, F>(
     font: *mut hb::hb_font_t,
-    font_data: *mut std::os::raw::c_void,
+    font_data: *mut c_void,
     glyph: hb::hb_codepoint_t,
     x: *mut Position,
     y: *mut Position,
-    closure_data: *mut std::os::raw::c_void,
+    closure_data: *mut c_void,
 ) -> hb::hb_bool_t
 where
     F: Fn(HbRef<Font>, &T, Glyph) -> Option<(Position, Position)>,
@@ -224,10 +225,10 @@ where
 
 extern "C" fn rust_get_glyph_kerning_closure<T, F>(
     font: *mut hb::hb_font_t,
-    font_data: *mut std::os::raw::c_void,
+    font_data: *mut c_void,
     before: hb::hb_codepoint_t,
     after: hb::hb_codepoint_t,
-    closure_data: *mut std::os::raw::c_void,
+    closure_data: *mut c_void,
 ) -> Position
 where
     F: Fn(HbRef<Font>, &T, Glyph, Glyph) -> Position,
@@ -240,10 +241,10 @@ where
 
 extern "C" fn rust_get_glyph_extents_closure<T, F>(
     font: *mut hb::hb_font_t,
-    font_data: *mut std::os::raw::c_void,
+    font_data: *mut c_void,
     glyph: hb::hb_codepoint_t,
     extents: *mut hb::hb_glyph_extents_t,
-    closure_data: *mut std::os::raw::c_void,
+    closure_data: *mut c_void,
 ) -> hb::hb_bool_t
 where
     F: Fn(HbRef<Font>, &T, Glyph) -> Option<GlyphExtents>,
@@ -262,12 +263,12 @@ where
 
 extern "C" fn rust_get_glyph_contour_point_closure<T, F>(
     font: *mut hb::hb_font_t,
-    font_data: *mut std::os::raw::c_void,
+    font_data: *mut c_void,
     glyph: hb::hb_codepoint_t,
     point: u32,
     x: *mut Position,
     y: *mut Position,
-    closure_data: *mut std::os::raw::c_void,
+    closure_data: *mut c_void,
 ) -> hb::hb_bool_t
 where
     F: Fn(HbRef<Font>, &T, Glyph, u32) -> Option<(Position, Position)>,
@@ -286,11 +287,11 @@ where
 
 extern "C" fn rust_get_glyph_name_closure<T, F>(
     font: *mut hb::hb_font_t,
-    font_data: *mut std::os::raw::c_void,
+    font_data: *mut c_void,
     glyph: hb::hb_codepoint_t,
     name: *mut std::os::raw::c_char,
     size: u32,
-    closure_data: *mut std::os::raw::c_void,
+    closure_data: *mut c_void,
 ) -> hb::hb_bool_t
 where
     F: Fn(HbRef<Font>, &T, Glyph) -> Option<String>,
@@ -313,11 +314,11 @@ where
 
 extern "C" fn rust_get_glyph_from_name_closure<T, F>(
     font: *mut hb::hb_font_t,
-    font_data: *mut std::os::raw::c_void,
+    font_data: *mut c_void,
     name: *const std::os::raw::c_char,
     size: i32,
     glyph: *mut hb::hb_codepoint_t,
-    closure_data: *mut std::os::raw::c_void,
+    closure_data: *mut c_void,
 ) -> hb::hb_bool_t
 where
     F: Fn(HbRef<Font>, &T, &str) -> Option<Glyph>,
