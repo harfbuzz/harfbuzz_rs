@@ -1,19 +1,10 @@
 [package]
 name = "harfbuzz_rs"
 version = "0.1.0"
-authors = ["Manuel Reinhardt <manuel.jr16@gmail.com>"]
+authors = ["Manuel Reinhardt <manuel.rhdt@gmail.com>"]
 
 [dependencies]
 harfbuzz-sys = { git = "https://github.com/manuel-rhdt/rust-harfbuzz.git" }
 libc = "0.2.*"
 rusttype = "0.2.1"
 lazy_static = "0.1.*"
-
-[dev-dependencies]
-image = "0.13.0"
-glutin = "0.8.1"
-shader_version = "0.2.2"
-gfx = "*"
-gfx_window_glutin = "*"
-piston2d-gfx_graphics = "*"
-piston2d-graphics = "*"
