@@ -17,7 +17,7 @@ use std::io::Write;
 /// This Trait specifies the font callbacks that harfbuzz uses for its shaping. You shouldn't
 /// call these functions yourself. They are exposed through the `Font` wrapper.
 ///
-/// No function in this trait need to be implemented, the default implementations simply return the
+/// No function in this trait needs to be implemented, the default implementations simply return the
 /// parent font's implementation. If a `Font` is created directly from a face, its parent is the
 /// empty `Font` which returns null values for every font func.
 #[allow(unused_variables)]

@@ -39,12 +39,14 @@ impl Debug for Tag {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let string = self.tag_to_string();
         let mut chars = string.chars().chain(std::iter::repeat('\u{FFFD}'));
-        write!(f,
-               "Tag({:?}, {:?}, {:?}, {:?})",
-               chars.next().unwrap(),
-               chars.next().unwrap(),
-               chars.next().unwrap(),
-               chars.next().unwrap())
+        write!(
+            f,
+            "Tag({:?}, {:?}, {:?}, {:?})",
+            chars.next().unwrap(),
+            chars.next().unwrap(),
+            chars.next().unwrap(),
+            chars.next().unwrap()
+        )
     }
 }
 
@@ -189,7 +191,9 @@ impl<T: HarfbuzzObject> HbArc<T> {
     /// Transfers ownership. _Use of the original pointer is now forbidden!_ Unsafe because a
     /// dereference of a raw pointer is necessary.
     pub unsafe fn from_raw(raw: T::Raw) -> Self {
-        HbArc { object: HbRef::from_raw(raw) }
+        HbArc {
+            object: HbRef::from_raw(raw),
+        }
     }
 
     /// Converts `self` into the underlying harfbuzz object pointer value. The resulting pointer
@@ -262,23 +266,28 @@ impl<T: HarfbuzzObject> HbRef<T> {
     ///
     /// Unsafe because a dereference of a raw pointer is necessary.
     pub unsafe fn from_raw(raw: T::Raw) -> Self {
-        HbRef { object: T::from_raw(raw) }
+        HbRef {
+            object: T::from_raw(raw),
+        }
     }
 
     /// Converts `self` into the underlying harfbuzz object pointer value.
     ///
     /// The resulting pointer has to be manually destroyed using `hb_TYPE_destroy` or be converted
     /// back into the wrapper using the `from_raw` function.
-   pub fn as_raw(&self) -> T::Raw {
-       self.object.as_raw()
-   }
+    pub fn as_raw(&self) -> T::Raw {
+        self.object.as_raw()
+    }
 }
 
 impl<T: HarfbuzzObject> ToOwned for HbRef<T> {
     type Owned = HbArc<T>;
 
     fn to_owned(&self) -> Self::Owned {
-        HbArc { object: HbRef { object: unsafe { self.reference() } } }
+        unsafe {
+            self.reference();
+            HbArc::from_raw(self.as_raw())
+        }
     }
 }
 
@@ -314,7 +323,9 @@ impl<T: HarfbuzzObject> HbBox<T> {
     ///
     /// Use this only to wrap freshly created HarfBuzz object!
     pub unsafe fn from_raw(raw: T::Raw) -> Self {
-        HbBox { object: T::from_raw(raw) }
+        HbBox {
+            object: T::from_raw(raw),
+        }
     }
 
     pub fn into_arc(self) -> HbArc<T> {
