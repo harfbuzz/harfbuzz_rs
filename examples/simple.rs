@@ -25,7 +25,7 @@ fn main() {
     let mut font = Font::new(face);
     font_set_rusttype_funcs(&mut font);
 
-    // Create a buffer with some text and shape it...
+    // Create a buffer with some text, shape it...
     let result = UnicodeBuffer::new().add_str("Hello World!").shape(&font, &[]);
 
     // ... and get the results.

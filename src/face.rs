@@ -5,7 +5,7 @@ use libc::c_void;
 use std::marker::PhantomData;
 
 use blob::Blob;
-use common::{Tag, HarfbuzzObject, HbArc, HbBox};
+use common::{HarfbuzzObject, HbArc, HbBox, Tag};
 
 /// A wrapper around `hb_face_t`.
 #[derive(Debug)]
@@ -32,16 +32,19 @@ impl<'a> Face<'a> {
 
     /// Create a new face from a closure that returns a raw [`Blob`](struct.Blob.html) of table
     pub fn from_table_func<'b, F>(func: F) -> HbBox<Face<'b>>
-        where F: FnMut(Tag) -> Option<HbArc<Blob<'b>>>
+    where
+        F: FnMut(Tag) -> Option<HbArc<Blob<'b>>>,
     {
         extern "C" fn destroy_box<U>(ptr: *mut c_void) {
             unsafe { Box::from_raw(ptr as *mut U) };
         }
-        extern "C" fn table_func<'b, F>(_: *mut hb::hb_face_t,
-                                        tag: hb::hb_tag_t,
-                                        user_data: *mut c_void)
-                                        -> *mut hb::hb_blob_t
-            where F: FnMut(Tag) -> Option<HbArc<Blob<'b>>>
+        extern "C" fn table_func<'b, F>(
+            _: *mut hb::hb_face_t,
+            tag: hb::hb_tag_t,
+            user_data: *mut c_void,
+        ) -> *mut hb::hb_blob_t
+        where
+            F: FnMut(Tag) -> Option<HbArc<Blob<'b>>>,
         {
             let tag = Tag(tag);
             let closure = unsafe { &mut *(user_data as *mut F) };
@@ -53,9 +56,11 @@ impl<'a> Face<'a> {
         }
         let boxed_closure = Box::new(func);
         unsafe {
-            let face = hb::hb_face_create_for_tables(Some(table_func::<'b, F>),
-                                                     Box::into_raw(boxed_closure) as *mut _,
-                                                     Some(destroy_box::<F>));
+            let face = hb::hb_face_create_for_tables(
+                Some(table_func::<'b, F>),
+                Box::into_raw(boxed_closure) as *mut _,
+                Some(destroy_box::<F>),
+            );
             HbBox::from_raw(face)
         }
     }
@@ -148,9 +153,9 @@ mod tests {
     #[test]
     fn test_face_from_table_func() {
         let face = Face::from_table_func(|table_tag| {
-                                             let content = format!("{}-table", table_tag);
-                                             Some(content.into_bytes().into())
-                                         });
+            let content = format!("{}-table", table_tag);
+            Some(content.into_bytes().into())
+        });
 
         let maxp_table = face.table_with_tag(Tag::new('m', 'a', 'x', 'p')).unwrap();
         assert_eq!(maxp_table, b"maxp-table");

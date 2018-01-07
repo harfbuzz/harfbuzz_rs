@@ -5,7 +5,7 @@ use libc::c_void;
 
 pub use font_funcs::{FontFuncs, FontFuncsImpl};
 use face::Face;
-use common::{HarfbuzzObject, HbArc, HbRef, HbBox};
+use common::{HarfbuzzObject, HbArc, HbBox, HbRef};
 
 use std::marker::PhantomData;
 use std::ffi::CStr;
@@ -155,14 +155,21 @@ impl<'a> Font<'a> {
 
     // scale from parent font
     pub(crate) fn parent_scale_position(&self, v: (Position, Position)) -> (Position, Position) {
-        (self.parent_scale_x_distance(v.0), self.parent_scale_y_distance(v.1))
+        (
+            self.parent_scale_x_distance(v.0),
+            self.parent_scale_y_distance(v.1),
+        )
     }
 
     pub fn get_font_h_extents(&self) -> Option<FontExtents> {
         unsafe {
             let mut extents = std::mem::uninitialized::<FontExtents>();
             let result = hb::hb_font_get_h_extents(self.hb_font, &mut extents);
-            if result == 1 { Some(extents) } else { None }
+            if result == 1 {
+                Some(extents)
+            } else {
+                None
+            }
         }
     }
 
@@ -170,7 +177,11 @@ impl<'a> Font<'a> {
         unsafe {
             let mut extents = std::mem::uninitialized::<FontExtents>();
             let result = hb::hb_font_get_v_extents(self.hb_font, &mut extents);
-            if result == 1 { Some(extents) } else { None }
+            if result == 1 {
+                Some(extents)
+            } else {
+                None
+            }
         }
     }
 
@@ -178,7 +189,11 @@ impl<'a> Font<'a> {
         unsafe {
             let mut glyph = 0;
             let result = hb::hb_font_get_nominal_glyph(self.hb_font, c as u32, &mut glyph);
-            if result == 1 { Some(glyph) } else { None }
+            if result == 1 {
+                Some(glyph)
+            } else {
+                None
+            }
         }
     }
 
@@ -187,7 +202,11 @@ impl<'a> Font<'a> {
             let mut glyph = 0;
             let result =
                 hb::hb_font_get_variation_glyph(self.hb_font, c as u32, v as u32, &mut glyph);
-            if result == 1 { Some(glyph) } else { None }
+            if result == 1 {
+                Some(glyph)
+            } else {
+                None
+            }
         }
     }
 
@@ -204,7 +223,11 @@ impl<'a> Font<'a> {
             let mut pos = (0, 0);
             let result =
                 hb::hb_font_get_glyph_h_origin(self.hb_font, glyph, &mut pos.0, &mut pos.1);
-            if result == 1 { Some(pos) } else { None }
+            if result == 1 {
+                Some(pos)
+            } else {
+                None
+            }
         }
     }
 
@@ -213,7 +236,11 @@ impl<'a> Font<'a> {
             let mut pos = (0, 0);
             let result =
                 hb::hb_font_get_glyph_v_origin(self.hb_font, glyph, &mut pos.0, &mut pos.1);
-            if result == 1 { Some(pos) } else { None }
+            if result == 1 {
+                Some(pos)
+            } else {
+                None
+            }
         }
     }
 
@@ -229,32 +256,45 @@ impl<'a> Font<'a> {
         unsafe {
             let mut extents = std::mem::uninitialized::<GlyphExtents>();
             let result = hb::hb_font_get_glyph_extents(self.hb_font, glyph, &mut extents);
-            if result == 1 { Some(extents) } else { None }
+            if result == 1 {
+                Some(extents)
+            } else {
+                None
+            }
         }
     }
 
-    pub fn get_glyph_contour_point(&self,
-                                   glyph: Glyph,
-                                   point_index: u32)
-                                   -> Option<(Position, Position)> {
+    pub fn get_glyph_contour_point(
+        &self,
+        glyph: Glyph,
+        point_index: u32,
+    ) -> Option<(Position, Position)> {
         unsafe {
             let mut pos = (0, 0);
-            let result = hb::hb_font_get_glyph_contour_point(self.hb_font,
-                                                             glyph,
-                                                             point_index,
-                                                             &mut pos.0,
-                                                             &mut pos.1);
-            if result == 1 { Some(pos) } else { None }
+            let result = hb::hb_font_get_glyph_contour_point(
+                self.hb_font,
+                glyph,
+                point_index,
+                &mut pos.0,
+                &mut pos.1,
+            );
+            if result == 1 {
+                Some(pos)
+            } else {
+                None
+            }
         }
     }
 
     pub fn get_glyph_name(&self, glyph: Glyph) -> Option<String> {
         let mut buffer = [0; 256];
         let result = unsafe {
-            hb::hb_font_get_glyph_name(self.hb_font,
-                                       glyph,
-                                       buffer.as_mut_ptr() as *mut _,
-                                       buffer.len() as u32)
+            hb::hb_font_get_glyph_name(
+                self.hb_font,
+                glyph,
+                buffer.as_mut_ptr() as *mut _,
+                buffer.len() as u32,
+            )
         };
         if result == 1 {
             let cstr = unsafe { CStr::from_ptr(buffer.as_ptr()) };
@@ -267,11 +307,17 @@ impl<'a> Font<'a> {
     pub fn get_glyph_from_name(&self, name: &str) -> Option<Glyph> {
         unsafe {
             let mut glyph = 0;
-            let result = hb::hb_font_get_glyph_from_name(self.hb_font,
-                                                         name.as_ptr() as *mut _,
-                                                         name.len() as i32,
-                                                         &mut glyph);
-            if result == 1 { Some(glyph) } else { None }
+            let result = hb::hb_font_get_glyph_from_name(
+                self.hb_font,
+                name.as_ptr() as *mut _,
+                name.len() as i32,
+                &mut glyph,
+            );
+            if result == 1 {
+                Some(glyph)
+            } else {
+                None
+            }
         }
     }
 }
