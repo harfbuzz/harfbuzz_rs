@@ -367,6 +367,9 @@ impl<T: HarfbuzzObject> DerefMut for HbBox<T> {
 mod tests {
     use super::*;
     use std::str::FromStr;
+    use std::cell::Cell;
+    use std::rc::Rc;
+    use std::mem;
 
     #[test]
     fn test_tag_debugging() {
@@ -389,5 +392,51 @@ mod tests {
         assert_eq!(Language::from_str("ger").unwrap().to_string(), "ger");
         assert_eq!(Language::from_str("ge!").unwrap().to_string(), "ge");
         assert_eq!(Language::from_str("German").unwrap().to_string(), "german");
+    }
+
+    #[derive(Debug)]
+    struct ReferenceCounter {
+        rc: Rc<Cell<isize>>,
+    }
+
+    impl HarfbuzzObject for ReferenceCounter {
+        type Raw = *mut Cell<isize>;
+
+        unsafe fn from_raw(raw: Self::Raw) -> Self {
+            ReferenceCounter { rc: Rc::from_raw(raw) }
+        }
+
+        fn as_raw(&self) -> Self::Raw {
+            Rc::into_raw(self.rc.clone()) as *mut _
+        }
+
+        unsafe fn reference(&self) -> Self {
+            println!("refrencing {:?}", self);
+            let rc = self.rc.get();
+            self.rc.set(rc + 1);
+            ReferenceCounter { rc: self.rc.clone() }
+        }
+
+        unsafe fn dereference(&self) {
+            println!("dereferencing {:?}", self);
+            let rc = self.rc.get();
+            self.rc.set(rc - 1);
+        }
+    }
+
+    #[test]
+    fn reference_counting_hbarc() {
+        let object = ReferenceCounter { rc: Rc::new(Cell::new(1)) };
+        let raw = object.as_raw();
+        let arc: HbArc<ReferenceCounter> = unsafe { HbArc::from_raw(raw) };
+        assert_eq!(object.rc.get(), 1);
+        {
+            let arc2 = HbArc::clone(&arc);
+            assert_eq!(object.rc.get(), 2);
+            mem::drop(arc2);
+        }
+        assert_eq!(object.rc.get(), 1);
+        mem::drop(arc);
+        assert_eq!(object.rc.get(), 0);
     }
 }
