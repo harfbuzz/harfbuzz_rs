@@ -5,7 +5,7 @@ use libc::c_void;
 
 pub use font_funcs::{FontFuncs, FontFuncsImpl};
 use face::Face;
-use common::{HarfbuzzObject, HbArc, HbBox, HbRef};
+use common::{HarfbuzzObject, HbArc, HbBox};
 
 use std::marker::PhantomData;
 use std::ffi::CStr;
@@ -14,36 +14,6 @@ pub type Glyph = u32;
 pub type FontExtents = hb::hb_font_extents_t;
 pub type GlyphExtents = hb::hb_glyph_extents_t;
 pub type Position = hb::hb_position_t;
-
-/// Represents a value that is either owned or a reference.
-pub enum MaybeOwned<'a, T: 'a> {
-    /// Owned value.
-    Owned(T),
-    /// Reference to a value.
-    Ref(&'a T),
-}
-
-impl<'a, T: 'a> std::convert::From<T> for MaybeOwned<'a, T> {
-    fn from(val: T) -> MaybeOwned<'a, T> {
-        MaybeOwned::Owned(val)
-    }
-}
-
-impl<'a, T: 'a> std::convert::From<&'a T> for MaybeOwned<'a, T> {
-    fn from(val: &'a T) -> MaybeOwned<'a, T> {
-        MaybeOwned::Ref(val)
-    }
-}
-
-impl<'a, T> std::ops::Deref for MaybeOwned<'a, T> {
-    type Target = T;
-    fn deref(&self) -> &T {
-        match *self {
-            MaybeOwned::Owned(ref val) => val,
-            MaybeOwned::Ref(val) => val,
-        }
-    }
-}
 
 pub(crate) extern "C" fn destroy_box<U>(ptr: *mut c_void) {
     unsafe { Box::from_raw(ptr as *mut U) };
@@ -54,8 +24,9 @@ pub(crate) extern "C" fn destroy_box<U>(ptr: *mut c_void) {
 /// A font can be created either as a subfont of an existing font or directly from a `Face` using
 /// its `create_font` function.
 #[derive(Debug)]
+#[repr(C)]
 pub struct Font<'a> {
-    hb_font: *mut hb::hb_font_t,
+    _raw: hb::hb_font_t,
     _marker: PhantomData<&'a hb::hb_font_t>,
 }
 
@@ -76,58 +47,51 @@ impl<'a> Font<'a> {
         unsafe { HbBox::from_raw(hb::hb_font_create_sub_font(font.into().as_raw())) }
     }
 
-    pub fn parent(&self) -> HbRef<Font<'a>> {
-        unsafe { HbRef::from_raw(hb::hb_font_get_parent(self.hb_font)) }
+    pub fn parent(&self) -> &Font<'a> {
+        unsafe { Font::from_raw(hb::hb_font_get_parent(self.as_raw())) }
     }
 
-    pub fn face(&self) -> HbRef<Face<'a>> {
-        unsafe { HbRef::from_raw(hb::hb_font_get_face(self.hb_font)) }
+    pub fn face(&self) -> &Face<'a> {
+        unsafe { Face::from_raw(hb::hb_font_get_face(self.as_raw())) }
     }
 
     pub fn scale(&self) -> (i32, i32) {
         let mut result = (0i32, 0i32);
-        unsafe { hb::hb_font_get_scale(self.hb_font, &mut result.0, &mut result.1) };
+        unsafe { hb::hb_font_get_scale(self.as_raw(), &mut result.0, &mut result.1) };
         result
     }
 
     pub fn set_scale(&mut self, x: i32, y: i32) -> &mut Font<'a> {
-        unsafe { hb::hb_font_set_scale(self.hb_font, x, y) };
+        unsafe { hb::hb_font_set_scale(self.as_raw(), x, y) };
         self
     }
 
     pub fn ppem(&self) -> (u32, u32) {
         let mut result = (0u32, 0u32);
-        unsafe { hb::hb_font_get_ppem(self.hb_font, &mut result.0, &mut result.1) };
+        unsafe { hb::hb_font_get_ppem(self.as_raw(), &mut result.0, &mut result.1) };
         result
     }
 
     pub fn set_ppem(&mut self, x: u32, y: u32) -> &mut Font<'a> {
-        unsafe { hb::hb_font_set_ppem(self.hb_font, x, y) };
+        unsafe { hb::hb_font_set_ppem(self.as_raw(), x, y) };
         self
     }
 
-    pub fn set_font_funcs<F, T, U>(&mut self, funcs: F, font_data: U) -> &mut Font<'a>
-        where F: Into<HbArc<FontFuncsImpl<T>>>,
-              T: 'a,
-              U: Into<MaybeOwned<'a, T>>
+    pub fn set_font_funcs<F, T>(&mut self, funcs: F, font_data: T) -> &mut Font<'a>
+    where
+        F: 'a + Into<HbArc<FontFuncsImpl<T>>>,
+        T: 'a + Send,
     {
         let funcs = funcs.into();
-        match font_data.into() {
-            MaybeOwned::Owned(font_data) => unsafe {
-                let font_data = Box::new(font_data);
-                hb::hb_font_set_funcs(self.hb_font,
-                                      funcs.as_raw(),
-                                      Box::into_raw(font_data) as *mut _,
-                                      Some(destroy_box::<T>));
-            },
-            // TODO: this may be unsafe because we cannot ensure that font_data lives long enough
-            MaybeOwned::Ref(font_data) => unsafe {
-                hb::hb_font_set_funcs(self.hb_font,
-                                      funcs.as_raw(),
-                                      font_data as *const T as *mut _,
-                                      None);
-            },
-        }
+        let font_data = Box::new(font_data);
+        unsafe {
+            hb::hb_font_set_funcs(
+                self.as_raw(),
+                funcs.as_raw(),
+                Box::into_raw(font_data) as *mut _,
+                Some(destroy_box::<T>),
+            )
+        };
         self
     }
 
@@ -164,7 +128,7 @@ impl<'a> Font<'a> {
     pub fn get_font_h_extents(&self) -> Option<FontExtents> {
         unsafe {
             let mut extents = std::mem::uninitialized::<FontExtents>();
-            let result = hb::hb_font_get_h_extents(self.hb_font, &mut extents);
+            let result = hb::hb_font_get_h_extents(self.as_raw(), &mut extents);
             if result == 1 {
                 Some(extents)
             } else {
@@ -176,7 +140,7 @@ impl<'a> Font<'a> {
     pub fn get_font_v_extents(&self) -> Option<FontExtents> {
         unsafe {
             let mut extents = std::mem::uninitialized::<FontExtents>();
-            let result = hb::hb_font_get_v_extents(self.hb_font, &mut extents);
+            let result = hb::hb_font_get_v_extents(self.as_raw(), &mut extents);
             if result == 1 {
                 Some(extents)
             } else {
@@ -188,7 +152,7 @@ impl<'a> Font<'a> {
     pub fn get_nominal_glyph(&self, c: char) -> Option<Glyph> {
         unsafe {
             let mut glyph = 0;
-            let result = hb::hb_font_get_nominal_glyph(self.hb_font, c as u32, &mut glyph);
+            let result = hb::hb_font_get_nominal_glyph(self.as_raw(), c as u32, &mut glyph);
             if result == 1 {
                 Some(glyph)
             } else {
@@ -201,7 +165,7 @@ impl<'a> Font<'a> {
         unsafe {
             let mut glyph = 0;
             let result =
-                hb::hb_font_get_variation_glyph(self.hb_font, c as u32, v as u32, &mut glyph);
+                hb::hb_font_get_variation_glyph(self.as_raw(), c as u32, v as u32, &mut glyph);
             if result == 1 {
                 Some(glyph)
             } else {
@@ -211,18 +175,18 @@ impl<'a> Font<'a> {
     }
 
     pub fn get_glyph_h_advance(&self, glyph: Glyph) -> Position {
-        unsafe { hb::hb_font_get_glyph_h_advance(self.hb_font, glyph) }
+        unsafe { hb::hb_font_get_glyph_h_advance(self.as_raw(), glyph) }
     }
 
     pub fn get_glyph_v_advance(&self, glyph: Glyph) -> Position {
-        unsafe { hb::hb_font_get_glyph_v_advance(self.hb_font, glyph) }
+        unsafe { hb::hb_font_get_glyph_v_advance(self.as_raw(), glyph) }
     }
 
     pub fn get_glyph_h_origin(&self, glyph: Glyph) -> Option<(Position, Position)> {
         unsafe {
             let mut pos = (0, 0);
             let result =
-                hb::hb_font_get_glyph_h_origin(self.hb_font, glyph, &mut pos.0, &mut pos.1);
+                hb::hb_font_get_glyph_h_origin(self.as_raw(), glyph, &mut pos.0, &mut pos.1);
             if result == 1 {
                 Some(pos)
             } else {
@@ -235,7 +199,7 @@ impl<'a> Font<'a> {
         unsafe {
             let mut pos = (0, 0);
             let result =
-                hb::hb_font_get_glyph_v_origin(self.hb_font, glyph, &mut pos.0, &mut pos.1);
+                hb::hb_font_get_glyph_v_origin(self.as_raw(), glyph, &mut pos.0, &mut pos.1);
             if result == 1 {
                 Some(pos)
             } else {
@@ -245,17 +209,17 @@ impl<'a> Font<'a> {
     }
 
     pub fn get_glyph_h_kerning(&self, left: Glyph, right: Glyph) -> Position {
-        unsafe { hb::hb_font_get_glyph_h_kerning(self.hb_font, left, right) }
+        unsafe { hb::hb_font_get_glyph_h_kerning(self.as_raw(), left, right) }
     }
 
     pub fn get_glyph_v_kerning(&self, before: Glyph, after: Glyph) -> Position {
-        unsafe { hb::hb_font_get_glyph_v_kerning(self.hb_font, before, after) }
+        unsafe { hb::hb_font_get_glyph_v_kerning(self.as_raw(), before, after) }
     }
 
     pub fn get_glyph_extents(&self, glyph: Glyph) -> Option<GlyphExtents> {
         unsafe {
             let mut extents = std::mem::uninitialized::<GlyphExtents>();
-            let result = hb::hb_font_get_glyph_extents(self.hb_font, glyph, &mut extents);
+            let result = hb::hb_font_get_glyph_extents(self.as_raw(), glyph, &mut extents);
             if result == 1 {
                 Some(extents)
             } else {
@@ -272,7 +236,7 @@ impl<'a> Font<'a> {
         unsafe {
             let mut pos = (0, 0);
             let result = hb::hb_font_get_glyph_contour_point(
-                self.hb_font,
+                self.as_raw(),
                 glyph,
                 point_index,
                 &mut pos.0,
@@ -290,7 +254,7 @@ impl<'a> Font<'a> {
         let mut buffer = [0; 256];
         let result = unsafe {
             hb::hb_font_get_glyph_name(
-                self.hb_font,
+                self.as_raw(),
                 glyph,
                 buffer.as_mut_ptr() as *mut _,
                 buffer.len() as u32,
@@ -308,7 +272,7 @@ impl<'a> Font<'a> {
         unsafe {
             let mut glyph = 0;
             let result = hb::hb_font_get_glyph_from_name(
-                self.hb_font,
+                self.as_raw(),
                 name.as_ptr() as *mut _,
                 name.len() as i32,
                 &mut glyph,
@@ -323,28 +287,13 @@ impl<'a> Font<'a> {
 }
 
 impl<'a> HarfbuzzObject for Font<'a> {
-    type Raw = *mut hb::hb_font_t;
+    type Raw = hb::hb_font_t;
 
-    unsafe fn from_raw(raw: *mut hb::hb_font_t) -> Self {
-        Font {
-            hb_font: raw,
-            _marker: PhantomData,
-        }
-    }
-
-    fn as_raw(&self) -> Self::Raw {
-        self.hb_font
-    }
-
-    unsafe fn reference(&self) -> Self {
-        let hb_font = hb::hb_font_reference(self.hb_font);
-        Font {
-            hb_font: hb_font,
-            _marker: PhantomData,
-        }
+    unsafe fn reference(&self) {
+        hb::hb_font_reference(self.as_raw());
     }
 
     unsafe fn dereference(&self) {
-        hb::hb_font_destroy(self.hb_font);
+        hb::hb_font_destroy(self.as_raw());
     }
 }

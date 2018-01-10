@@ -73,11 +73,10 @@
 //! gid69=10@528,0+0
 //! gid2=11@276,0+0
 //! ```
+#![deny(missing_debug_implementations)]
+
 extern crate harfbuzz_sys as hb;
 extern crate libc;
-
-#[macro_use]
-extern crate lazy_static;
 
 mod font;
 mod font_funcs;

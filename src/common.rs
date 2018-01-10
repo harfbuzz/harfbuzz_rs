@@ -1,6 +1,6 @@
 use hb;
 use std::ops::{Deref, DerefMut};
-use std::borrow::{Borrow, ToOwned};
+use std::borrow::Borrow;
 
 /// A type to represent 4-byte SFNT tags.
 ///
@@ -142,34 +142,57 @@ impl FromStr for Language {
     }
 }
 
-
 /// A trait which is implemented for all harffbuzz wrapper structs. It exposes common functionality
 /// for converting from and to the underlying raw harfbuzz pointers that are useful for ffi.
-pub trait HarfbuzzObject {
+pub trait HarfbuzzObject: Sized {
     /// Type of the raw harfbuzz object pointer.
     type Raw;
 
-    /// Creates a value from a harfbuzz object pointer.
+    /// Creates a reference from a harfbuzz object pointer.
     ///
     /// Unsafe because a raw pointer may be accessed. The reference count is not changed. Should not
     /// be called directly by a library user.
-    unsafe fn from_raw(val: Self::Raw) -> Self;
+    ///
+    /// Use the HbBox and HbArc abstractions instead.
+    unsafe fn from_raw<'a>(val: *const Self::Raw) -> &'a Self {
+        &*(val as *const Self)
+    }
+
+    /// Creates a mutable reference from a harfbuzz object pointer.
+    ///
+    /// Unsafe because a raw pointer may be accessed. The reference count is not changed. Should not
+    /// be called directly by a library user.
+    ///
+    /// Use the HbBox and HbArc abstractions instead.
+    unsafe fn from_raw_mut<'a>(val: *mut Self::Raw) -> &'a mut Self {
+        &mut *(val as *mut Self)
+    }
 
     /// Returns the underlying harfbuzz object pointer.
     ///
     /// The caller must ensure, that this pointer is not used after `self`'s destruction.
-    fn as_raw(&self) -> Self::Raw;
+    fn as_raw(&self) -> *mut Self::Raw {
+        (((self as *const Self) as *mut Self) as *mut Self::Raw)
+    }
 
     /// Increases the reference count of the HarfBuzz object.
     ///
     /// Wraps a `hb_TYPE_reference()` call.
-    unsafe fn reference(&self) -> Self;
+    unsafe fn reference(&self);
 
     /// Decreases the reference count of the HarfBuzz object and destroys it if the reference count
     /// reaches zero.
     ///
     /// Wraps a `hb_TYPE_destroy()` call.
     unsafe fn dereference(&self);
+
+    /// Makes an owned value from the reference.
+    fn upgrade(&self) -> HbArc<Self> {
+        unsafe {
+            self.reference();
+            HbArc::from_raw(self.as_raw())
+        }
+    }
 }
 
 /// Wraps an atomically reference counted HarfBuzz object.
@@ -182,25 +205,23 @@ pub trait HarfbuzzObject {
 /// similar semantics.
 #[derive(Debug, PartialEq, Eq)]
 pub struct HbArc<T: HarfbuzzObject> {
-    object: HbRef<T>,
+    pointer: *mut T::Raw,
 }
 
 impl<T: HarfbuzzObject> HbArc<T> {
     /// Creates a `HbArc` from a raw harfbuzz pointer.
     ///
-    /// Transfers ownership. _Use of the original pointer is now forbidden!_ Unsafe because a
-    /// dereference of a raw pointer is necessary.
-    pub unsafe fn from_raw(raw: T::Raw) -> Self {
-        HbArc {
-            object: HbRef::from_raw(raw),
-        }
+    /// Transfers ownership. _Use of the original pointer is now forbidden!_ Unsafe because
+    /// dereferencing a raw pointer is necessary.
+    pub unsafe fn from_raw(raw: *mut T::Raw) -> Self {
+        HbArc { pointer: raw }
     }
 
     /// Converts `self` into the underlying harfbuzz object pointer value. The resulting pointer
     /// has to be manually destroyed using `hb_TYPE_destroy` or be converted back into the wrapper
     /// using the `from_raw` function.
-    pub fn into_raw(self) -> T::Raw {
-        let result = self.object.as_raw();
+    pub fn into_raw(self) -> *mut T::Raw {
+        let result = self.pointer;
         std::mem::forget(self);
         result
     }
@@ -208,96 +229,43 @@ impl<T: HarfbuzzObject> HbArc<T> {
 
 impl<T: HarfbuzzObject> Clone for HbArc<T> {
     fn clone(&self) -> Self {
-        unsafe { HbArc { object: HbRef { object: self.object.reference() } } }
+        unsafe {
+            self.reference();
+            Self::from_raw(self.pointer)
+        }
     }
 }
 
 impl<T: HarfbuzzObject> Deref for HbArc<T> {
-    type Target = HbRef<T>;
+    type Target = T;
 
-    fn deref(&self) -> &HbRef<T> {
-        &self.object
+    fn deref(&self) -> &T {
+        unsafe { T::from_raw(self.pointer) }
     }
 }
 
-impl<T: HarfbuzzObject> Borrow<HbRef<T>> for HbArc<T> {
-    fn borrow(&self) -> &HbRef<T> {
-        &self
+impl<T: HarfbuzzObject> Borrow<T> for HbArc<T> {
+    fn borrow(&self) -> &T {
+        self
     }
 }
 
 impl<T: HarfbuzzObject> From<HbBox<T>> for HbArc<T> {
     fn from(t: HbBox<T>) -> Self {
-        let raw = t.object.as_raw();
+        let ptr = t.pointer;
         std::mem::forget(t);
-        unsafe { HbArc::from_raw(raw) }
-    }
-}
-
-impl<T: HarfbuzzObject> From<HbRef<T>> for HbArc<T> {
-    fn from(t: HbRef<T>) -> Self {
-        HbArc { object: t }
+        unsafe { HbArc::from_raw(ptr) }
     }
 }
 
 impl<T: HarfbuzzObject> Drop for HbArc<T> {
     fn drop(&mut self) {
-        unsafe { self.object.dereference() }
+        unsafe { self.dereference() }
     }
 }
 
 unsafe impl<T: HarfbuzzObject + Sync + Send> Send for HbArc<T> {}
 unsafe impl<T: HarfbuzzObject + Sync + Send> Sync for HbArc<T> {}
-
-/// Wraps a reference to a harfbuzz object and provides immutable access to it through its `Deref`
-/// implementation.
-///
-/// A `HbRef` does not own its content.
-#[derive(Debug, PartialEq, Eq)]
-pub struct HbRef<T: HarfbuzzObject> {
-    object: T,
-}
-
-impl<T: HarfbuzzObject> HbRef<T> {
-    /// Creates a `HbRef`that safely wraps a reference to a raw harfbuzz object.
-    ///
-    /// This does not transfer ownership. Special care must be taken that the harfbuzz object is not
-    /// destroyed while a `HbRef` is in use.
-    ///
-    /// Unsafe because a dereference of a raw pointer is necessary.
-    pub unsafe fn from_raw(raw: T::Raw) -> Self {
-        HbRef {
-            object: T::from_raw(raw),
-        }
-    }
-
-    /// Converts `self` into the underlying harfbuzz object pointer value.
-    ///
-    /// The resulting pointer has to be manually destroyed using `hb_TYPE_destroy` or be converted
-    /// back into the wrapper using the `from_raw` function.
-    pub fn as_raw(&self) -> T::Raw {
-        self.object.as_raw()
-    }
-}
-
-impl<T: HarfbuzzObject> ToOwned for HbRef<T> {
-    type Owned = HbArc<T>;
-
-    fn to_owned(&self) -> Self::Owned {
-        unsafe {
-            self.reference();
-            HbArc::from_raw(self.as_raw())
-        }
-    }
-}
-
-impl<T: HarfbuzzObject> Deref for HbRef<T> {
-    type Target = T;
-
-    fn deref(&self) -> &T {
-        &self.object
-    }
-}
 
 /// Wraps a mutable owned harfbuzz object.
 ///
@@ -312,7 +280,7 @@ impl<T: HarfbuzzObject> Deref for HbRef<T> {
 /// converted to  a `HbArc<T>`, it will not possible to mutate it anymore.
 #[derive(Debug, PartialEq, Eq)]
 pub struct HbBox<T: HarfbuzzObject> {
-    object: T,
+    pointer: *mut T::Raw,
 }
 
 impl<T: HarfbuzzObject> HbBox<T> {
@@ -322,30 +290,18 @@ impl<T: HarfbuzzObject> HbBox<T> {
     /// because a dereference of a raw pointer is necessary.
     ///
     /// Use this only to wrap freshly created HarfBuzz object!
-    pub unsafe fn from_raw(raw: T::Raw) -> Self {
-        HbBox {
-            object: T::from_raw(raw),
-        }
+    pub unsafe fn from_raw(raw: *mut T::Raw) -> Self {
+        HbBox { pointer: raw }
     }
 
     pub fn into_arc(self) -> HbArc<T> {
         self.into()
     }
-
-    // TODO
-    //    /// Converts `self` into the underlying harfbuzz object pointer value. The resulting
-    // pointer
-    //    /// has to be manually destroyed using `hb_TYPE_destroy` or be converted back into the
-    // wrapper
-    //    /// using the `from_raw` function.
-    //    pub fn as_raw(&self) -> T::Raw {
-    //        self.object.as_raw()
-    //    }
 }
 
 impl<T: HarfbuzzObject> Drop for HbBox<T> {
     fn drop(&mut self) {
-        unsafe { self.object.dereference() }
+        unsafe { self.dereference() }
     }
 }
 
@@ -353,13 +309,13 @@ impl<T: HarfbuzzObject> Deref for HbBox<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
-        &self.object
+        unsafe { T::from_raw(self.pointer) }
     }
 }
 
 impl<T: HarfbuzzObject> DerefMut for HbBox<T> {
     fn deref_mut(&mut self) -> &mut T {
-        &mut self.object
+        unsafe { T::from_raw_mut(self.pointer) }
     }
 }
 
@@ -367,8 +323,8 @@ impl<T: HarfbuzzObject> DerefMut for HbBox<T> {
 mod tests {
     use super::*;
     use std::str::FromStr;
-    use std::cell::Cell;
     use std::rc::Rc;
+    use std::cell::Cell;
     use std::mem;
 
     #[test]
@@ -396,25 +352,16 @@ mod tests {
 
     #[derive(Debug)]
     struct ReferenceCounter {
-        rc: Rc<Cell<isize>>,
+        rc: Cell<isize>,
     }
 
     impl HarfbuzzObject for ReferenceCounter {
-        type Raw = *mut Cell<isize>;
+        type Raw = Cell<isize>;
 
-        unsafe fn from_raw(raw: Self::Raw) -> Self {
-            ReferenceCounter { rc: Rc::from_raw(raw) }
-        }
-
-        fn as_raw(&self) -> Self::Raw {
-            Rc::into_raw(self.rc.clone()) as *mut _
-        }
-
-        unsafe fn reference(&self) -> Self {
-            println!("refrencing {:?}", self);
+        unsafe fn reference(&self) {
+            println!("referencing {:?}", self);
             let rc = self.rc.get();
             self.rc.set(rc + 1);
-            ReferenceCounter { rc: self.rc.clone() }
         }
 
         unsafe fn dereference(&self) {
@@ -426,8 +373,10 @@ mod tests {
 
     #[test]
     fn reference_counting_hbarc() {
-        let object = ReferenceCounter { rc: Rc::new(Cell::new(1)) };
-        let raw = object.as_raw();
+        // Mimic a C-API that returns a pointer to a reference counted value.
+        let object = Rc::new(ReferenceCounter { rc: Cell::new(1) });
+        let raw = Rc::into_raw(object.clone()) as *mut _;
+
         let arc: HbArc<ReferenceCounter> = unsafe { HbArc::from_raw(raw) };
         assert_eq!(object.rc.get(), 1);
         {
@@ -438,5 +387,8 @@ mod tests {
         assert_eq!(object.rc.get(), 1);
         mem::drop(arc);
         assert_eq!(object.rc.get(), 0);
+
+        // don't leak memory
+        let _ = unsafe { Rc::from_raw(raw) };
     }
 }

@@ -7,8 +7,9 @@ use std::marker::PhantomData;
 use std::path::Path;
 use std::fs::File;
 use std::io::Read;
+use std::fmt;
 
-use common::{HarfbuzzObject, HbBox, HbArc};
+use common::{HarfbuzzObject, HbArc, HbBox};
 
 /// A `Blob` manages raw data like e.g. file contents. It refers to a slice of bytes that can be
 /// either owned by the `Blob` or not.
@@ -18,19 +19,22 @@ use common::{HarfbuzzObject, HbBox, HbArc};
 ///
 /// A `Blob` implements `Into` for every type that satisfies the `AsRef<[u8]>' trait such as
 /// `Vec<u8>` and `Box<[u8]>` so owned blobs can be created easily from standard Rust objects.
+#[repr(C)]
 pub struct Blob<'a> {
-    hb_blob: *mut hb::hb_blob_t,
-    _marker: PhantomData<&'a mut hb::hb_blob_t>,
+    _raw: hb::hb_blob_t,
+    _marker: PhantomData<&'a mut [u8]>,
 }
 impl<'a> Blob<'a> {
     /// Create a new `Blob` from the slice `bytes`. The blob will not own the data.
     pub fn with_bytes(bytes: &[u8]) -> HbBox<Blob> {
         let hb_blob = unsafe {
-            hb::hb_blob_create(bytes.as_ptr() as *const i8,
-                               bytes.len() as u32,
-                               hb::HB_MEMORY_MODE_READONLY,
-                               0 as *mut _,
-                               None)
+            hb::hb_blob_create(
+                bytes.as_ptr() as *const i8,
+                bytes.len() as u32,
+                hb::HB_MEMORY_MODE_READONLY,
+                0 as *mut _,
+                None,
+            )
         };
         unsafe { HbBox::from_raw(hb_blob) }
     }
@@ -52,11 +56,13 @@ impl<'a> Blob<'a> {
     /// you're doing.
     pub fn with_mut_bytes(bytes: &mut [u8]) -> HbBox<Blob> {
         let hb_blob = unsafe {
-            hb::hb_blob_create(bytes.as_ptr() as *const i8,
-                               bytes.len() as u32,
-                               hb::HB_MEMORY_MODE_WRITABLE,
-                               0 as *mut _,
-                               None)
+            hb::hb_blob_create(
+                bytes.as_ptr() as *const i8,
+                bytes.len() as u32,
+                hb::HB_MEMORY_MODE_WRITABLE,
+                0 as *mut _,
+                None,
+            )
         };
         unsafe { HbBox::from_raw(hb_blob) }
     }
@@ -64,8 +70,8 @@ impl<'a> Blob<'a> {
     /// Get a slice of the `Blob`'s bytes.
     pub fn get_data(&self) -> &'a [u8] {
         unsafe {
-            let mut length = hb::hb_blob_get_length(self.hb_blob);
-            let data_ptr = hb::hb_blob_get_data(self.hb_blob, &mut length as *mut _);
+            let mut length = hb::hb_blob_get_length(self.as_raw());
+            let data_ptr = hb::hb_blob_get_data(self.as_raw(), &mut length as *mut _);
             std::slice::from_raw_parts(data_ptr as *const u8, length as usize)
         }
     }
@@ -78,18 +84,18 @@ impl<'a> Blob<'a> {
     /// * `length`: Length of the sub-blob.
     pub fn create_sub_blob(&self, offset: usize, length: usize) -> HbArc<Blob<'a>> {
         let blob =
-            unsafe { hb::hb_blob_create_sub_blob(self.hb_blob, offset as u32, length as u32) };
+            unsafe { hb::hb_blob_create_sub_blob(self.as_raw(), offset as u32, length as u32) };
         unsafe { HbArc::from_raw(blob) }
     }
 
     /// Returns true if the blob is immutable.
     pub fn is_immutable(&self) -> bool {
-        unsafe { hb::hb_blob_is_immutable(self.hb_blob) == 1 }
+        unsafe { hb::hb_blob_is_immutable(self.as_raw()) == 1 }
     }
 
     /// Makes this blob immutable so the bytes it refers to will never change during its lifetime.
     pub fn make_immutable(&mut self) {
-        unsafe { hb::hb_blob_make_immutable(self.hb_blob) }
+        unsafe { hb::hb_blob_make_immutable(self.as_raw()) }
     }
 
     /// Try to get a mutable slice of the `Blob`'s bytes, possibly copying them.
@@ -97,41 +103,37 @@ impl<'a> Blob<'a> {
     /// This returns `None` if the blob is immutable or memory allocation failed.
     pub fn try_get_mut_data(&mut self) -> Option<&'a mut [u8]> {
         unsafe {
-            let mut length = hb::hb_blob_get_length(self.hb_blob);
-            let data_ptr = hb::hb_blob_get_data_writable(self.hb_blob, &mut length as *mut _);
+            let mut length = hb::hb_blob_get_length(self.as_raw());
+            let data_ptr = hb::hb_blob_get_data_writable(self.as_raw(), &mut length as *mut _);
             if data_ptr.is_null() {
                 None
             } else {
-                Some(std::slice::from_raw_parts_mut(data_ptr as *mut u8, length as usize))
+                Some(std::slice::from_raw_parts_mut(
+                    data_ptr as *mut u8,
+                    length as usize,
+                ))
             }
         }
     }
 }
 
+impl<'a> fmt::Debug for Blob<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("Blob")
+            .field("data", &self.get_data())
+            .finish()
+    }
+}
+
 impl<'a> HarfbuzzObject for Blob<'a> {
-    type Raw = *mut hb::hb_blob_t;
+    type Raw = hb::hb_blob_t;
 
-    unsafe fn from_raw(val: Self::Raw) -> Self {
-        Blob {
-            hb_blob: val,
-            _marker: PhantomData,
-        }
-    }
-
-    fn as_raw(&self) -> Self::Raw {
-        self.hb_blob
-    }
-
-    unsafe fn reference(&self) -> Self {
-        let hb_blob = hb::hb_blob_reference(self.hb_blob);
-        Blob {
-            hb_blob: hb_blob,
-            _marker: PhantomData,
-        }
+    unsafe fn reference(&self) {
+        hb::hb_blob_reference(self.as_raw());
     }
 
     unsafe fn dereference(&self) {
-        hb::hb_blob_destroy(self.hb_blob);
+        hb::hb_blob_destroy(self.as_raw());
     }
 }
 
@@ -154,7 +156,8 @@ impl<'a> Deref for Blob<'a> {
 use std::convert::From;
 
 impl<'a, T> From<T> for HbArc<Blob<'a>>
-    where T: AsRef<[u8]> + 'a
+where
+    T: 'static + Send + AsRef<[u8]>,
 {
     fn from(container: T) -> HbArc<Blob<'a>> {
         let len = container.as_ref().len();
@@ -167,11 +170,13 @@ impl<'a, T> From<T> for HbArc<Blob<'a>>
         }
 
         let hb_blob = unsafe {
-            hb::hb_blob_create(ptr as *const i8,
-                               len as u32,
-                               hb::HB_MEMORY_MODE_READONLY,
-                               data as *mut _,
-                               Some(destroy::<T>))
+            hb::hb_blob_create(
+                ptr as *const i8,
+                len as u32,
+                hb::HB_MEMORY_MODE_READONLY,
+                data as *mut _,
+                Some(destroy::<T>),
+            )
         };
         unsafe { HbArc::from_raw(hb_blob) }
     }
@@ -195,10 +200,10 @@ mod tests {
         }
     }
 
-    use std::rc::Rc;
+    use std::sync::Arc;
     #[test]
-    fn test_rc_to_blob_conversion() {
-        let rc_slice: Rc<[u8]> = Rc::new([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+    fn test_arc_to_blob_conversion() {
+        let rc_slice: Arc<[u8]> = Arc::new([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
         let blob: HbArc<Blob<'static>> = rc_slice.into();
 
         assert_eq!(blob.len(), 11);

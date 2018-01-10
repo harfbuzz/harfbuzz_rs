@@ -2,7 +2,7 @@ use hb;
 use std;
 
 use font::Font;
-use common::{HarfbuzzObject, Tag, Language};
+use common::{HarfbuzzObject, Language, Tag};
 
 pub type GlyphPosition = hb::hb_glyph_position_t;
 pub type GlyphInfo = hb::hb_glyph_info_t;
@@ -33,11 +33,13 @@ impl BufferRaw {
     fn add_str(&mut self, string: &str) {
         let utf8_ptr = string.as_ptr() as *const i8;
         unsafe {
-            hb::hb_buffer_add_utf8(self.hb_buffer,
-                                   utf8_ptr,
-                                   string.len() as i32,
-                                   0,
-                                   string.len() as i32);
+            hb::hb_buffer_add_utf8(
+                self.hb_buffer,
+                utf8_ptr,
+                string.len() as i32,
+                0,
+                string.len() as i32,
+            );
         }
     }
 
@@ -85,10 +87,12 @@ impl BufferRaw {
 
     fn shape(&mut self, font: &Font, features: &[Feature]) {
         unsafe {
-            hb::hb_shape(font.as_raw(),
-                         self.hb_buffer,
-                         features.as_ptr(),
-                         features.len() as u32)
+            hb::hb_shape(
+                font.as_raw(),
+                self.hb_buffer,
+                features.as_ptr(),
+                features.len() as u32,
+            )
         };
     }
 
@@ -99,8 +103,8 @@ impl BufferRaw {
     fn get_glyph_positions(&self) -> &[GlyphPosition] {
         unsafe {
             let mut length: u32 = 0;
-            let glyph_pos = hb::hb_buffer_get_glyph_positions(self.hb_buffer,
-                                                              &mut length as *mut u32);
+            let glyph_pos =
+                hb::hb_buffer_get_glyph_positions(self.hb_buffer, &mut length as *mut u32);
             std::slice::from_raw_parts(glyph_pos, length as usize)
         }
     }
@@ -108,8 +112,8 @@ impl BufferRaw {
     fn get_glyph_infos(&self) -> &[GlyphInfo] {
         unsafe {
             let mut length: u32 = 0;
-            let glyph_infos = hb::hb_buffer_get_glyph_infos(self.hb_buffer,
-                                                            &mut length as *mut u32);
+            let glyph_infos =
+                hb::hb_buffer_get_glyph_infos(self.hb_buffer, &mut length as *mut u32);
             std::slice::from_raw_parts(glyph_infos, length as usize)
         }
     }
@@ -131,7 +135,9 @@ impl Clone for BufferRaw {
         unsafe {
             hb::hb_buffer_reference(self.hb_buffer);
         }
-        BufferRaw { hb_buffer: self.hb_buffer }
+        BufferRaw {
+            hb_buffer: self.hb_buffer,
+        }
     }
 }
 
@@ -197,7 +203,8 @@ impl UnicodeBuffer {
     }
 
     pub fn set_script(mut self, script: Tag) -> UnicodeBuffer {
-        self.0.set_script(unsafe { hb::hb_script_from_iso15924_tag(script.0) });
+        self.0
+            .set_script(unsafe { hb::hb_script_from_iso15924_tag(script.0) });
         self
     }
 

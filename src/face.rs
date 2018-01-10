@@ -10,7 +10,7 @@ use common::{HarfbuzzObject, HbArc, HbBox, Tag};
 /// A wrapper around `hb_face_t`.
 #[derive(Debug)]
 pub struct Face<'a> {
-    hb_face: *mut hb::hb_face_t,
+    hb_face: hb::hb_face_t,
     _marker: PhantomData<&'a [u8]>,
 }
 
@@ -76,14 +76,14 @@ impl<'a> Face<'a> {
 
     pub fn face_data(&self) -> &'a [u8] {
         unsafe {
-            let raw_blob = hb::hb_face_reference_blob(self.hb_face);
+            let raw_blob = hb::hb_face_reference_blob(self.as_raw());
             Blob::from_raw(raw_blob).get_data()
         }
     }
 
     pub fn table_with_tag(&self, tag: Tag) -> Option<&[u8]> {
         unsafe {
-            let raw_blob = hb::hb_face_reference_table(self.hb_face, tag.0);
+            let raw_blob = hb::hb_face_reference_table(self.as_raw(), tag.0);
             if raw_blob.is_null() {
                 None
             } else {
@@ -98,50 +98,35 @@ impl<'a> Face<'a> {
     }
 
     pub fn index(&self) -> u32 {
-        unsafe { hb::hb_face_get_index(self.hb_face) }
+        unsafe { hb::hb_face_get_index(self.as_raw()) }
     }
 
     pub fn set_upem(&mut self, upem: u32) {
-        unsafe { hb::hb_face_set_upem(self.hb_face, upem) };
+        unsafe { hb::hb_face_set_upem(self.as_raw(), upem) };
     }
 
     pub fn upem(&self) -> u32 {
-        unsafe { hb::hb_face_get_upem(self.hb_face) }
+        unsafe { hb::hb_face_get_upem(self.as_raw()) }
     }
 
     pub fn set_glyph_count(&mut self, count: u32) {
-        unsafe { hb::hb_face_set_glyph_count(self.hb_face, count) };
+        unsafe { hb::hb_face_set_glyph_count(self.as_raw(), count) };
     }
 
     pub fn glyph_count(&self) -> u32 {
-        unsafe { hb::hb_face_get_glyph_count(self.hb_face) }
+        unsafe { hb::hb_face_get_glyph_count(self.as_raw()) }
     }
 }
 
 impl<'a> HarfbuzzObject for Face<'a> {
-    type Raw = *mut hb::hb_face_t;
+    type Raw = hb::hb_face_t;
 
-    unsafe fn from_raw(raw: *mut hb::hb_face_t) -> Self {
-        Face {
-            hb_face: raw,
-            _marker: PhantomData,
-        }
-    }
-
-    fn as_raw(&self) -> *mut hb::hb_face_t {
-        self.hb_face
-    }
-
-    unsafe fn reference(&self) -> Self {
-        let hb_face = hb::hb_face_reference(self.hb_face);
-        Face {
-            hb_face: hb_face,
-            _marker: PhantomData,
-        }
+    unsafe fn reference(&self) {
+        hb::hb_face_reference(self.as_raw());
     }
 
     unsafe fn dereference(&self) {
-        hb::hb_face_destroy(self.hb_face);
+        hb::hb_face_destroy(self.as_raw());
     }
 }
 
