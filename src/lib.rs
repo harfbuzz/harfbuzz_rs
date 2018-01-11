@@ -20,12 +20,17 @@
 //!
 //! ```
 //! use harfbuzz_rs::*;
+//! use harfbuzz_rs::rusttype::SetRustTypeFuncs;
 //!
 //! let path = "path/to/some/font_file.otf";
-//! let index = 0;
+//! let index = 0; //< face index in the font file
 //! # let path = "testfiles/SourceSansVariable-Roman.ttf";
 //! let face = Face::from_file(path, index).unwrap();
 //! let mut font = Font::new(face);
+//! // Use RustType as provider for font information that harfbuzz needs.
+//! // You can also use a custom font implementation. For more information look
+//! // at the documentation for `FontFuncs`.
+//! font.set_rusttype_funcs();
 //!
 //! let output = UnicodeBuffer::new().add_str("Hello World!").shape(&font, &[]);
 //! ```
@@ -35,12 +40,13 @@
 //!
 //! ```
 //! # use harfbuzz_rs::*;
+//! # use harfbuzz_rs::rusttype::SetRustTypeFuncs;
 //! #
 //! # let index = 0;
 //! # let path = "testfiles/SourceSansVariable-Roman.ttf";
 //! # let face = Face::from_file(path, index).unwrap();
 //! # let mut font = Font::new(face);
-//! #
+//! # font.set_rusttype_funcs();
 //! # let output = UnicodeBuffer::new().add_str("Hello World!").shape(&font, &[]);
 //! let positions = output.get_glyph_positions();
 //! let infos = output.get_glyph_infos();

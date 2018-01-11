@@ -8,7 +8,7 @@ use self::rusttype::Font as RTFont;
 
 use font;
 use face;
-use font::{Font as HBFont, FontFuncs, Glyph as GlyphIndex, GlyphExtents, Position};
+use font::{Font, FontFuncs, Glyph as GlyphIndex, GlyphExtents, Position};
 
 use std;
 use std::str::FromStr;
@@ -74,7 +74,7 @@ impl<'a> ScaledRusttypeFont<'a> {
 }
 
 impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
-    fn get_glyph_h_advance(&self, _: &HBFont, glyph: GlyphIndex) -> Position {
+    fn get_glyph_h_advance(&self, _: &Font, glyph: GlyphIndex) -> Position {
         let glyph = self.font.glyph(GlyphId(glyph));
         if let Some(glyph) = glyph {
             let glyph = glyph.scaled(self.scale);
@@ -84,13 +84,13 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
         }
     }
 
-    fn get_glyph_h_kerning(&self, _: &HBFont, left: GlyphIndex, right: GlyphIndex) -> Position {
+    fn get_glyph_h_kerning(&self, _: &Font, left: GlyphIndex, right: GlyphIndex) -> Position {
         self.font
             .pair_kerning(self.scale, GlyphId(left), GlyphId(right))
             .round() as Position
     }
 
-    fn get_glyph_extents(&self, _: &HBFont, glyph: GlyphIndex) -> Option<GlyphExtents> {
+    fn get_glyph_extents(&self, _: &Font, glyph: GlyphIndex) -> Option<GlyphExtents> {
         let glyph = self.font.glyph(GlyphId(glyph));
         glyph.and_then(|glyph| {
             let glyph = glyph.scaled(self.scale);
@@ -110,9 +110,16 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
     }
 }
 
-/// Let a font use rusttype's font API for getting information like the advance width of some
-/// glyph or its extents.
-pub fn font_set_rusttype_funcs<'a>(font: &mut font::Font<'a>) {
-    let font_data = ScaledRusttypeFont::from_hb_font(font);
-    font.set_font_funcs(font_data);
+/// Extends the harfbuzz font to allow setting RustType as font funcs provider.
+pub trait SetRustTypeFuncs {
+    fn set_rusttype_funcs(&mut self);
+}
+
+impl<'a> SetRustTypeFuncs for Font<'a> {
+    /// Let a font use rusttype's font API for getting information like the advance width of some
+    /// glyph or its extents.
+    fn set_rusttype_funcs(&mut self) {
+        let font_data = ScaledRusttypeFont::from_hb_font(self);
+        self.set_font_funcs(font_data);
+    }
 }

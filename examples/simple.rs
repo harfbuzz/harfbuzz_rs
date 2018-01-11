@@ -1,7 +1,7 @@
 extern crate harfbuzz_rs;
 
 use harfbuzz_rs::{Face, Font, UnicodeBuffer};
-use harfbuzz_rs::rusttype::font_set_rusttype_funcs;
+use harfbuzz_rs::rusttype::SetRustTypeFuncs;
 
 // Execute this file from the root directory of this repository.
 //
@@ -23,10 +23,12 @@ fn main() {
     let path = "testfiles/SourceSansVariable-Roman.ttf";
     let face = Face::from_file(path, index).expect("Error reading font file.");
     let mut font = Font::new(face);
-    font_set_rusttype_funcs(&mut font);
+    font.set_rusttype_funcs();
 
     // Create a buffer with some text, shape it...
-    let result = UnicodeBuffer::new().add_str("Hello World!").shape(&font, &[]);
+    let result = UnicodeBuffer::new()
+        .add_str("Hello World!")
+        .shape(&font, &[]);
 
     // ... and get the results.
     let positions = result.get_glyph_positions();
@@ -40,11 +42,9 @@ fn main() {
         let x_offset = position.x_offset;
         let y_offset = position.y_offset;
 
-        println!("gid{:0>2?}={:0>2?}@{:>4?},{:?}+{:?}",
-                 gid,
-                 cluster,
-                 x_advance,
-                 x_offset,
-                 y_offset);
+        println!(
+            "gid{:0>2?}={:0>2?}@{:>4?},{:?}+{:?}",
+            gid, cluster, x_advance, x_offset, y_offset
+        );
     }
 }
