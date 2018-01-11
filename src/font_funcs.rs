@@ -328,7 +328,7 @@ where
 ///
 /// Create a `FontFuncsImpl` from individual closures:
 ///
-/// ```
+/// ```ignore
 /// use harfbuzz_rs::*;
 /// use std::mem;
 ///
@@ -341,7 +341,7 @@ where
 ///
 /// Create a `FontFuncsImpl` from a type that implements `FontFuncs`:
 ///
-/// ```
+/// ```ignore
 /// use harfbuzz_rs::*;
 ///
 /// // Dummy struct implementing FontFuncs
@@ -372,6 +372,7 @@ pub struct FontFuncsImpl<T> {
 impl<T> FontFuncsImpl<T> {
     /// Returns an empty `FontFuncsImpl`. Every font callback of the returned `FontFuncsImpl` gives
     /// a null value regardless of its input.
+    #[allow(unused)]
     pub fn empty() -> HbArc<FontFuncsImpl<T>> {
         let raw = unsafe { hb::hb_font_funcs_get_empty() };
         unsafe { HbArc::from_raw(raw) }
@@ -385,7 +386,7 @@ impl<T: FontFuncs> FontFuncsImpl<T> {
     ///
     /// Supposing `MyFontData` is a struct that implements `FontFuncs`.
     ///
-    /// ```
+    /// ```ignore
     /// use harfbuzz_rs::*;
     ///
     /// # // Dummy struct implementing FontFuncs

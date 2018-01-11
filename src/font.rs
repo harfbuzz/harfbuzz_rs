@@ -3,7 +3,8 @@ use std;
 
 use libc::c_void;
 
-pub use font_funcs::{FontFuncs, FontFuncsImpl};
+pub use font_funcs::FontFuncs;
+use font_funcs::FontFuncsImpl;
 use face::Face;
 use common::{HarfbuzzObject, HbArc, HbBox};
 
@@ -77,19 +78,18 @@ impl<'a> Font<'a> {
         self
     }
 
-    pub fn set_font_funcs<F, T>(&mut self, funcs: F, font_data: T) -> &mut Font<'a>
+    pub fn set_font_funcs<FuncsType>(&mut self, funcs: FuncsType) -> &mut Font<'a>
     where
-        F: 'a + Into<HbArc<FontFuncsImpl<T>>>,
-        T: 'a + Send,
+        FuncsType: 'a + Send + FontFuncs,
     {
-        let funcs = funcs.into();
-        let font_data = Box::new(font_data);
+        let funcs_impl: HbBox<FontFuncsImpl<FuncsType>> = FontFuncsImpl::from_trait_impl();
+        let font_data = Box::new(funcs);
         unsafe {
             hb::hb_font_set_funcs(
                 self.as_raw(),
-                funcs.as_raw(),
+                funcs_impl.as_raw(),
                 Box::into_raw(font_data) as *mut _,
-                Some(destroy_box::<T>),
+                Some(destroy_box::<FuncsType>),
             )
         };
         self

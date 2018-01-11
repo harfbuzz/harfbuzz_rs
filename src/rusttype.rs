@@ -8,7 +8,7 @@ use self::rusttype::Font as RTFont;
 
 use font;
 use face;
-use font::{Font as HBFont, FontFuncs, FontFuncsImpl, Glyph as GlyphIndex, GlyphExtents, Position};
+use font::{Font as HBFont, FontFuncs, Glyph as GlyphIndex, GlyphExtents, Position};
 
 use std;
 use std::str::FromStr;
@@ -31,7 +31,7 @@ fn get_font_height(font: &font::Font) -> i32 {
     }
 }
 
-pub fn rusttype_font_from_face<'a>(face: &face::Face<'a>) -> RTFont<'a> {
+fn rusttype_font_from_face<'a>(face: &face::Face<'a>) -> RTFont<'a> {
     let font_blob = face.face_data();
     let index = face.index();
     let collection = rusttype::FontCollection::from_bytes(font_blob);
@@ -49,7 +49,7 @@ fn rusttype_scale_from_hb_font(font: &font::Font) -> Scale {
     }
 }
 
-pub struct ScaledRusttypeFont<'a> {
+struct ScaledRusttypeFont<'a> {
     pub font: rusttype::Font<'a>,
     pub scale: Scale,
 }
@@ -114,6 +114,5 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
 /// glyph or its extents.
 pub fn font_set_rusttype_funcs<'a>(font: &mut font::Font<'a>) {
     let font_data = ScaledRusttypeFont::from_hb_font(font);
-    let font_funcs = FontFuncsImpl::from_trait_impl();
-    font.set_font_funcs(font_funcs, font_data);
+    font.set_font_funcs(font_data);
 }
