@@ -195,7 +195,10 @@ pub trait HarfbuzzObject: Sized {
     }
 }
 
-/// Wraps an atomically reference counted HarfBuzz object.
+/// A smart pointer that wraps an atomically reference counted HarfBuzz object.
+///
+/// Usually you don't create a `HbArc` yourself, but get it from another function in this crate.
+/// You can just use the methods of the wrapped object through its `Deref` implementation.
 ///
 /// A `HbArc` is a safe wrapper for reference counted HarfBuzz objects and provides shared immutable
 /// access to its inner object. As HarfBuzz' objects are all thread-safe `HbArc` implements `Send`
@@ -267,16 +270,18 @@ impl<T: HarfbuzzObject> Drop for HbArc<T> {
 unsafe impl<T: HarfbuzzObject + Sync + Send> Send for HbArc<T> {}
 unsafe impl<T: HarfbuzzObject + Sync + Send> Sync for HbArc<T> {}
 
-/// Wraps a mutable owned harfbuzz object.
+/// A smart pointer that wraps a singly owned harfbuzz object.
 ///
-/// This is used to wrap freshly created owned HarfBuzz objects. It permits mutable, non-shared
+/// Usually you don't create a `HbBox` yourself, but get it from another function in this crate.
+/// You can just use the methods of the wrapped object through its `Deref` implementation.
+///
+/// A `HbBox` is used to wrap freshly created owned HarfBuzz objects. It permits mutable, non-shared
 /// access to the enclosed HarfBuzz value so it can be used e.g. to set up a `Font` or `Face` after
 /// its creation.
 ///
-/// When you are finished mutating the value, you usually want to pass it to other HarfBuzz
-/// functions that expects shared access. This can be accomplished with the `to_arc` method
-/// that takes a `HbBox<T>` and turns it into a `HbArc<T>` which uses atomic reference counting to
-/// manage thread-safe and shared access to its inner resource. Note however that once a value is
+/// When you are finished mutating the inner value, you usually want to pass it to other HarfBuzz
+/// functions that expect shared access. Thus you need to convert the `HbBox` to a `HbArc` pointer
+/// using `.into()`. Note however that once a value is
 /// converted to  a `HbArc<T>`, it will not possible to mutate it anymore.
 #[derive(Debug, PartialEq, Eq)]
 pub struct HbBox<T: HarfbuzzObject> {
@@ -292,10 +297,6 @@ impl<T: HarfbuzzObject> HbBox<T> {
     /// Use this only to wrap freshly created HarfBuzz object!
     pub unsafe fn from_raw(raw: *mut T::Raw) -> Self {
         HbBox { pointer: raw }
-    }
-
-    pub fn into_arc(self) -> HbArc<T> {
-        self.into()
     }
 }
 
