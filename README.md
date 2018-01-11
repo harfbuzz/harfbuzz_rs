@@ -24,7 +24,7 @@
  To shape a simple string of text you just create a `Font` from a font file, fill a `Buffer`
  with some text and call the `shape` function.
 
- ```
+ ```rust
  use harfbuzz_rs::*;
  use harfbuzz_rs::rusttype::SetRustTypeFuncs;
 
@@ -43,7 +43,7 @@
  The results of the shaping operation are stored in the buffer that was also used as input to
  the `shape` function.
 
- ```
+ ```rust
  let positions = output.get_glyph_positions();
  let infos = output.get_glyph_infos();
 
