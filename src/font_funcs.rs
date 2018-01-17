@@ -260,63 +260,51 @@ hb_callback!(
     }
 );
 
-extern "C" fn rust_get_glyph_name_closure<T, F>(
-    font: *mut hb::hb_font_t,
-    font_data: *mut c_void,
-    glyph: hb::hb_codepoint_t,
-    name: *mut std::os::raw::c_char,
-    size: u32,
-    closure_data: *mut c_void,
-) -> hb::hb_bool_t
-where
-    F: Fn(&Font, &T, Glyph) -> Option<String>,
-{
-    let font_data = unsafe { &*(font_data as *const T) };
-    let font = unsafe { Font::from_raw(font) };
-    let closure = unsafe { &mut *(closure_data as *mut F) };
-    let mut name = unsafe { std::slice::from_raw_parts_mut(name as *mut u8, size as usize) };
-    let result = closure(font, font_data, glyph)
-        .and_then(|string| CString::new(string).ok())
-        .and_then(|cstr| name.write_all(cstr.as_bytes_with_nul()).ok());
-    if result.is_some() {
-        1
-    } else {
-        println!("{:?}", (glyph, size));
-        name[0] = 0;
-        0
+hb_callback!(
+    rust_get_glyph_name_closure<glyph: hb::hb_codepoint_t, name: *mut std::os::raw::c_char, size: u32> -> hb::hb_bool_t {
+        argument Glyph => glyph,
+        return value: Option<String> => {
+            let mut name = unsafe { std::slice::from_raw_parts_mut(name as *mut u8, size as usize) };
+            let result = value
+                .and_then(|string| CString::new(string).ok())
+                .and_then(|cstr| name.write_all(cstr.as_bytes_with_nul()).ok());
+            if result.is_some() {
+                1
+            } else {
+                name[0] = 0;
+                0
+            }
+        }
     }
-}
+);
 
-extern "C" fn rust_get_glyph_from_name_closure<T, F>(
-    font: *mut hb::hb_font_t,
-    font_data: *mut c_void,
-    name: *const std::os::raw::c_char,
-    size: i32,
-    glyph: *mut hb::hb_codepoint_t,
-    closure_data: *mut c_void,
-) -> hb::hb_bool_t
-where
-    F: Fn(&Font, &T, &str) -> Option<Glyph>,
-{
-    let font_data = unsafe { &*(font_data as *const T) };
-    let font = unsafe { Font::from_raw(font) };
-    let closure = unsafe { &mut *(closure_data as *mut F) };
-    let string = match size {
-        // `name` is null-terminated
-        -1 => unsafe { CStr::from_ptr(name).to_str().ok() },
-        // `name` has length = `size`
-        i if i >= 1 => unsafe {
-            std::str::from_utf8(std::slice::from_raw_parts(name as *const u8, size as usize)).ok()
+hb_callback!(
+    rust_get_glyph_from_name_closure<name: *const std::os::raw::c_char, size: i32, glyph: *mut hb::hb_codepoint_t> -> hb::hb_bool_t {
+        argument &str => {
+            let string = match size {
+                // `name` is null-terminated
+                -1 => unsafe { CStr::from_ptr(name).to_str().ok() },
+                // `name` has length = `size`
+                i if i >= 1 => unsafe {
+                    std::str::from_utf8(std::slice::from_raw_parts(name as *const u8, size as usize)).ok()
+                },
+                _ => None,
+            };
+            match string {
+                Some(string) => string,
+                None => return 0,
+            }
         },
-        _ => None,
-    };
-    if let Some(result_glyph) = string.and_then(|x| closure(font, font_data, x)) {
-        unsafe { *glyph = result_glyph };
-        1
-    } else {
-        0
+        return result_glyph: Option<Glyph> => {
+            if let Some(g) = result_glyph {
+                unsafe { *glyph = g }
+                1
+            } else {
+                0
+            }
+        }
     }
-}
+);
 
 /// A `FontFuncsImpl` contains implementations of the font callbacks that harfbuzz uses.
 ///
