@@ -145,7 +145,7 @@ impl FromStr for Language {
 /// A trait which is implemented for all harffbuzz wrapper structs. It exposes common functionality
 /// for converting from and to the underlying raw harfbuzz pointers that are useful for ffi.
 pub trait HarfbuzzObject: Sized {
-    /// Type of the raw harfbuzz object pointer.
+    /// Type of the raw harfbuzz object.
     type Raw;
 
     /// Creates a reference from a harfbuzz object pointer.
@@ -222,7 +222,7 @@ impl<T: HarfbuzzObject> HbArc<T> {
 
     /// Converts `self` into the underlying harfbuzz object pointer value. The resulting pointer
     /// has to be manually destroyed using `hb_TYPE_destroy` or be converted back into the wrapper
-    /// using the `from_raw` function.
+    /// using the `from_raw` function to avoid leaking memory.
     pub fn into_raw(self) -> *mut T::Raw {
         let result = self.pointer;
         std::mem::forget(self);
@@ -294,7 +294,7 @@ impl<T: HarfbuzzObject> HbBox<T> {
     /// This fully transfers ownership. _Use of the original pointer is now forbidden!_ Unsafe
     /// because a dereference of a raw pointer is necessary.
     ///
-    /// Use this only to wrap freshly created HarfBuzz object!
+    /// Use this only to wrap freshly created HarfBuzz object that is not shared!
     pub unsafe fn from_raw(raw: *mut T::Raw) -> Self {
         HbBox { pointer: raw }
     }
