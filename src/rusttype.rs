@@ -14,44 +14,63 @@ use std;
 use std::str::FromStr;
 use std::fmt::Debug;
 
+/// An error type generated when a failure occurs in a call to `set_rusttype_funcs`.
+#[derive(Debug, Fail)]
+pub enum RusttypeFontFuncsError {
+    /// This case indicates that for some reason Rusttype was not able to read the
+    /// font.
+    #[fail(display = "rusttype: Could not read font.")]
+    FontReadError,
+    /// This indicates that the font is malformed and does not contain all required
+    /// font tables.
+    #[fail(display = "Could not find table with tag `{}`.", _0)]
+    MissingTable(Tag),
+}
+
 // Work around weird rusttype scaling by reading the hhea table.
-fn get_font_height(font: &font::Font) -> i32 {
+fn get_font_height(font: &font::Font) -> Result<i32, RusttypeFontFuncsError> {
     let face = font.face();
-    let hhea_table = face.table_with_tag(Tag::from_str("hhea").unwrap()).unwrap();
+    let tag = Tag::from_str("hhea").unwrap();
+    let hhea_table = face.table_with_tag(tag)
+        .ok_or(RusttypeFontFuncsError::MissingTable(tag))?;
     if hhea_table.len() >= 8 {
         unsafe {
             let ascent_ptr = (&hhea_table)[4..6].as_ptr() as *const i16;
             let ascent = i16::from_be(*ascent_ptr);
             let descent_ptr = (&hhea_table)[6..8].as_ptr() as *const i16;
             let descent = i16::from_be(*descent_ptr);
-            ascent as i32 - descent as i32
+            Ok(ascent as i32 - descent as i32)
         }
     } else {
-        0
+        Err(RusttypeFontFuncsError::MissingTable(tag))
     }
 }
 
-fn rusttype_font_from_face<'a>(face: &face::Face<'a>) -> RTFont<'a> {
+fn rusttype_font_from_face<'a>(
+    face: &face::Face<'a>,
+) -> Result<RTFont<'a>, RusttypeFontFuncsError> {
     let font_blob = face.face_data();
     let index = face.index();
     let collection = rusttype::FontCollection::from_bytes(font_blob);
-    collection.font_at(index as usize).unwrap()
+    collection
+        .font_at(index as usize)
+        .ok_or(RusttypeFontFuncsError::FontReadError)
 }
 
-fn rusttype_scale_from_hb_font(font: &font::Font) -> Scale {
-    let font_height = get_font_height(font) as f32;
+fn rusttype_scale_from_hb_font(font: &font::Font) -> Result<Scale, RusttypeFontFuncsError> {
+    let font_height = get_font_height(font)? as f32;
     let em_scale = font.scale();
     let x_scale = em_scale.0 as f32;
     let y_scale = em_scale.1 as f32;
-    Scale {
+    Ok(Scale {
         x: font_height * x_scale / y_scale,
         y: font_height,
-    }
+    })
 }
 
 struct ScaledRusttypeFont<'a> {
-    pub font: rusttype::Font<'a>,
-    pub scale: Scale,
+    font: rusttype::Font<'a>,
+    scale: Scale,
 }
 
 impl<'a> Debug for ScaledRusttypeFont<'a> {
@@ -63,13 +82,15 @@ impl<'a> Debug for ScaledRusttypeFont<'a> {
 }
 
 impl<'a> ScaledRusttypeFont<'a> {
-    pub fn from_hb_font<'b>(hb_font: &font::Font<'b>) -> ScaledRusttypeFont<'b> {
-        let font = rusttype_font_from_face(&hb_font.face());
-        let scale = rusttype_scale_from_hb_font(hb_font);
-        ScaledRusttypeFont {
+    fn from_hb_font<'b>(
+        hb_font: &font::Font<'b>,
+    ) -> Result<ScaledRusttypeFont<'b>, RusttypeFontFuncsError> {
+        let font = rusttype_font_from_face(&hb_font.face())?;
+        let scale = rusttype_scale_from_hb_font(hb_font)?;
+        Ok(ScaledRusttypeFont {
             font: font,
             scale: scale,
-        }
+        })
     }
 }
 
@@ -112,14 +133,15 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
 
 /// Extends the harfbuzz font to allow setting RustType as font funcs provider.
 pub trait SetRustTypeFuncs {
-    fn set_rusttype_funcs(&mut self);
+    /// Let a font use rusttype's font API for getting information like the advance width of some
+    /// glyph or its extents.
+    fn set_rusttype_funcs(&mut self) -> Result<(), RusttypeFontFuncsError>;
 }
 
 impl<'a> SetRustTypeFuncs for Font<'a> {
-    /// Let a font use rusttype's font API for getting information like the advance width of some
-    /// glyph or its extents.
-    fn set_rusttype_funcs(&mut self) {
-        let font_data = ScaledRusttypeFont::from_hb_font(self);
+    fn set_rusttype_funcs(&mut self) -> Result<(), RusttypeFontFuncsError> {
+        let font_data = ScaledRusttypeFont::from_hb_font(self)?;
         self.set_font_funcs(font_data);
+        Ok(())
     }
 }

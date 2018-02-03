@@ -19,37 +19,33 @@
 //! with some text and call the `shape` function.
 //!
 //! ```
+//! # extern crate harfbuzz_rs;
 //! use harfbuzz_rs::*;
 //! use harfbuzz_rs::rusttype::SetRustTypeFuncs;
+//!
+//! # extern crate failure;
+//! # use failure::Error;
+//! # fn try_main() -> Result<(), Error> {
 //!
 //! let path = "path/to/some/font_file.otf";
 //! let index = 0; //< face index in the font file
 //! # let path = "testfiles/SourceSansVariable-Roman.ttf";
-//! let face = Face::from_file(path, index).unwrap();
+//! let face = Face::from_file(path, index)?;
 //! let mut font = Font::new(face);
 //! // Use RustType as provider for font information that harfbuzz needs.
 //! // You can also use a custom font implementation. For more information look
 //! // at the documentation for `FontFuncs`.
-//! font.set_rusttype_funcs();
+//! font.set_rusttype_funcs()?;
 //!
 //! let output = UnicodeBuffer::new().add_str("Hello World!").shape(&font, &[]);
-//! ```
 //!
-//! The results of the shaping operation are stored in the buffer that was also used as input to
-//! the `shape` function.
+//! // The results of the shaping operation are stored in the `output` buffer.
 //!
-//! ```
-//! # use harfbuzz_rs::*;
-//! # use harfbuzz_rs::rusttype::SetRustTypeFuncs;
-//! #
-//! # let index = 0;
-//! # let path = "testfiles/SourceSansVariable-Roman.ttf";
-//! # let face = Face::from_file(path, index).unwrap();
-//! # let mut font = Font::new(face);
-//! # font.set_rusttype_funcs();
-//! # let output = UnicodeBuffer::new().add_str("Hello World!").shape(&font, &[]);
 //! let positions = output.get_glyph_positions();
 //! let infos = output.get_glyph_infos();
+//!
+//! # assert_eq!(positions.len(), 12);
+//! assert_eq!(positions.len(), infos.len());
 //!
 //! // iterate over the shaped glyphs
 //! for (position, info) in positions.iter().zip(infos) {
@@ -62,6 +58,13 @@
 //!     // Here you would usually draw the glyphs.
 //!     println!("gid{:?}={:?}@{:?},{:?}+{:?}", gid, cluster, x_advance, x_offset, y_offset);
 //! }
+//!
+//! # Ok(())
+//! # }
+//! #
+//! # fn main() {
+//! #   try_main().unwrap();
+//! # }
 //! ```
 //! This should print out something similar to the following:
 //!
@@ -81,6 +84,8 @@
 //! ```
 #![deny(missing_debug_implementations)]
 
+#[macro_use]
+extern crate failure;
 extern crate harfbuzz_sys as hb;
 extern crate libc;
 

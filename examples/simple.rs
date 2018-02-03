@@ -23,7 +23,7 @@ fn main() {
     let path = "testfiles/SourceSansVariable-Roman.ttf";
     let face = Face::from_file(path, index).expect("Error reading font file.");
     let mut font = Font::new(face);
-    font.set_rusttype_funcs();
+    font.set_rusttype_funcs().expect("An error occured");
 
     // Create a buffer with some text, shape it...
     let result = UnicodeBuffer::new()
