@@ -20,7 +20,7 @@ impl<'a> Face<'a> {
     /// Create a new `Face` from the data in `bytes`.
     pub fn new<'b, T: Into<HbArc<Blob<'b>>>>(bytes: T, index: u32) -> HbBox<Face<'b>> {
         let blob = bytes.into();
-        let hb_face = unsafe { hb::hb_face_create(blob.into_raw(), index) };
+        let hb_face = unsafe { hb::hb_face_create(HbArc::into_raw(blob), index) };
         unsafe { HbBox::from_raw(hb_face) }
     }
 
@@ -50,7 +50,7 @@ impl<'a> Face<'a> {
             let closure = unsafe { &mut *(user_data as *mut F) };
             let blob = closure(tag);
             match blob {
-                Some(blob) => blob.into_raw(),
+                Some(blob) => HbArc::into_raw(blob),
                 None => std::ptr::null_mut(),
             }
         }

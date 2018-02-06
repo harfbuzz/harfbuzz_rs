@@ -35,7 +35,8 @@ impl<'a> Font<'a> {
     /// Create a new font with a specified `Face`.
     pub fn new<T: Into<HbArc<Face<'a>>>>(face: T) -> HbBox<Self> {
         unsafe {
-            let raw_font = hb::hb_font_create(face.into().into_raw());
+            let face = face.into();
+            let raw_font = hb::hb_font_create(HbArc::into_raw(face));
             // set default font funcs for a completely new font
             // hb::hb_ot_font_set_funcs(raw_font);
             HbBox::from_raw(raw_font)

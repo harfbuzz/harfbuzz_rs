@@ -223,9 +223,9 @@ impl<T: HarfbuzzObject> HbArc<T> {
     /// Converts `self` into the underlying harfbuzz object pointer value. The resulting pointer
     /// has to be manually destroyed using `hb_TYPE_destroy` or be converted back into the wrapper
     /// using the `from_raw` function to avoid leaking memory.
-    pub fn into_raw(self) -> *mut T::Raw {
-        let result = self.pointer;
-        std::mem::forget(self);
+    pub fn into_raw(hbarc: HbArc<T>) -> *mut T::Raw {
+        let result = hbarc.pointer;
+        std::mem::forget(hbarc);
         result
     }
 }
@@ -297,6 +297,15 @@ impl<T: HarfbuzzObject> HbBox<T> {
     /// Use this only to wrap freshly created HarfBuzz object that is not shared!
     pub unsafe fn from_raw(raw: *mut T::Raw) -> Self {
         HbBox { pointer: raw }
+    }
+
+    /// Converts `self` into the underlying harfbuzz object pointer value. The resulting pointer
+    /// has to be manually destroyed using `hb_TYPE_destroy` or be converted back into the wrapper
+    /// using the `from_raw` function to avoid leaking memory.
+    pub fn into_raw(hbbox: HbBox<T>) -> *mut T::Raw {
+        let result = hbbox.pointer;
+        std::mem::forget(hbbox);
+        result
     }
 }
 
