@@ -33,7 +33,7 @@ impl<'a> Face<'a> {
     /// Create a new face from a closure that returns a raw [`Blob`](struct.Blob.html) of table
     pub fn from_table_func<'b, F>(func: F) -> HbBox<Face<'b>>
     where
-        F: FnMut(Tag) -> Option<HbArc<Blob<'b>>>,
+        F: 'b + Send + Sync + FnMut(Tag) -> Option<HbArc<Blob<'b>>>,
     {
         extern "C" fn destroy_box<U>(ptr: *mut c_void) {
             unsafe { Box::from_raw(ptr as *mut U) };
