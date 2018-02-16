@@ -37,8 +37,9 @@
 //! // at the documentation for `FontFuncs`.
 //! font.set_rusttype_funcs()?;
 //!
-//! let output = UnicodeBuffer::new().add_str("Hello World!").shape(&font, &[]);
-//!
+//! let buffer = UnicodeBuffer::new().add_str("Hello World!");
+//! let output = shape(&font, buffer, &[]);
+//! 
 //! // The results of the shaping operation are stored in the `output` buffer.
 //!
 //! let positions = output.get_glyph_positions();
@@ -102,6 +103,24 @@ pub use face::*;
 pub use blob::*;
 pub use buffer::*;
 pub use common::*;
+
+/// Shape the contents of the buffer using the provided font and activating all OpenType features
+/// given in `features`.
+///
+/// This function consumes the `buffer` and returns a `GlyphBuffer` containing the
+/// resulting glyph indices and the corresponding positioning information.
+pub fn shape(font: &Font, buffer: UnicodeBuffer, features: &[Feature]) -> GlyphBuffer {
+    let buffer = buffer.guess_segment_properties();
+    unsafe {
+        hb::hb_shape(
+            font.as_raw(),
+            buffer.0.as_raw(),
+            features.as_ptr(),
+            features.len() as u32,
+        )
+    };
+    GlyphBuffer(buffer.0)
+}
 
 #[cfg(test)]
 mod tests {

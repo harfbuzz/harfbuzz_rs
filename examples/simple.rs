@@ -1,6 +1,6 @@
 extern crate harfbuzz_rs;
 
-use harfbuzz_rs::{Face, Font, UnicodeBuffer};
+use harfbuzz_rs::{shape, Face, Font, UnicodeBuffer};
 use harfbuzz_rs::rusttype::SetRustTypeFuncs;
 
 // Execute this file from the root directory of this repository.
@@ -26,9 +26,9 @@ fn main() {
     font.set_rusttype_funcs().expect("An error occured");
 
     // Create a buffer with some text, shape it...
-    let result = UnicodeBuffer::new()
-        .add_str("Hello World!")
-        .shape(&font, &[]);
+    let buffer = UnicodeBuffer::new().add_str("Hello World!");
+    
+    let result = shape(&font, buffer, &[]);
 
     // ... and get the results.
     let positions = result.get_glyph_positions();
