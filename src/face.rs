@@ -5,7 +5,7 @@ use libc::c_void;
 use std::marker::PhantomData;
 
 use blob::Blob;
-use common::{HarfbuzzObject, HbArc, HbBox, Tag};
+use common::{HarfbuzzObject, Owned, Shared, Tag};
 
 /// A wrapper around `hb_face_t`.
 #[derive(Debug)]
@@ -18,22 +18,22 @@ use std::path::Path;
 
 impl<'a> Face<'a> {
     /// Create a new `Face` from the data in `bytes`.
-    pub fn new<'b, T: Into<HbArc<Blob<'b>>>>(bytes: T, index: u32) -> HbBox<Face<'b>> {
+    pub fn new<'b, T: Into<Shared<Blob<'b>>>>(bytes: T, index: u32) -> Owned<Face<'b>> {
         let blob = bytes.into();
-        let hb_face = unsafe { hb::hb_face_create(HbArc::into_raw(blob), index) };
-        unsafe { HbBox::from_raw(hb_face) }
+        let hb_face = unsafe { hb::hb_face_create(Shared::into_raw(blob), index) };
+        unsafe { Owned::from_raw(hb_face) }
     }
 
     /// Create a new face from the contents of the file at `path`.
-    pub fn from_file<P: AsRef<Path>>(path: P, index: u32) -> std::io::Result<HbBox<Face<'static>>> {
+    pub fn from_file<P: AsRef<Path>>(path: P, index: u32) -> std::io::Result<Owned<Face<'static>>> {
         let blob = Blob::from_file(path)?;
         Ok(Face::new(blob, index))
     }
 
     /// Create a new face from a closure that returns a raw [`Blob`](struct.Blob.html) of table
-    pub fn from_table_func<'b, F>(func: F) -> HbBox<Face<'b>>
+    pub fn from_table_func<'b, F>(func: F) -> Owned<Face<'b>>
     where
-        F: 'b + Send + Sync + FnMut(Tag) -> Option<HbArc<Blob<'b>>>,
+        F: 'b + Send + Sync + FnMut(Tag) -> Option<Shared<Blob<'b>>>,
     {
         extern "C" fn destroy_box<U>(ptr: *mut c_void) {
             unsafe { Box::from_raw(ptr as *mut U) };
@@ -44,13 +44,13 @@ impl<'a> Face<'a> {
             user_data: *mut c_void,
         ) -> *mut hb::hb_blob_t
         where
-            F: FnMut(Tag) -> Option<HbArc<Blob<'b>>>,
+            F: FnMut(Tag) -> Option<Shared<Blob<'b>>>,
         {
             let tag = Tag(tag);
             let closure = unsafe { &mut *(user_data as *mut F) };
             let blob = closure(tag);
             match blob {
-                Some(blob) => HbArc::into_raw(blob),
+                Some(blob) => Shared::into_raw(blob),
                 None => std::ptr::null_mut(),
             }
         }
@@ -61,7 +61,7 @@ impl<'a> Face<'a> {
                 Box::into_raw(boxed_closure) as *mut _,
                 Some(destroy_box::<F>),
             );
-            HbBox::from_raw(face)
+            Owned::from_raw(face)
         }
     }
 
@@ -70,7 +70,7 @@ impl<'a> Face<'a> {
     //    /// funcs for shaping and have no scale value set so that the returned values will be in
     // font
     //    /// space.
-    //    pub fn create_font(self) -> HbBox<Font<'a>> {
+    //    pub fn create_font(self) -> Owned<Font<'a>> {
     //        Font::new(self)
     //    }
 

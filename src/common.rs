@@ -153,7 +153,7 @@ pub trait HarfbuzzObject: Sized {
     /// Unsafe because a raw pointer may be accessed. The reference count is not changed. Should not
     /// be called directly by a library user.
     ///
-    /// Use the HbBox and HbArc abstractions instead.
+    /// Use the Owned and Shared abstractions instead.
     unsafe fn from_raw<'a>(val: *const Self::Raw) -> &'a Self {
         &*(val as *const Self)
     }
@@ -163,7 +163,7 @@ pub trait HarfbuzzObject: Sized {
     /// Unsafe because a raw pointer may be accessed. The reference count is not changed. Should not
     /// be called directly by a library user.
     ///
-    /// Use the HbBox and HbArc abstractions instead.
+    /// Use the Owned and Shared abstractions instead.
     unsafe fn from_raw_mut<'a>(val: *mut Self::Raw) -> &'a mut Self {
         &mut *(val as *mut Self)
     }
@@ -185,52 +185,51 @@ pub trait HarfbuzzObject: Sized {
     ///
     /// Wraps a `hb_TYPE_destroy()` call.
     unsafe fn dereference(&self);
-
-    /// Makes an owned value from the reference.
-    fn upgrade(&self) -> HbArc<Self> {
-        unsafe {
-            self.reference();
-            HbArc::from_raw(self.as_raw())
-        }
-    }
 }
 
 /// A smart pointer that wraps an atomically reference counted HarfBuzz object.
 ///
-/// Usually you don't create a `HbArc` yourself, but get it from another function in this crate.
+/// Usually you don't create a `Shared` yourself, but get it from another function in this crate.
 /// You can just use the methods of the wrapped object through its `Deref` implementation.
 ///
-/// A `HbArc` is a safe wrapper for reference counted HarfBuzz objects and provides shared immutable
-/// access to its inner object. As HarfBuzz' objects are all thread-safe `HbArc` implements `Send`
+/// A `Shared` is a safe wrapper for reference counted HarfBuzz objects and provides shared immutable
+/// access to its inner object. As HarfBuzz' objects are all thread-safe `Shared` implements `Send`
 /// and `Sync`.
 ///
 /// Tries to mirror the stdlib `Arc` interface where applicable as HarfBuzz' reference counting has
 /// similar semantics.
 #[derive(Debug, PartialEq, Eq)]
-pub struct HbArc<T: HarfbuzzObject> {
+pub struct Shared<T: HarfbuzzObject> {
     pointer: *mut T::Raw,
 }
 
-impl<T: HarfbuzzObject> HbArc<T> {
-    /// Creates a `HbArc` from a raw harfbuzz pointer.
+impl<T: HarfbuzzObject> Shared<T> {
+    /// Creates a `Shared` from a raw harfbuzz pointer.
     ///
     /// Transfers ownership. _Use of the original pointer is now forbidden!_ Unsafe because
     /// dereferencing a raw pointer is necessary.
     pub unsafe fn from_raw(raw: *mut T::Raw) -> Self {
-        HbArc { pointer: raw }
+        Shared { pointer: raw }
     }
 
     /// Converts `self` into the underlying harfbuzz object pointer value. The resulting pointer
     /// has to be manually destroyed using `hb_TYPE_destroy` or be converted back into the wrapper
     /// using the `from_raw` function to avoid leaking memory.
-    pub fn into_raw(hbarc: HbArc<T>) -> *mut T::Raw {
-        let result = hbarc.pointer;
-        std::mem::forget(hbarc);
+    pub fn into_raw(shared: Shared<T>) -> *mut T::Raw {
+        let result = shared.pointer;
+        std::mem::forget(shared);
         result
+    }
+
+    pub fn from_ref(reference: &T) -> Self {
+        unsafe {
+            reference.reference();
+            Shared::from_raw(reference.as_raw())
+        }
     }
 }
 
-impl<T: HarfbuzzObject> Clone for HbArc<T> {
+impl<T: HarfbuzzObject> Clone for Shared<T> {
     fn clone(&self) -> Self {
         unsafe {
             self.reference();
@@ -239,7 +238,7 @@ impl<T: HarfbuzzObject> Clone for HbArc<T> {
     }
 }
 
-impl<T: HarfbuzzObject> Deref for HbArc<T> {
+impl<T: HarfbuzzObject> Deref for Shared<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -247,75 +246,75 @@ impl<T: HarfbuzzObject> Deref for HbArc<T> {
     }
 }
 
-impl<T: HarfbuzzObject> Borrow<T> for HbArc<T> {
+impl<T: HarfbuzzObject> Borrow<T> for Shared<T> {
     fn borrow(&self) -> &T {
         self
     }
 }
 
-impl<T: HarfbuzzObject> From<HbBox<T>> for HbArc<T> {
-    fn from(t: HbBox<T>) -> Self {
+impl<T: HarfbuzzObject> From<Owned<T>> for Shared<T> {
+    fn from(t: Owned<T>) -> Self {
         let ptr = t.pointer;
         std::mem::forget(t);
-        unsafe { HbArc::from_raw(ptr) }
+        unsafe { Shared::from_raw(ptr) }
     }
 }
 
-impl<T: HarfbuzzObject> Drop for HbArc<T> {
+impl<T: HarfbuzzObject> Drop for Shared<T> {
     fn drop(&mut self) {
         unsafe { self.dereference() }
     }
 }
 
-unsafe impl<T: HarfbuzzObject + Sync + Send> Send for HbArc<T> {}
-unsafe impl<T: HarfbuzzObject + Sync + Send> Sync for HbArc<T> {}
+unsafe impl<T: HarfbuzzObject + Sync + Send> Send for Shared<T> {}
+unsafe impl<T: HarfbuzzObject + Sync + Send> Sync for Shared<T> {}
 
 /// A smart pointer that wraps a singly owned harfbuzz object.
 ///
-/// Usually you don't create a `HbBox` yourself, but get it from another function in this crate.
+/// Usually you don't create a `Owned` yourself, but get it from another function in this crate.
 /// You can just use the methods of the wrapped object through its `Deref` implementation.
 ///
-/// A `HbBox` is used to wrap freshly created owned HarfBuzz objects. It permits mutable, non-shared
+/// A `Owned` is used to wrap freshly created owned HarfBuzz objects. It permits mutable, non-shared
 /// access to the enclosed HarfBuzz value so it can be used e.g. to set up a `Font` or `Face` after
 /// its creation.
 ///
 /// When you are finished mutating the inner value, you usually want to pass it to other HarfBuzz
-/// functions that expect shared access. Thus you need to convert the `HbBox` to a `HbArc` pointer
+/// functions that expect shared access. Thus you need to convert the `Owned` to a `Shared` pointer
 /// using `.into()`. Note however that once a value is
-/// converted to  a `HbArc<T>`, it will not possible to mutate it anymore.
+/// converted to  a `Shared<T>`, it will not possible to mutate it anymore.
 #[derive(Debug, PartialEq, Eq)]
-pub struct HbBox<T: HarfbuzzObject> {
+pub struct Owned<T: HarfbuzzObject> {
     pointer: *mut T::Raw,
 }
 
-impl<T: HarfbuzzObject> HbBox<T> {
-    /// Creates a `HbBox` safely wrapping a raw harfbuzz pointer.
+impl<T: HarfbuzzObject> Owned<T> {
+    /// Creates a `Owned` safely wrapping a raw harfbuzz pointer.
     ///
     /// This fully transfers ownership. _Use of the original pointer is now forbidden!_ Unsafe
     /// because a dereference of a raw pointer is necessary.
     ///
     /// Use this only to wrap freshly created HarfBuzz object that is not shared!
     pub unsafe fn from_raw(raw: *mut T::Raw) -> Self {
-        HbBox { pointer: raw }
+        Owned { pointer: raw }
     }
 
     /// Converts `self` into the underlying harfbuzz object pointer value. The resulting pointer
     /// has to be manually destroyed using `hb_TYPE_destroy` or be converted back into the wrapper
     /// using the `from_raw` function to avoid leaking memory.
-    pub fn into_raw(hbbox: HbBox<T>) -> *mut T::Raw {
-        let result = hbbox.pointer;
-        std::mem::forget(hbbox);
+    pub fn into_raw(owned: Owned<T>) -> *mut T::Raw {
+        let result = owned.pointer;
+        std::mem::forget(owned);
         result
     }
 }
 
-impl<T: HarfbuzzObject> Drop for HbBox<T> {
+impl<T: HarfbuzzObject> Drop for Owned<T> {
     fn drop(&mut self) {
         unsafe { self.dereference() }
     }
 }
 
-impl<T: HarfbuzzObject> Deref for HbBox<T> {
+impl<T: HarfbuzzObject> Deref for Owned<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -323,7 +322,7 @@ impl<T: HarfbuzzObject> Deref for HbBox<T> {
     }
 }
 
-impl<T: HarfbuzzObject> DerefMut for HbBox<T> {
+impl<T: HarfbuzzObject> DerefMut for Owned<T> {
     fn deref_mut(&mut self) -> &mut T {
         unsafe { T::from_raw_mut(self.pointer) }
     }
@@ -382,15 +381,15 @@ mod tests {
     }
 
     #[test]
-    fn reference_counting_hbarc() {
+    fn reference_counting_shared() {
         // Mimic a C-API that returns a pointer to a reference counted value.
         let object = Rc::new(ReferenceCounter { rc: Cell::new(1) });
         let raw = Rc::into_raw(object.clone()) as *mut _;
 
-        let arc: HbArc<ReferenceCounter> = unsafe { HbArc::from_raw(raw) };
+        let arc: Shared<ReferenceCounter> = unsafe { Shared::from_raw(raw) };
         assert_eq!(object.rc.get(), 1);
         {
-            let arc2 = HbArc::clone(&arc);
+            let arc2 = Shared::clone(&arc);
             assert_eq!(object.rc.get(), 2);
             mem::drop(arc2);
         }
