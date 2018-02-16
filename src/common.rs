@@ -271,13 +271,16 @@ unsafe impl<T: HarfbuzzObject + Sync + Send> Sync for Shared<T> {}
 
 /// A smart pointer that wraps a singly owned harfbuzz object.
 ///
-/// Usually you don't create a `Owned` yourself, but get it from another function in this crate.
-/// You can just use the methods of the wrapped object through its `Deref` implementation.
-///
 /// A `Owned` is used to wrap freshly created owned HarfBuzz objects. It permits mutable, non-shared
 /// access to the enclosed HarfBuzz value so it can be used e.g. to set up a `Font` or `Face` after
 /// its creation.
+/// 
+/// There is no safe way to construct an `Owned` pointer and usually you don't need to create a 
+/// `Owned` yourself, but get it from another function in this crate.
+/// You can just use the methods of the wrapped object through its `Deref` implementation.
 ///
+/// Interaction with `Shared`
+/// -------------------------
 /// When you are finished mutating the inner value, you usually want to pass it to other HarfBuzz
 /// functions that expect shared access. Thus you need to convert the `Owned` to a `Shared` pointer
 /// using `.into()`. Note however that once a value is
