@@ -81,7 +81,7 @@ impl<'a> Font<'a> {
 
     pub fn set_font_funcs<FuncsType>(&mut self, funcs: FuncsType) -> &mut Font<'a>
     where
-        FuncsType: 'a + Send + FontFuncs,
+        FuncsType: 'a + Send + Sync + FontFuncs,
     {
         let funcs_impl: HbBox<FontFuncsImpl<FuncsType>> = FontFuncsImpl::from_trait_impl();
         let font_data = Box::new(funcs);
