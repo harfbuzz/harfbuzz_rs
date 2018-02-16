@@ -8,7 +8,6 @@ pub type GlyphPosition = hb::hb_glyph_position_t;
 pub type GlyphInfo = hb::hb_glyph_info_t;
 pub type Feature = hb::hb_feature_t;
 
-
 #[derive(Debug)]
 pub(crate) struct GenericBuffer {
     _raw: hb::hb_buffer_t,
@@ -109,8 +108,7 @@ impl GenericBuffer {
     pub(crate) fn get_glyph_infos(&self) -> &[GlyphInfo] {
         unsafe {
             let mut length: u32 = 0;
-            let glyph_infos =
-                hb::hb_buffer_get_glyph_infos(self.as_raw(), &mut length as *mut u32);
+            let glyph_infos = hb::hb_buffer_get_glyph_infos(self.as_raw(), &mut length as *mut u32);
             std::slice::from_raw_parts(glyph_infos, length as usize)
         }
     }
@@ -155,18 +153,27 @@ impl TypedBuffer {
         let generic_buf: HbBox<GenericBuffer> = HbBox::from_raw(raw);
         let content_type = generic_buf.content_type();
         match content_type {
-            hb::HB_BUFFER_CONTENT_TYPE_UNICODE => Some(TypedBuffer::Unicode(UnicodeBuffer(generic_buf))),
-            hb::HB_BUFFER_CONTENT_TYPE_GLYPHS => Some(TypedBuffer::Glyphs(GlyphBuffer(generic_buf))),
+            hb::HB_BUFFER_CONTENT_TYPE_UNICODE => {
+                Some(TypedBuffer::Unicode(UnicodeBuffer(generic_buf)))
+            }
+            hb::HB_BUFFER_CONTENT_TYPE_GLYPHS => {
+                Some(TypedBuffer::Glyphs(GlyphBuffer(generic_buf)))
+            }
             _ => None,
         }
     }
 }
 
 /// A `UnicodeBuffer` can be filled with unicode text and corresponding cluster indices.
-/// 
-/// The buffer manages an allocation for the unicode codepoints to be shaped. This allocation however
-/// is reused for storing the results of the shaping operation in a `GlyphBuffer` object. 
-/// 
+///
+/// The buffer manages an allocation for the unicode codepoints to be shaped. This allocation however 
+/// is reused for storing the results of the shaping operation in a `GlyphBuffer` object. The intended 
+/// usage is to keep one (or e.g. one per thread) `UnicodeBuffer` around. When needed, you fill it with 
+/// text that should be shaped and call `.shape()` on it. That method returns a `GlyphBuffer` object
+/// containing the shaped glyph indices. Once you got the needed information out of the `GlyphBuffer`
+/// you call its `.clear()` method which in turn gives you a fresh `UnicodeBuffer` (actually using the
+/// original allocation). This buffer can then be used to shape more text.
+///
 /// If you want to get a `UnicodeBuffer` from a pointer to a raw harfbuzz object, you need to use the
 /// `from_raw` static method on `TypedBuffer`. This ensures that a buffer of correct type is created.
 pub struct UnicodeBuffer(HbBox<GenericBuffer>);
@@ -242,8 +249,8 @@ impl UnicodeBuffer {
     /// assert_eq!('b' as u32, iterator.next().unwrap());
     /// assert!(iterator.next().is_none());
     /// ```
-    pub fn codepoints<'a>(&'a self) -> CodepointsIter<'a> {
-        CodepointsIter {
+    pub fn codepoints<'a>(&'a self) -> Codepoints<'a> {
+        Codepoints {
             slice_iter: self.0.get_glyph_infos().iter(),
         }
     }
@@ -350,13 +357,15 @@ impl std::default::Default for UnicodeBuffer {
 
 /// An iterator over the codepoints stored in a `UnicodeBuffer`.
 ///
-/// You get an iterator of this type from the `codepoints()` method on `UnicodeBuffer`.
-#[derive(Debug)]
-pub struct CodepointsIter<'a> {
+/// You get an iterator of this type from the `.codepoints()` method on `UnicodeBuffer`.
+/// I yields `u32`s that should be interpreted as unicode codepoints stored
+/// in the underlying buffer.
+#[derive(Debug, Clone)]
+pub struct Codepoints<'a> {
     slice_iter: std::slice::Iter<'a, GlyphInfo>,
 }
 
-impl<'a> Iterator for CodepointsIter<'a> {
+impl<'a> Iterator for Codepoints<'a> {
     type Item = u32;
 
     fn next(&mut self) -> Option<u32> {
@@ -364,8 +373,8 @@ impl<'a> Iterator for CodepointsIter<'a> {
     }
 }
 
-/// A `GlyphBuffer` contains the resulting output information of the shaping process. 
-/// 
+/// A `GlyphBuffer` contains the resulting output information of the shaping process.
+///
 /// An object of this type is obtained through the `shape` function of a `UnicodeBuffer`.
 pub struct GlyphBuffer(HbBox<GenericBuffer>);
 
