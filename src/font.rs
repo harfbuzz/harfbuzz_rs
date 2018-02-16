@@ -65,9 +65,8 @@ impl<'a> Font<'a> {
         result
     }
 
-    pub fn set_scale(&mut self, x: i32, y: i32) -> &mut Font<'a> {
+    pub fn set_scale(&mut self, x: i32, y: i32) {
         unsafe { hb::hb_font_set_scale(self.as_raw(), x, y) };
-        self
     }
 
     pub fn ppem(&self) -> (u32, u32) {
@@ -76,12 +75,11 @@ impl<'a> Font<'a> {
         result
     }
 
-    pub fn set_ppem(&mut self, x: u32, y: u32) -> &mut Font<'a> {
+    pub fn set_ppem(&mut self, x: u32, y: u32) {
         unsafe { hb::hb_font_set_ppem(self.as_raw(), x, y) };
-        self
     }
 
-    pub fn set_font_funcs<FuncsType>(&mut self, funcs: FuncsType) -> &mut Font<'a>
+    pub fn set_font_funcs<FuncsType>(&mut self, funcs: FuncsType)
     where
         FuncsType: 'a + Send + Sync + FontFuncs,
     {
@@ -95,7 +93,6 @@ impl<'a> Font<'a> {
                 Some(destroy_box::<FuncsType>),
             )
         };
-        self
     }
 
     // scale from parent font
