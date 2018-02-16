@@ -6,7 +6,7 @@ use libc::c_void;
 pub use font_funcs::FontFuncs;
 use font_funcs::FontFuncsImpl;
 use face::Face;
-use common::{HarfbuzzObject, HbArc, HbBox};
+use common::{HarfbuzzObject, Owned, Shared};
 
 use std::marker::PhantomData;
 use std::ffi::CStr;
@@ -33,26 +33,28 @@ pub struct Font<'a> {
 
 impl<'a> Font<'a> {
     /// Create a new font with a specified `Face`.
-    pub fn new<T: Into<HbArc<Face<'a>>>>(face: T) -> HbBox<Self> {
+    pub fn new<T: Into<Shared<Face<'a>>>>(face: T) -> Owned<Self> {
         unsafe {
             let face = face.into();
-            let raw_font = hb::hb_font_create(HbArc::into_raw(face));
+            let raw_font = hb::hb_font_create(Shared::into_raw(face));
             // set default font funcs for a completely new font
             // hb::hb_ot_font_set_funcs(raw_font);
-            HbBox::from_raw(raw_font)
+            Owned::from_raw(raw_font)
         }
     }
 
     /// Create a new sub font from the current font that by default inherits its parent font's
     /// face, scale, ppem and font funcs.
-    pub fn create_sub_font<T: Into<HbArc<Font<'a>>>>(font: T) -> HbBox<Font<'a>> {
-        unsafe { HbBox::from_raw(hb::hb_font_create_sub_font(font.into().as_raw())) }
+    pub fn create_sub_font<T: Into<Shared<Font<'a>>>>(font: T) -> Owned<Font<'a>> {
+        unsafe { Owned::from_raw(hb::hb_font_create_sub_font(font.into().as_raw())) }
     }
 
+    /// Returns the parent font.
     pub fn parent(&self) -> &Font<'a> {
         unsafe { Font::from_raw(hb::hb_font_get_parent(self.as_raw())) }
     }
 
+    /// Returns the face which was used to create the font.
     pub fn face(&self) -> &Face<'a> {
         unsafe { Face::from_raw(hb::hb_font_get_face(self.as_raw())) }
     }
@@ -83,7 +85,7 @@ impl<'a> Font<'a> {
     where
         FuncsType: 'a + Send + FontFuncs,
     {
-        let funcs_impl: HbBox<FontFuncsImpl<FuncsType>> = FontFuncsImpl::from_trait_impl();
+        let funcs_impl: Owned<FontFuncsImpl<FuncsType>> = FontFuncsImpl::from_trait_impl();
         let font_data = Box::new(funcs);
         unsafe {
             hb::hb_font_set_funcs(

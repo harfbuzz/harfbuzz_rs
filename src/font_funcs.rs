@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-use {Font, FontExtents, Glyph, GlyphExtents, HarfbuzzObject, HbArc, HbBox, Position};
+use {Font, FontExtents, Glyph, GlyphExtents, HarfbuzzObject, Owned, Position, Shared};
 use font::destroy_box;
 
 use libc::c_void;
@@ -320,7 +320,7 @@ hb_callback!(
 /// use harfbuzz_rs::*;
 /// use std::mem;
 ///
-/// let mut ffuncs: HbBox<FontFuncsImpl<()>> = FontFuncsImpl::new();
+/// let mut ffuncs: Owned<FontFuncsImpl<()>> = FontFuncsImpl::new();
 /// let value = 113;
 /// ffuncs.set_font_h_extents_func(|_, _| {
 ///     Some(FontExtents { ascender: value, .. unsafe { mem::zeroed() } })
@@ -344,7 +344,7 @@ hb_callback!(
 /// }
 ///
 /// fn main() {
-///     let font_funcs: HbBox<FontFuncsImpl<MyFontData>> = FontFuncsImpl::from_trait_impl();
+///     let font_funcs: Owned<FontFuncsImpl<MyFontData>> = FontFuncsImpl::from_trait_impl();
 /// }
 /// ```
 ///
@@ -361,9 +361,9 @@ impl<T> FontFuncsImpl<T> {
     /// Returns an empty `FontFuncsImpl`. Every font callback of the returned `FontFuncsImpl` gives
     /// a null value regardless of its input.
     #[allow(unused)]
-    pub fn empty() -> HbArc<FontFuncsImpl<T>> {
+    pub fn empty() -> Shared<FontFuncsImpl<T>> {
         let raw = unsafe { hb::hb_font_funcs_get_empty() };
-        unsafe { HbArc::from_raw(raw) }
+        unsafe { Shared::from_raw(raw) }
     }
 }
 
@@ -389,11 +389,11 @@ impl<T: FontFuncs> FontFuncsImpl<T> {
     /// # }
     /// #
     /// # fn main() {
-    /// let font_funcs: HbBox<FontFuncsImpl<MyFontData>> = FontFuncsImpl::from_trait_impl();
+    /// let font_funcs: Owned<FontFuncsImpl<MyFontData>> = FontFuncsImpl::from_trait_impl();
     /// # }
     /// ```
     ///
-    pub fn from_trait_impl() -> HbBox<FontFuncsImpl<T>> {
+    pub fn from_trait_impl() -> Owned<FontFuncsImpl<T>> {
         let mut ffuncs = FontFuncsImpl::new();
         ffuncs.set_trait_impl();
         ffuncs
@@ -426,8 +426,8 @@ impl<T: FontFuncs> FontFuncsImpl<T> {
 }
 
 impl<T> FontFuncsImpl<T> {
-    pub fn new() -> HbBox<FontFuncsImpl<T>> {
-        unsafe { HbBox::from_raw(hb::hb_font_funcs_create()) }
+    pub fn new() -> Owned<FontFuncsImpl<T>> {
+        unsafe { Owned::from_raw(hb::hb_font_funcs_create()) }
     }
 
     pub fn set_font_h_extents_func<F>(&mut self, func: F)

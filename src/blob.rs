@@ -9,7 +9,7 @@ use std::fs::File;
 use std::io::Read;
 use std::fmt;
 
-use common::{HarfbuzzObject, HbArc, HbBox};
+use common::{HarfbuzzObject, Owned, Shared};
 
 /// A `Blob` manages raw data like e.g. file contents. It refers to a slice of bytes that can be
 /// either owned by the `Blob` or not.
@@ -26,7 +26,7 @@ pub struct Blob<'a> {
 }
 impl<'a> Blob<'a> {
     /// Create a new `Blob` from the slice `bytes`. The blob will not own the data.
-    pub fn with_bytes(bytes: &[u8]) -> HbBox<Blob> {
+    pub fn with_bytes(bytes: &[u8]) -> Owned<Blob> {
         let hb_blob = unsafe {
             hb::hb_blob_create(
                 bytes.as_ptr() as *const i8,
@@ -36,7 +36,7 @@ impl<'a> Blob<'a> {
                 None,
             )
         };
-        unsafe { HbBox::from_raw(hb_blob) }
+        unsafe { Owned::from_raw(hb_blob) }
     }
 
     /// Create a `Blob` from the contents of the file at `path`. The entire file is read into
@@ -45,7 +45,7 @@ impl<'a> Blob<'a> {
     /// This can be a performance problem if the file is very big. If this turns out to be a
     /// problem consider `mmap`ing the file or splitting it into smaller chunks before creating a
     /// `Blob`.
-    pub fn from_file<P: AsRef<Path>>(path: P) -> std::io::Result<HbArc<Blob<'static>>> {
+    pub fn from_file<P: AsRef<Path>>(path: P) -> std::io::Result<Shared<Blob<'static>>> {
         let mut file = File::open(path)?;
         let mut vec = Vec::new();
         file.read_to_end(&mut vec)?;
@@ -54,7 +54,7 @@ impl<'a> Blob<'a> {
 
     /// Create a new mutable `Blob` from a slice of bytes. Use this only if you *really* know what
     /// you're doing.
-    pub fn with_mut_bytes(bytes: &mut [u8]) -> HbBox<Blob> {
+    pub fn with_mut_bytes(bytes: &mut [u8]) -> Owned<Blob> {
         let hb_blob = unsafe {
             hb::hb_blob_create(
                 bytes.as_ptr() as *const i8,
@@ -64,7 +64,7 @@ impl<'a> Blob<'a> {
                 None,
             )
         };
-        unsafe { HbBox::from_raw(hb_blob) }
+        unsafe { Owned::from_raw(hb_blob) }
     }
 
     /// Get a slice of the `Blob`'s bytes.
@@ -82,10 +82,10 @@ impl<'a> Blob<'a> {
     /// ### Arguments
     /// * `offset`: Byte-offset of sub-blob within parent.
     /// * `length`: Length of the sub-blob.
-    pub fn create_sub_blob(&self, offset: usize, length: usize) -> HbArc<Blob<'a>> {
+    pub fn create_sub_blob(&self, offset: usize, length: usize) -> Shared<Blob<'a>> {
         let blob =
             unsafe { hb::hb_blob_create_sub_blob(self.as_raw(), offset as u32, length as u32) };
-        unsafe { HbArc::from_raw(blob) }
+        unsafe { Shared::from_raw(blob) }
     }
 
     /// Returns true if the blob is immutable.
@@ -155,11 +155,11 @@ impl<'a> Deref for Blob<'a> {
 
 use std::convert::From;
 
-impl<'a, T> From<T> for HbArc<Blob<'a>>
+impl<'a, T> From<T> for Shared<Blob<'a>>
 where
     T: 'static + Send + AsRef<[u8]>,
 {
-    fn from(container: T) -> HbArc<Blob<'a>> {
+    fn from(container: T) -> Shared<Blob<'a>> {
         let len = container.as_ref().len();
         let ptr = container.as_ref().as_ptr();
 
@@ -178,7 +178,7 @@ where
                 Some(destroy::<T>),
             )
         };
-        unsafe { HbArc::from_raw(hb_blob) }
+        unsafe { Shared::from_raw(hb_blob) }
     }
 }
 
@@ -189,7 +189,7 @@ mod tests {
     #[test]
     fn test_vec_to_blob_conversion() {
         let a_vec: Vec<u8> = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-        let blob: HbArc<Blob> = a_vec.into();
+        let blob: Shared<Blob> = a_vec.into();
 
         assert_eq!(blob.len(), 11);
 
@@ -204,7 +204,7 @@ mod tests {
     #[test]
     fn test_arc_to_blob_conversion() {
         let rc_slice: Arc<[u8]> = Arc::new([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
-        let blob: HbArc<Blob<'static>> = rc_slice.into();
+        let blob: Shared<Blob<'static>> = rc_slice.into();
 
         assert_eq!(blob.len(), 11);
 

@@ -2,7 +2,7 @@ use hb;
 use std;
 
 use font::Font;
-use common::{HarfbuzzObject, HbBox, Language, Tag};
+use common::{HarfbuzzObject, Owned, Language, Tag};
 
 pub type GlyphPosition = hb::hb_glyph_position_t;
 pub type GlyphInfo = hb::hb_glyph_info_t;
@@ -13,9 +13,9 @@ pub(crate) struct GenericBuffer {
     _raw: hb::hb_buffer_t,
 }
 impl GenericBuffer {
-    pub(crate) fn new() -> HbBox<GenericBuffer> {
+    pub(crate) fn new() -> Owned<GenericBuffer> {
         let buffer = unsafe { hb::hb_buffer_create() };
-        unsafe { HbBox::from_raw(buffer) }
+        unsafe { Owned::from_raw(buffer) }
     }
 
     pub(crate) fn len(&self) -> usize {
@@ -150,7 +150,7 @@ pub enum TypedBuffer {
 
 impl TypedBuffer {
     pub unsafe fn take_from_raw(raw: *mut hb::hb_buffer_t) -> Option<TypedBuffer> {
-        let generic_buf: HbBox<GenericBuffer> = HbBox::from_raw(raw);
+        let generic_buf: Owned<GenericBuffer> = Owned::from_raw(raw);
         let content_type = generic_buf.content_type();
         match content_type {
             hb::HB_BUFFER_CONTENT_TYPE_UNICODE => {
@@ -166,9 +166,9 @@ impl TypedBuffer {
 
 /// A `UnicodeBuffer` can be filled with unicode text and corresponding cluster indices.
 ///
-/// The buffer manages an allocation for the unicode codepoints to be shaped. This allocation however 
-/// is reused for storing the results of the shaping operation in a `GlyphBuffer` object. The intended 
-/// usage is to keep one (or e.g. one per thread) `UnicodeBuffer` around. When needed, you fill it with 
+/// The buffer manages an allocation for the unicode codepoints to be shaped. This allocation however
+/// is reused for storing the results of the shaping operation in a `GlyphBuffer` object. The intended
+/// usage is to keep one (or e.g. one per thread) `UnicodeBuffer` around. When needed, you fill it with
 /// text that should be shaped and call `.shape()` on it. That method returns a `GlyphBuffer` object
 /// containing the shaped glyph indices. Once you got the needed information out of the `GlyphBuffer`
 /// you call its `.clear()` method which in turn gives you a fresh `UnicodeBuffer` (actually using the
@@ -176,7 +176,7 @@ impl TypedBuffer {
 ///
 /// If you want to get a `UnicodeBuffer` from a pointer to a raw harfbuzz object, you need to use the
 /// `from_raw` static method on `TypedBuffer`. This ensures that a buffer of correct type is created.
-pub struct UnicodeBuffer(HbBox<GenericBuffer>);
+pub struct UnicodeBuffer(Owned<GenericBuffer>);
 impl UnicodeBuffer {
     /// Creates a new empty `Buffer`.
     ///
@@ -193,7 +193,7 @@ impl UnicodeBuffer {
 
     /// Converts this buffer to a raw harfbuzz object pointer.
     pub fn into_raw(self) -> *mut hb::hb_buffer_t {
-        HbBox::into_raw(self.0)
+        Owned::into_raw(self.0)
     }
 
     /// Returns the length of the data of the buffer.
@@ -376,7 +376,7 @@ impl<'a> Iterator for Codepoints<'a> {
 /// A `GlyphBuffer` contains the resulting output information of the shaping process.
 ///
 /// An object of this type is obtained through the `shape` function of a `UnicodeBuffer`.
-pub struct GlyphBuffer(HbBox<GenericBuffer>);
+pub struct GlyphBuffer(Owned<GenericBuffer>);
 
 impl GlyphBuffer {
     /// Returns the length of the data of the buffer.
@@ -389,7 +389,7 @@ impl GlyphBuffer {
 
     /// Converts this buffer to a raw harfbuzz object pointer.
     pub fn into_raw(self) -> *mut hb::hb_buffer_t {
-        HbBox::into_raw(self.0)
+        Owned::into_raw(self.0)
     }
 
     /// Returns `true` if the buffer contains no elements.
