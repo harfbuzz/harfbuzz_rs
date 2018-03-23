@@ -16,5 +16,4 @@ appveyor = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master", service 
 [dependencies]
 harfbuzz-sys = "^0.1"
 libc = "^0.2"
-rusttype = "^0.3"
-failure = "^0.1"
+rusttype = "^0.5"

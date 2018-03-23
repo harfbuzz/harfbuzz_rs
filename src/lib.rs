@@ -23,9 +23,7 @@
 //! use harfbuzz_rs::*;
 //! use harfbuzz_rs::rusttype::SetRustTypeFuncs;
 //!
-//! # extern crate failure;
-//! # use failure::Error;
-//! # fn try_main() -> Result<(), Error> {
+//! # fn try_main() -> Result<(), std::io::Error> {
 //!
 //! let path = "path/to/some/font_file.otf";
 //! let index = 0; //< face index in the font file
@@ -84,8 +82,6 @@
 //! ```
 #![deny(missing_debug_implementations)]
 
-#[macro_use]
-extern crate failure;
 extern crate harfbuzz_sys as hb;
 extern crate libc;
 
