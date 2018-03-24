@@ -1,7 +1,6 @@
 use hb;
 use std;
 
-use font::Font;
 use common::{HarfbuzzObject, Owned, Language, Tag};
 
 pub type GlyphPosition = hb::hb_glyph_position_t;
@@ -79,17 +78,6 @@ impl GenericBuffer {
             hb::hb_buffer_get_segment_properties(self.as_raw(), &mut segment_props as *mut _);
             segment_props
         }
-    }
-
-    pub(crate) fn shape(&mut self, font: &Font, features: &[Feature]) {
-        unsafe {
-            hb::hb_shape(
-                font.as_raw(),
-                self.as_raw(),
-                features.as_ptr(),
-                features.len() as u32,
-            )
-        };
     }
 
     pub(crate) fn clear_contents(&mut self) {
@@ -176,7 +164,7 @@ impl TypedBuffer {
 ///
 /// If you want to get a `UnicodeBuffer` from a pointer to a raw harfbuzz object, you need to use the
 /// `from_raw` static method on `TypedBuffer`. This ensures that a buffer of correct type is created.
-pub struct UnicodeBuffer(Owned<GenericBuffer>);
+pub struct UnicodeBuffer(pub(crate) Owned<GenericBuffer>);
 impl UnicodeBuffer {
     /// Creates a new empty `Buffer`.
     ///
@@ -309,17 +297,6 @@ impl UnicodeBuffer {
         self.0.get_segment_properties()
     }
 
-    /// Shape the contents of the buffer using the provided font and activating all OpenType features
-    /// given in `features`.
-    ///
-    /// This function consumes the `UnicodeBuffer` and returns a `GlyphBuffer` containing the
-    /// resulting glyph indices and the corresponding positioning information.
-    pub fn shape(mut self, font: &Font, features: &[Feature]) -> GlyphBuffer {
-        self = self.guess_segment_properties();
-        self.0.shape(font, features);
-        GlyphBuffer(self.0)
-    }
-
     /// Clear the contents of the buffer (i.e. the stored string of unicode characters).
     ///
     /// # Examples
@@ -376,7 +353,7 @@ impl<'a> Iterator for Codepoints<'a> {
 /// A `GlyphBuffer` contains the resulting output information of the shaping process.
 ///
 /// An object of this type is obtained through the `shape` function of a `UnicodeBuffer`.
-pub struct GlyphBuffer(Owned<GenericBuffer>);
+pub struct GlyphBuffer(pub(crate) Owned<GenericBuffer>);
 
 impl GlyphBuffer {
     /// Returns the length of the data of the buffer.
