@@ -3,6 +3,8 @@ use hb;
 use libc::c_void;
 
 use std::marker::PhantomData;
+use std::path::Path;
+use std::io;
 
 use blob::Blob;
 use common::{HarfbuzzObject, Owned, Shared, Tag};
@@ -13,8 +15,6 @@ pub struct Face<'a> {
     hb_face: hb::hb_face_t,
     _marker: PhantomData<&'a [u8]>,
 }
-
-use std::path::Path;
 
 impl<'a> Face<'a> {
     /// Create a new `Face` from the data in `bytes`.
@@ -28,6 +28,11 @@ impl<'a> Face<'a> {
     pub fn from_file<P: AsRef<Path>>(path: P, index: u32) -> std::io::Result<Owned<Face<'static>>> {
         let blob = Blob::from_file(path)?;
         Ok(Face::new(blob, index))
+    }
+
+    pub fn from_bytes<'b>(bytes: &'b [u8], index: u32) -> Owned<Face<'b>> {
+        let blob = Blob::with_bytes(bytes);
+        Face::new(blob, index)
     }
 
     /// Create a new face from a closure that returns a raw [`Blob`](struct.Blob.html) of table

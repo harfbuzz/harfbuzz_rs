@@ -26,7 +26,7 @@ pub struct Blob<'a> {
 }
 impl<'a> Blob<'a> {
     /// Create a new `Blob` from the slice `bytes`. The blob will not own the data.
-    pub fn with_bytes(bytes: &[u8]) -> Owned<Blob> {
+    pub fn with_bytes(bytes: &'a [u8]) -> Owned<Blob<'a>> {
         let hb_blob = unsafe {
             hb::hb_blob_create(
                 bytes.as_ptr() as *const i8,
