@@ -4,7 +4,6 @@ use libc::c_void;
 
 use std::marker::PhantomData;
 use std::path::Path;
-use std::io;
 
 use blob::Blob;
 use common::{HarfbuzzObject, Owned, Shared, Tag};
