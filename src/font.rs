@@ -3,13 +3,13 @@ use std;
 
 use libc::c_void;
 
+use common::{HarfbuzzObject, Owned, Shared};
+use face::Face;
 pub use font_funcs::FontFuncs;
 use font_funcs::FontFuncsImpl;
-use face::Face;
-use common::{HarfbuzzObject, Owned, Shared};
 
-use std::marker::PhantomData;
 use std::ffi::CStr;
+use std::marker::PhantomData;
 
 pub type Glyph = u32;
 pub type FontExtents = hb::hb_font_extents_t;

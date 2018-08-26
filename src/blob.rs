@@ -4,15 +4,18 @@ use libc::c_void;
 use std;
 use std::marker::PhantomData;
 
-use std::path::Path;
+use std::fmt;
 use std::fs::File;
 use std::io::Read;
-use std::fmt;
+use std::path::Path;
 
 use common::{HarfbuzzObject, Owned, Shared};
 
 /// A `Blob` manages raw data like e.g. file contents. It refers to a slice of bytes that can be
 /// either owned by the `Blob` or not.
+///
+/// Since it is a simple wrapper for `hb_blob_t` it can be used to construct `Font`s and `Face`s
+/// directly from memory.
 ///
 /// To enable shared usage of its data it uses a reference counting mechanism making the `clone`
 /// operation very cheap as no data is cloned.
@@ -25,7 +28,7 @@ pub struct Blob<'a> {
     _marker: PhantomData<&'a mut [u8]>,
 }
 impl<'a> Blob<'a> {
-    /// Create a new `Blob` from the slice `bytes`. The blob will not own the data.
+    /// Create a new `Blob` from the slice `bytes`. The blob will not own the slice's data.
     pub fn with_bytes(bytes: &'a [u8]) -> Owned<Blob<'a>> {
         let hb_blob = unsafe {
             hb::hb_blob_create(
@@ -39,8 +42,10 @@ impl<'a> Blob<'a> {
         unsafe { Owned::from_raw(hb_blob) }
     }
 
-    /// Create a `Blob` from the contents of the file at `path`. The entire file is read into
-    /// memory and the resulting `Blob` owns this data.
+    /// Create a `Blob` from the contents of the file at `path` whose contents will be read into memory.
+    ///
+    /// The result will be either a `Blob` that owns the file's contents or an error that happened while
+    /// trying to read the file.
     ///
     /// This can be a performance problem if the file is very big. If this turns out to be a
     /// problem consider `mmap`ing the file or splitting it into smaller chunks before creating a
@@ -52,8 +57,7 @@ impl<'a> Blob<'a> {
         Ok(vec.into())
     }
 
-    /// Create a new mutable `Blob` from a slice of bytes. Use this only if you *really* know what
-    /// you're doing.
+    /// Create a new mutable `Blob` from a slice of bytes.
     pub fn with_mut_bytes(bytes: &mut [u8]) -> Owned<Blob> {
         let hb_blob = unsafe {
             hb::hb_blob_create(
@@ -146,12 +150,12 @@ impl<'a> Deref for Blob<'a> {
     }
 }
 
-// use std::convert::AsRef;
-// impl<'a> AsRef<[u8]> for Blob<'a> {
-//     fn as_ref(&self) -> &[u8] {
-//         self.get_data()
-//     }
-// }
+use std::convert::AsRef;
+impl<'a> AsRef<[u8]> for Blob<'a> {
+    fn as_ref(&self) -> &[u8] {
+        self.get_data()
+    }
+}
 
 use std::convert::From;
 

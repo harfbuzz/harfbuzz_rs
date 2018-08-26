@@ -3,24 +3,24 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-use {Font, FontExtents, Glyph, GlyphExtents, HarfbuzzObject, Owned, Position, Shared};
 use font::destroy_box;
+use {Font, FontExtents, Glyph, GlyphExtents, HarfbuzzObject, Owned, Position, Shared};
 
-use libc::c_void;
 use hb;
+use libc::c_void;
 
 use std;
-use std::marker::PhantomData;
 use std::ffi::{CStr, CString};
-use std::io::Write;
-use std::panic;
 use std::fmt;
+use std::io::Write;
+use std::marker::PhantomData;
+use std::panic;
 
 /// This Trait specifies the font callbacks that harfbuzz uses for its shaping. You shouldn't
 /// call these functions yourself. They are exposed through the `Font` wrapper.
 ///
 /// No function in this trait needs to be implemented, the default implementations simply return the
-/// parent font's implementation. If a `Font` is created directly from a face, its parent is the
+/// parent font's data. If a `Font` is created directly from a face, its parent is the
 /// empty `Font` which returns null values for every font func.
 #[allow(unused_variables)]
 pub trait FontFuncs {
@@ -129,6 +129,7 @@ macro_rules! hb_callback {
             match catch_result {
                 Ok(val) => val,
                 Err(_) => {
+                    // TODO: Log error
                     Default::default()
                 }
             }

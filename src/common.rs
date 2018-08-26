@@ -1,6 +1,6 @@
 use hb;
-use std::ops::{Deref, DerefMut};
 use std::borrow::Borrow;
+use std::ops::{Deref, DerefMut};
 
 /// A type to represent 4-byte SFNT tags.
 ///
@@ -274,8 +274,8 @@ unsafe impl<T: HarfbuzzObject + Sync + Send> Sync for Shared<T> {}
 /// A `Owned` is used to wrap freshly created owned HarfBuzz objects. It permits mutable, non-shared
 /// access to the enclosed HarfBuzz value so it can be used e.g. to set up a `Font` or `Face` after
 /// its creation.
-/// 
-/// There is no safe way to construct an `Owned` pointer and usually you don't need to create a 
+///
+/// There is no safe way to construct an `Owned` pointer and usually you don't need to create a
 /// `Owned` yourself, but get it from another function in this crate.
 /// You can just use the methods of the wrapped object through its `Deref` implementation.
 ///
@@ -334,10 +334,10 @@ impl<T: HarfbuzzObject> DerefMut for Owned<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::str::FromStr;
-    use std::rc::Rc;
     use std::cell::Cell;
     use std::mem;
+    use std::rc::Rc;
+    use std::str::FromStr;
 
     #[test]
     fn test_tag_debugging() {
@@ -362,6 +362,7 @@ mod tests {
         assert_eq!(Language::from_str("German").unwrap().to_string(), "german");
     }
 
+    // this is a mock struct for testing HarfbuzzObject's behaviour.
     #[derive(Debug)]
     struct ReferenceCounter {
         rc: Cell<isize>,

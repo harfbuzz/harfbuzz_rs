@@ -12,7 +12,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! harfbuzz_rs = "^0.1"
+//! harfbuzz_rs = "^0.2"
 //! ```
 //!
 //! To shape a simple string of text you just create a `Font` from a font file, fill a `Buffer`
@@ -37,7 +37,7 @@
 //!
 //! let buffer = UnicodeBuffer::new().add_str("Hello World!");
 //! let output = shape(&font, buffer, &[]);
-//! 
+//!
 //! // The results of the shaping operation are stored in the `output` buffer.
 //!
 //! let positions = output.get_glyph_positions();
@@ -86,19 +86,19 @@
 extern crate harfbuzz_sys as hb;
 extern crate libc;
 
+mod blob;
+mod buffer;
+mod common;
+mod face;
 mod font;
 mod font_funcs;
-mod blob;
-mod face;
 pub mod rusttype;
-mod common;
-mod buffer;
 
-pub use font::*;
-pub use face::*;
 pub use blob::*;
 pub use buffer::*;
 pub use common::*;
+pub use face::*;
+pub use font::*;
 
 /// Shape the contents of the buffer using the provided font and activating all OpenType features
 /// given in `features`.
