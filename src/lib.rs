@@ -84,7 +84,6 @@
 #![deny(missing_debug_implementations)]
 
 extern crate harfbuzz_sys as hb;
-extern crate libc;
 
 mod blob;
 mod buffer;

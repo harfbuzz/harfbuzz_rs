@@ -7,7 +7,7 @@ use font::destroy_box;
 use {Font, FontExtents, Glyph, GlyphExtents, HarfbuzzObject, Owned, Position, Shared};
 
 use hb;
-use libc::c_void;
+use std::os::raw::c_void;
 
 use std;
 use std::ffi::{CStr, CString};

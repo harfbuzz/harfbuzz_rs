@@ -1,7 +1,7 @@
 use hb;
 use std;
 
-use libc::c_void;
+use std::os::raw::c_void;
 
 use common::{HarfbuzzObject, Owned, Shared};
 use face::Face;

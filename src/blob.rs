@@ -1,5 +1,5 @@
 use hb;
-use libc::c_void;
+use std::os::raw::c_void;
 
 use std;
 use std::marker::PhantomData;
