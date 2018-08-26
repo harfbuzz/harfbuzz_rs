@@ -1,6 +1,7 @@
 use hb;
 use std::borrow::Borrow;
 use std::ops::{Deref, DerefMut};
+use std::ptr::NonNull;
 
 /// A type to represent 4-byte SFNT tags.
 ///
@@ -202,7 +203,7 @@ pub unsafe trait HarfbuzzObject: Sized {
 /// similar semantics.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Shared<T: HarfbuzzObject> {
-    pointer: *mut T::Raw,
+    pointer: NonNull<T::Raw>,
 }
 
 impl<T: HarfbuzzObject> Shared<T> {
@@ -211,7 +212,9 @@ impl<T: HarfbuzzObject> Shared<T> {
     /// Transfers ownership. _Use of the original pointer is now forbidden!_ Unsafe because
     /// dereferencing a raw pointer is necessary.
     pub unsafe fn from_raw(raw: *mut T::Raw) -> Self {
-        Shared { pointer: raw }
+        Shared {
+            pointer: NonNull::new_unchecked(raw),
+        }
     }
 
     /// Converts `self` into the underlying harfbuzz object pointer value. The resulting pointer
@@ -220,7 +223,7 @@ impl<T: HarfbuzzObject> Shared<T> {
     pub fn into_raw(shared: Shared<T>) -> *mut T::Raw {
         let result = shared.pointer;
         std::mem::forget(shared);
-        result
+        result.as_ptr()
     }
 
     pub fn from_ref(reference: &T) -> Self {
@@ -235,7 +238,7 @@ impl<T: HarfbuzzObject> Clone for Shared<T> {
     fn clone(&self) -> Self {
         unsafe {
             self.reference();
-            Self::from_raw(self.pointer)
+            Self::from_raw(self.pointer.as_ptr())
         }
     }
 }
@@ -244,7 +247,7 @@ impl<T: HarfbuzzObject> Deref for Shared<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
-        unsafe { T::from_raw(self.pointer) }
+        unsafe { T::from_raw(self.pointer.as_ptr()) }
     }
 }
 
@@ -258,7 +261,7 @@ impl<T: HarfbuzzObject> From<Owned<T>> for Shared<T> {
     fn from(t: Owned<T>) -> Self {
         let ptr = t.pointer;
         std::mem::forget(t);
-        unsafe { Shared::from_raw(ptr) }
+        unsafe { Shared::from_raw(ptr.as_ptr()) }
     }
 }
 
@@ -289,7 +292,7 @@ unsafe impl<T: HarfbuzzObject + Sync + Send> Sync for Shared<T> {}
 /// converted to  a `Shared<T>`, it will not possible to mutate it anymore.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Owned<T: HarfbuzzObject> {
-    pointer: *mut T::Raw,
+    pointer: NonNull<T::Raw>,
 }
 
 impl<T: HarfbuzzObject> Owned<T> {
@@ -300,7 +303,9 @@ impl<T: HarfbuzzObject> Owned<T> {
     ///
     /// Use this only to wrap freshly created HarfBuzz object that is not shared!
     pub unsafe fn from_raw(raw: *mut T::Raw) -> Self {
-        Owned { pointer: raw }
+        Owned {
+            pointer: NonNull::new_unchecked(raw),
+        }
     }
 
     /// Converts `self` into the underlying harfbuzz object pointer value. The resulting pointer
@@ -309,7 +314,7 @@ impl<T: HarfbuzzObject> Owned<T> {
     pub fn into_raw(owned: Owned<T>) -> *mut T::Raw {
         let result = owned.pointer;
         std::mem::forget(owned);
-        result
+        result.as_ptr()
     }
 }
 
@@ -323,13 +328,13 @@ impl<T: HarfbuzzObject> Deref for Owned<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
-        unsafe { T::from_raw(self.pointer) }
+        unsafe { T::from_raw(self.pointer.as_ptr()) }
     }
 }
 
 impl<T: HarfbuzzObject> DerefMut for Owned<T> {
     fn deref_mut(&mut self) -> &mut T {
-        unsafe { T::from_raw_mut(self.pointer) }
+        unsafe { T::from_raw_mut(self.pointer.as_ptr()) }
     }
 }
 
