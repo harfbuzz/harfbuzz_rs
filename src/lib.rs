@@ -8,12 +8,6 @@
 //! need a lot of control on advanced text layout then this is the right library to use.
 //!
 //! # Getting Started
-//! Add the following to your `Cargo.toml`:
-//!
-//! ```toml
-//! [dependencies]
-//! harfbuzz_rs = "^0.2"
-//! ```
 //!
 //! To shape a simple string of text you just create a `Font` from a font file, fill a `Buffer`
 //! with some text and call the `shape` function.

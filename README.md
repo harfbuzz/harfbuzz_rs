@@ -1,6 +1,7 @@
 # harfbuzz_rs
 
 [![Crates.io](https://img.shields.io/crates/v/harfbuzz_rs.svg)](https://crates.io/crates/harfbuzz_rs)
+[![Documentation](https://docs.rs/harfbuzz_rs/badge.svg)](https://docs.rs/harfbuzz_rs)
 [![Build Status](https://travis-ci.org/manuel-rhdt/harfbuzz_rs.svg?branch=master)](https://travis-ci.org/manuel-rhdt/harfbuzz_rs)
 [![Build status](https://ci.appveyor.com/api/projects/status/tg2xpx3am2iw7nxr?svg=true)](https://ci.appveyor.com/project/manuel-rhdt/harfbuzz-rs)
 
@@ -15,12 +16,6 @@ another library. However if you want to build a library for drawing text on some
 need a lot of control on advanced text layout then this is the right library to use.
 
 # Getting Started
-Add the following to your `Cargo.toml`:
-
-```toml
-[dependencies]
-harfbuzz_rs = "^0.1"
-```
 
 To shape a simple string of text you just create a `Font` from a font file, fill a `Buffer`
 with some text and call the `shape` function.
