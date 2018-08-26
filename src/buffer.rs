@@ -1,7 +1,7 @@
 use hb;
 use std;
 
-use common::{HarfbuzzObject, Owned, Language, Tag};
+use common::{HarfbuzzObject, Language, Owned, Tag};
 
 pub type GlyphPosition = hb::hb_glyph_position_t;
 pub type GlyphInfo = hb::hb_glyph_info_t;
@@ -117,7 +117,7 @@ impl GenericBuffer {
     }
 }
 
-impl HarfbuzzObject for GenericBuffer {
+unsafe impl HarfbuzzObject for GenericBuffer {
     type Raw = hb::hb_buffer_t;
 
     unsafe fn reference(&self) {

@@ -1,6 +1,6 @@
-use std;
 use hb;
 use libc::c_void;
+use std;
 
 use std::marker::PhantomData;
 use std::path::Path;
@@ -122,7 +122,7 @@ impl<'a> Face<'a> {
     }
 }
 
-impl<'a> HarfbuzzObject for Face<'a> {
+unsafe impl<'a> HarfbuzzObject for Face<'a> {
     type Raw = hb::hb_face_t;
 
     unsafe fn reference(&self) {

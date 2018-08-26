@@ -129,7 +129,7 @@ impl<'a> fmt::Debug for Blob<'a> {
     }
 }
 
-impl<'a> HarfbuzzObject for Blob<'a> {
+unsafe impl<'a> HarfbuzzObject for Blob<'a> {
     type Raw = hb::hb_blob_t;
 
     unsafe fn reference(&self) {

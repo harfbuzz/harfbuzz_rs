@@ -144,7 +144,9 @@ impl FromStr for Language {
 
 /// A trait which is implemented for all harffbuzz wrapper structs. It exposes common functionality
 /// for converting from and to the underlying raw harfbuzz pointers that are useful for ffi.
-pub trait HarfbuzzObject: Sized {
+///
+/// This trait may only be implemented for structs that are zero-sized and is therefore unsafe to implement.
+pub unsafe trait HarfbuzzObject: Sized {
     /// Type of the raw harfbuzz object.
     type Raw;
 
@@ -368,7 +370,7 @@ mod tests {
         rc: Cell<isize>,
     }
 
-    impl HarfbuzzObject for ReferenceCounter {
+    unsafe impl HarfbuzzObject for ReferenceCounter {
         type Raw = Cell<isize>;
 
         unsafe fn reference(&self) {

@@ -304,7 +304,7 @@ impl<'a> Font<'a> {
     }
 }
 
-impl<'a> HarfbuzzObject for Font<'a> {
+unsafe impl<'a> HarfbuzzObject for Font<'a> {
     type Raw = hb::hb_font_t;
 
     unsafe fn reference(&self) {

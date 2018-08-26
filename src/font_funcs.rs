@@ -648,7 +648,7 @@ impl<T> fmt::Debug for FontFuncsImpl<T> {
     }
 }
 
-impl<T> HarfbuzzObject for FontFuncsImpl<T> {
+unsafe impl<T> HarfbuzzObject for FontFuncsImpl<T> {
     type Raw = hb::hb_font_funcs_t;
 
     unsafe fn reference(&self) {
