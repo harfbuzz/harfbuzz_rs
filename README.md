@@ -69,3 +69,7 @@ gid77=9@253,0+0
 gid69=10@528,0+0
 gid2=11@276,0+0
 ```
+
+# Optional Features
+
+If you do not want to use rusttype's font functions you can disable the "rusttype" feature.

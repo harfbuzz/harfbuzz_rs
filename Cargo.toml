@@ -13,6 +13,9 @@ license = "MIT"
 travis-ci = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master" }
 appveyor = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master", service = "github" }
 
+[features]
+default = ["rusttype"]
+
 [dependencies]
 harfbuzz-sys = "^0.2"
-rusttype = "^0.7"
+rusttype = { version = "^0.7", optional = true }

@@ -85,6 +85,8 @@ mod common;
 mod face;
 mod font;
 mod font_funcs;
+
+#[cfg(feature = "rusttype")]
 pub mod rusttype;
 
 pub use blob::*;
