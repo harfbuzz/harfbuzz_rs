@@ -50,8 +50,16 @@ impl<'a> Font<'a> {
     }
 
     /// Returns the parent font.
-    pub fn parent(&self) -> &Font<'a> {
-        unsafe { Font::from_raw(hb::hb_font_get_parent(self.as_raw())) }
+    pub fn parent(&self) -> Option<&Font<'a>> {
+        unsafe {
+            let parent = hb::hb_font_get_parent(self.as_raw());
+            if parent.is_null() {
+                // hb_font_get_parent returns null-ptr if called on the empty font.
+                None
+            } else {
+                Some(Font::from_raw(parent))
+            }
+        }
     }
 
     /// Returns the face which was used to create the font.
@@ -96,32 +104,42 @@ impl<'a> Font<'a> {
     }
 
     // scale from parent font
-    pub(crate) fn parent_scale_x_distance(&self, v: Position) -> Position {
-        let parent_x_scale = self.parent().scale().0;
+    pub(crate) fn parent_scale_x_distance(&self, f: impl Fn(&Font) -> Position) -> Position {
         let x_scale = self.scale().0;
-        if parent_x_scale != x_scale {
-            (v as i64 * x_scale as i64 / parent_x_scale as i64) as Position
+        if let Some(parent) = self.parent() {
+            let parent_x_scale = parent.scale().0;
+
+            if parent_x_scale != x_scale {
+                (f(parent) as i64 * x_scale as i64 / parent_x_scale as i64) as Position
+            } else {
+                f(parent)
+            }
         } else {
-            v
+            0
         }
     }
 
     // scale from parent font
-    pub(crate) fn parent_scale_y_distance(&self, v: Position) -> Position {
-        let parent_y_scale = self.parent().scale().1;
-        let y_scale = self.scale().1;
-        if parent_y_scale != y_scale {
-            (v as i64 * y_scale as i64 / parent_y_scale as i64) as Position
+    pub(crate) fn parent_scale_y_distance(&self, f: impl Fn(&Font) -> Position) -> Position {
+        let y_scale = self.scale().0;
+        if let Some(parent) = self.parent() {
+            let parent_y_scale = parent.scale().0;
+
+            if parent_y_scale != y_scale {
+                (f(parent) as i64 * y_scale as i64 / parent_y_scale as i64) as Position
+            } else {
+                f(parent)
+            }
         } else {
-            v
+            0
         }
     }
 
     // scale from parent font
     pub(crate) fn parent_scale_position(&self, v: (Position, Position)) -> (Position, Position) {
         (
-            self.parent_scale_x_distance(v.0),
-            self.parent_scale_y_distance(v.1),
+            self.parent_scale_x_distance(|_| v.0),
+            self.parent_scale_y_distance(|_| v.1),
         )
     }
 

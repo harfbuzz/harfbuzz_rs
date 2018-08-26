@@ -25,27 +25,27 @@ use std::panic;
 #[allow(unused_variables)]
 pub trait FontFuncs {
     fn get_font_h_extents(&self, font: &Font) -> Option<FontExtents> {
-        font.parent()
+        font.parent()?
             .get_font_h_extents()
             .map(|extents| FontExtents {
-                ascender: font.parent_scale_y_distance(extents.ascender),
-                descender: font.parent_scale_y_distance(extents.descender),
-                line_gap: font.parent_scale_y_distance(extents.line_gap),
+                ascender: font.parent_scale_y_distance(|_| extents.ascender),
+                descender: font.parent_scale_y_distance(|_| extents.descender),
+                line_gap: font.parent_scale_y_distance(|_| extents.line_gap),
                 ..extents
             })
     }
     fn get_font_v_extents(&self, font: &Font) -> Option<FontExtents> {
-        font.parent()
+        font.parent()?
             .get_font_v_extents()
             .map(|extents| FontExtents {
-                ascender: font.parent_scale_y_distance(extents.ascender),
-                descender: font.parent_scale_y_distance(extents.descender),
-                line_gap: font.parent_scale_y_distance(extents.line_gap),
+                ascender: font.parent_scale_y_distance(|_| extents.ascender),
+                descender: font.parent_scale_y_distance(|_| extents.descender),
+                line_gap: font.parent_scale_y_distance(|_| extents.line_gap),
                 ..extents
             })
     }
     fn get_nominal_glyph(&self, font: &Font, unicode: char) -> Option<Glyph> {
-        font.parent().get_nominal_glyph(unicode)
+        font.parent()?.get_nominal_glyph(unicode)
     }
     fn get_variation_glyph(
         &self,
@@ -53,38 +53,38 @@ pub trait FontFuncs {
         unicode: char,
         variation_sel: char,
     ) -> Option<Glyph> {
-        font.parent().get_variation_glyph(unicode, variation_sel)
+        font.parent()?.get_variation_glyph(unicode, variation_sel)
     }
     fn get_glyph_h_advance(&self, font: &Font, glyph: Glyph) -> Position {
-        font.parent_scale_x_distance(font.parent().get_glyph_h_advance(glyph))
+        font.parent_scale_x_distance(|parent| parent.get_glyph_h_advance(glyph))
     }
     fn get_glyph_v_advance(&self, font: &Font, glyph: Glyph) -> Position {
-        font.parent_scale_y_distance(font.parent().get_glyph_v_advance(glyph))
+        font.parent_scale_y_distance(|parent| parent.get_glyph_v_advance(glyph))
     }
     fn get_glyph_h_origin(&self, font: &Font, glyph: Glyph) -> Option<(Position, Position)> {
-        font.parent()
+        font.parent()?
             .get_glyph_h_origin(glyph)
             .map(|x| font.parent_scale_position(x))
     }
     fn get_glyph_v_origin(&self, font: &Font, glyph: Glyph) -> Option<(Position, Position)> {
-        font.parent()
+        font.parent()?
             .get_glyph_v_origin(glyph)
             .map(|x| font.parent_scale_position(x))
     }
     fn get_glyph_h_kerning(&self, font: &Font, left: Glyph, right: Glyph) -> Position {
-        font.parent_scale_x_distance(font.parent().get_glyph_h_kerning(left, right))
+        font.parent_scale_x_distance(|parent| parent.get_glyph_h_kerning(left, right))
     }
     fn get_glyph_v_kerning(&self, font: &Font, before: Glyph, after: Glyph) -> Position {
-        font.parent_scale_y_distance(font.parent().get_glyph_v_kerning(before, after))
+        font.parent_scale_y_distance(|parent| parent.get_glyph_v_kerning(before, after))
     }
     fn get_glyph_extents(&self, font: &Font, glyph: Glyph) -> Option<GlyphExtents> {
-        font.parent()
+        font.parent()?
             .get_glyph_extents(glyph)
             .map(|extents| GlyphExtents {
-                x_bearing: font.parent_scale_x_distance(extents.x_bearing),
-                y_bearing: font.parent_scale_y_distance(extents.y_bearing),
-                width: font.parent_scale_x_distance(extents.width),
-                height: font.parent_scale_y_distance(extents.height),
+                x_bearing: font.parent_scale_x_distance(|_| extents.x_bearing),
+                y_bearing: font.parent_scale_y_distance(|_| extents.y_bearing),
+                width: font.parent_scale_x_distance(|_| extents.width),
+                height: font.parent_scale_y_distance(|_| extents.height),
                 ..extents
             })
     }
@@ -94,15 +94,15 @@ pub trait FontFuncs {
         glyph: Glyph,
         point_index: u32,
     ) -> Option<(Position, Position)> {
-        font.parent()
+        font.parent()?
             .get_glyph_contour_point(glyph, point_index)
             .map(|x| font.parent_scale_position(x))
     }
     fn get_glyph_name(&self, font: &Font, glyph: Glyph) -> Option<String> {
-        font.parent().get_glyph_name(glyph)
+        font.parent()?.get_glyph_name(glyph)
     }
     fn get_glyph_from_name(&self, font: &Font, name: &str) -> Option<Glyph> {
-        font.parent().get_glyph_from_name(name)
+        font.parent()?.get_glyph_from_name(name)
     }
 }
 
