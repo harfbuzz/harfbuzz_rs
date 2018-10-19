@@ -1,5 +1,6 @@
 use hb;
 use std;
+use std::ptr::NonNull;
 
 use common::{HarfbuzzObject, Language, Owned, Tag};
 
@@ -9,7 +10,7 @@ pub type Feature = hb::hb_feature_t;
 
 #[derive(Debug)]
 pub(crate) struct GenericBuffer {
-    _raw: hb::hb_buffer_t,
+    _raw: NonNull<hb::hb_buffer_t>,
 }
 impl GenericBuffer {
     pub(crate) fn new() -> Owned<GenericBuffer> {

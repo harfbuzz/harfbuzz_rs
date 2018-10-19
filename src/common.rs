@@ -1,7 +1,8 @@
 use hb;
 use std::borrow::Borrow;
 use std::ops::{Deref, DerefMut};
-use std::ptr::NonNull;
+
+use std::mem;
 
 /// A type to represent 4-byte SFNT tags.
 ///
@@ -157,25 +158,16 @@ pub unsafe trait HarfbuzzObject: Sized {
     /// be called directly by a library user.
     ///
     /// Use the Owned and Shared abstractions instead.
-    unsafe fn from_raw<'a>(val: *const Self::Raw) -> &'a Self {
-        &*(val as *const Self)
-    }
-
-    /// Creates a mutable reference from a harfbuzz object pointer.
-    ///
-    /// Unsafe because a raw pointer may be accessed. The reference count is not changed. Should not
-    /// be called directly by a library user.
-    ///
-    /// Use the Owned and Shared abstractions instead.
-    unsafe fn from_raw_mut<'a>(val: *mut Self::Raw) -> &'a mut Self {
-        &mut *(val as *mut Self)
+    #[doc(hide)]
+    unsafe fn from_raw(val: *const Self::Raw) -> Self {
+        mem::transmute_copy(&val)
     }
 
     /// Returns the underlying harfbuzz object pointer.
     ///
     /// The caller must ensure, that this pointer is not used after `self`'s destruction.
     fn as_raw(&self) -> *mut Self::Raw {
-        (((self as *const Self) as *mut Self) as *mut Self::Raw)
+        unsafe { mem::transmute_copy(self) }
     }
 
     /// Increases the reference count of the HarfBuzz object.
@@ -203,7 +195,7 @@ pub unsafe trait HarfbuzzObject: Sized {
 /// similar semantics.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Shared<T: HarfbuzzObject> {
-    pointer: NonNull<T::Raw>,
+    object: T,
 }
 
 impl<T: HarfbuzzObject> Shared<T> {
@@ -211,35 +203,30 @@ impl<T: HarfbuzzObject> Shared<T> {
     ///
     /// Transfers ownership. _Use of the original pointer is now forbidden!_ Unsafe because
     /// dereferencing a raw pointer is necessary.
-    pub unsafe fn from_raw(raw: *mut T::Raw) -> Self {
-        Shared {
-            pointer: NonNull::new_unchecked(raw),
-        }
+    pub unsafe fn from_raw_owned(raw: *mut T::Raw) -> Self {
+        let object = T::from_raw(raw);
+        Shared { object }
     }
 
     /// Converts `self` into the underlying harfbuzz object pointer value. The resulting pointer
     /// has to be manually destroyed using `hb_TYPE_destroy` or be converted back into the wrapper
     /// using the `from_raw` function to avoid leaking memory.
     pub fn into_raw(shared: Shared<T>) -> *mut T::Raw {
-        let result = shared.pointer;
+        let result = shared.object.as_raw();
         std::mem::forget(shared);
-        result.as_ptr()
+        result
     }
 
-    pub fn from_ref(reference: &T) -> Self {
-        unsafe {
-            reference.reference();
-            Shared::from_raw(reference.as_raw())
-        }
+    pub unsafe fn from_raw_ref(raw: *mut T::Raw) -> Self {
+        let object = T::from_raw(raw);
+        object.reference();
+        Shared { object }
     }
 }
 
 impl<T: HarfbuzzObject> Clone for Shared<T> {
     fn clone(&self) -> Self {
-        unsafe {
-            self.reference();
-            Self::from_raw(self.pointer.as_ptr())
-        }
+        unsafe { Self::from_raw_ref(self.object.as_raw()) }
     }
 }
 
@@ -247,7 +234,7 @@ impl<T: HarfbuzzObject> Deref for Shared<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
-        unsafe { T::from_raw(self.pointer.as_ptr()) }
+        &self.object
     }
 }
 
@@ -259,9 +246,9 @@ impl<T: HarfbuzzObject> Borrow<T> for Shared<T> {
 
 impl<T: HarfbuzzObject> From<Owned<T>> for Shared<T> {
     fn from(t: Owned<T>) -> Self {
-        let ptr = t.pointer;
+        let ptr = t.object.as_raw();
         std::mem::forget(t);
-        unsafe { Shared::from_raw(ptr.as_ptr()) }
+        unsafe { Shared::from_raw_owned(ptr) }
     }
 }
 
@@ -292,7 +279,7 @@ unsafe impl<T: HarfbuzzObject + Sync + Send> Sync for Shared<T> {}
 /// converted to  a `Shared<T>`, it will not possible to mutate it anymore.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Owned<T: HarfbuzzObject> {
-    pointer: NonNull<T::Raw>,
+    object: T,
 }
 
 impl<T: HarfbuzzObject> Owned<T> {
@@ -304,7 +291,7 @@ impl<T: HarfbuzzObject> Owned<T> {
     /// Use this only to wrap freshly created HarfBuzz object that is not shared!
     pub unsafe fn from_raw(raw: *mut T::Raw) -> Self {
         Owned {
-            pointer: NonNull::new_unchecked(raw),
+            object: T::from_raw(raw),
         }
     }
 
@@ -312,9 +299,9 @@ impl<T: HarfbuzzObject> Owned<T> {
     /// has to be manually destroyed using `hb_TYPE_destroy` or be converted back into the wrapper
     /// using the `from_raw` function to avoid leaking memory.
     pub fn into_raw(owned: Owned<T>) -> *mut T::Raw {
-        let result = owned.pointer;
+        let result = owned.object.as_raw();
         std::mem::forget(owned);
-        result.as_ptr()
+        result
     }
 }
 
@@ -328,13 +315,13 @@ impl<T: HarfbuzzObject> Deref for Owned<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
-        unsafe { T::from_raw(self.pointer.as_ptr()) }
+        &self.object
     }
 }
 
 impl<T: HarfbuzzObject> DerefMut for Owned<T> {
     fn deref_mut(&mut self) -> &mut T {
-        unsafe { T::from_raw_mut(self.pointer.as_ptr()) }
+        &mut self.object
     }
 }
 
@@ -375,19 +362,19 @@ mod tests {
         rc: Cell<isize>,
     }
 
-    unsafe impl HarfbuzzObject for ReferenceCounter {
+    unsafe impl HarfbuzzObject for *mut ReferenceCounter {
         type Raw = Cell<isize>;
 
         unsafe fn reference(&self) {
             println!("referencing {:?}", self);
-            let rc = self.rc.get();
-            self.rc.set(rc + 1);
+            let rc = (**self).rc.get();
+            (**self).rc.set(rc + 1);
         }
 
         unsafe fn dereference(&self) {
             println!("dereferencing {:?}", self);
-            let rc = self.rc.get();
-            self.rc.set(rc - 1);
+            let rc = (**self).rc.get();
+            (**self).rc.set(rc - 1);
         }
     }
 
@@ -397,7 +384,7 @@ mod tests {
         let object = Rc::new(ReferenceCounter { rc: Cell::new(1) });
         let raw = Rc::into_raw(object.clone()) as *mut _;
 
-        let arc: Shared<ReferenceCounter> = unsafe { Shared::from_raw(raw) };
+        let arc: Shared<*mut ReferenceCounter> = unsafe { Shared::from_raw_owned(raw) };
         assert_eq!(object.rc.get(), 1);
         {
             let arc2 = Shared::clone(&arc);

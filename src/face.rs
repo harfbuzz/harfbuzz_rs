@@ -1,6 +1,7 @@
 use hb;
 use std;
 use std::os::raw::c_void;
+use std::ptr::NonNull;
 
 use std::marker::PhantomData;
 use std::path::Path;
@@ -11,7 +12,7 @@ use common::{HarfbuzzObject, Owned, Shared, Tag};
 /// A wrapper around `hb_face_t`.
 #[derive(Debug)]
 pub struct Face<'a> {
-    hb_face: hb::hb_face_t,
+    hb_face: NonNull<hb::hb_face_t>,
     _marker: PhantomData<&'a [u8]>,
 }
 

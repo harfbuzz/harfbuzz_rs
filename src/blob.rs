@@ -8,6 +8,7 @@ use std::fmt;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
+use std::ptr::NonNull;
 
 use common::{HarfbuzzObject, Owned, Shared};
 
@@ -24,7 +25,7 @@ use common::{HarfbuzzObject, Owned, Shared};
 /// `Vec<u8>` and `Box<[u8]>` so owned blobs can be created easily from standard Rust objects.
 #[repr(C)]
 pub struct Blob<'a> {
-    _raw: hb::hb_blob_t,
+    _raw: NonNull<hb::hb_blob_t>,
     _marker: PhantomData<&'a mut [u8]>,
 }
 impl<'a> Blob<'a> {
@@ -89,7 +90,7 @@ impl<'a> Blob<'a> {
     pub fn create_sub_blob(&self, offset: usize, length: usize) -> Shared<Blob<'a>> {
         let blob =
             unsafe { hb::hb_blob_create_sub_blob(self.as_raw(), offset as u32, length as u32) };
-        unsafe { Shared::from_raw(blob) }
+        unsafe { Shared::from_raw_owned(blob) }
     }
 
     /// Returns true if the blob is immutable.
@@ -182,7 +183,7 @@ where
                 Some(destroy::<T>),
             )
         };
-        unsafe { Shared::from_raw(hb_blob) }
+        unsafe { Shared::from_raw_owned(hb_blob) }
     }
 }
 

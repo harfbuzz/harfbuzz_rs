@@ -2,25 +2,24 @@
 
 extern crate rusttype;
 
-use common::Tag;
-use self::rusttype::{Codepoint, GlyphId, Scale};
-use self::rusttype::Font as RTFont;
 pub use self::rusttype::Error;
+use self::rusttype::Font as RTFont;
+use self::rusttype::{Codepoint, GlyphId, Scale};
+use common::Tag;
 
-use font;
 use face;
+use font;
 use font::{Font, FontFuncs, Glyph as GlyphIndex, GlyphExtents, Position};
 
 use std;
-use std::str::FromStr;
 use std::fmt::Debug;
+use std::str::FromStr;
 
 // Work around weird rusttype scaling by reading the hhea table.
 fn get_font_height(font: &font::Font) -> Result<i32, Error> {
     let face = font.face();
     let tag = Tag::from_str("hhea").unwrap();
-    let hhea_table = face.table_with_tag(tag)
-        .ok_or(Error::IllFormed)?;
+    let hhea_table = face.table_with_tag(tag).ok_or(Error::IllFormed)?;
     if hhea_table.len() >= 8 {
         unsafe {
             let ascent_ptr = (&hhea_table)[4..6].as_ptr() as *const i16;
@@ -34,9 +33,7 @@ fn get_font_height(font: &font::Font) -> Result<i32, Error> {
     }
 }
 
-fn rusttype_font_from_face<'a>(
-    face: &face::Face<'a>,
-) -> Result<RTFont<'a>, Error> {
+fn rusttype_font_from_face<'a>(face: &face::Face<'a>) -> Result<RTFont<'a>, Error> {
     let font_blob = face.face_data();
     let index = face.index();
     let collection = rusttype::FontCollection::from_bytes(font_blob)?;
@@ -68,9 +65,7 @@ impl<'a> Debug for ScaledRusttypeFont<'a> {
 }
 
 impl<'a> ScaledRusttypeFont<'a> {
-    fn from_hb_font<'b>(
-        hb_font: &font::Font<'b>,
-    ) -> Result<ScaledRusttypeFont<'b>, Error> {
+    fn from_hb_font<'b>(hb_font: &font::Font<'b>) -> Result<ScaledRusttypeFont<'b>, Error> {
         let font = rusttype_font_from_face(&hb_font.face())?;
         let scale = rusttype_scale_from_hb_font(hb_font)?;
         Ok(ScaledRusttypeFont {

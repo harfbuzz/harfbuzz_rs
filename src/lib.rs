@@ -89,6 +89,11 @@ mod font_funcs;
 #[cfg(feature = "rusttype")]
 pub mod rusttype;
 
+#[cfg(feature = "font_parse")]
+extern crate font_parse;
+#[cfg(feature = "font_parse")]
+pub mod rust_font;
+
 pub use blob::*;
 pub use buffer::*;
 pub use common::*;

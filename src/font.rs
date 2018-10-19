@@ -1,5 +1,6 @@
 use hb;
 use std;
+use std::ptr::NonNull;
 
 use std::os::raw::c_void;
 
@@ -27,7 +28,7 @@ pub(crate) extern "C" fn destroy_box<U>(ptr: *mut c_void) {
 #[derive(Debug)]
 #[repr(C)]
 pub struct Font<'a> {
-    _raw: hb::hb_font_t,
+    _raw: NonNull<hb::hb_font_t>,
     _marker: PhantomData<&'a hb::hb_font_t>,
 }
 
@@ -45,26 +46,26 @@ impl<'a> Font<'a> {
 
     /// Create a new sub font from the current font that by default inherits its parent font's
     /// face, scale, ppem and font funcs.
-    pub fn create_sub_font<T: Into<Shared<Font<'a>>>>(font: T) -> Owned<Font<'a>> {
+    pub fn create_sub_font<T: Into<Shared<Self>>>(font: T) -> Owned<Self> {
         unsafe { Owned::from_raw(hb::hb_font_create_sub_font(font.into().as_raw())) }
     }
 
     /// Returns the parent font.
-    pub fn parent(&self) -> Option<&Font<'a>> {
+    pub fn parent(&self) -> Option<Shared<Self>> {
         unsafe {
             let parent = hb::hb_font_get_parent(self.as_raw());
             if parent.is_null() {
                 // hb_font_get_parent returns null-ptr if called on the empty font.
                 None
             } else {
-                Some(Font::from_raw(parent))
+                Some(Shared::from_raw_ref(parent))
             }
         }
     }
 
     /// Returns the face which was used to create the font.
-    pub fn face(&self) -> &Face<'a> {
-        unsafe { Face::from_raw(hb::hb_font_get_face(self.as_raw())) }
+    pub fn face(&self) -> Shared<Face<'a>> {
+        unsafe { Shared::from_raw_ref(hb::hb_font_get_face(self.as_raw())) }
     }
 
     pub fn scale(&self) -> (i32, i32) {
@@ -110,9 +111,9 @@ impl<'a> Font<'a> {
             let parent_x_scale = parent.scale().0;
 
             if parent_x_scale != x_scale {
-                (f(parent) as i64 * x_scale as i64 / parent_x_scale as i64) as Position
+                (f(&parent) as i64 * x_scale as i64 / parent_x_scale as i64) as Position
             } else {
-                f(parent)
+                f(&parent)
             }
         } else {
             0
@@ -126,9 +127,9 @@ impl<'a> Font<'a> {
             let parent_y_scale = parent.scale().0;
 
             if parent_y_scale != y_scale {
-                (f(parent) as i64 * y_scale as i64 / parent_y_scale as i64) as Position
+                (f(&parent) as i64 * y_scale as i64 / parent_y_scale as i64) as Position
             } else {
-                f(parent)
+                f(&parent)
             }
         } else {
             0

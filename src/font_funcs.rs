@@ -15,6 +15,7 @@ use std::fmt;
 use std::io::Write;
 use std::marker::PhantomData;
 use std::panic;
+use std::ptr::NonNull;
 
 /// This Trait specifies the font callbacks that harfbuzz uses for its shaping. You shouldn't
 /// call these functions yourself. They are exposed through the `Font` wrapper.
@@ -123,7 +124,7 @@ macro_rules! hb_callback {
                 let font_data = unsafe { &*(font_data as *const T) };
                 let font = unsafe { Font::from_raw(font) };
                 let closure = unsafe { &mut *(closure_data as *mut F) };
-                let $closure_ret_id = closure(font, font_data, $($expr),*);
+                let $closure_ret_id = closure(&font, font_data, $($expr),*);
                 $ret_expr
             }));
             match catch_result {
@@ -354,7 +355,7 @@ hb_callback!(
 ///
 #[repr(C)]
 pub struct FontFuncsImpl<T> {
-    _raw: hb::hb_font_funcs_t,
+    _raw: NonNull<hb::hb_font_funcs_t>,
     _marker: PhantomData<T>,
 }
 
@@ -364,7 +365,7 @@ impl<T> FontFuncsImpl<T> {
     #[allow(unused)]
     pub fn empty() -> Shared<FontFuncsImpl<T>> {
         let raw = unsafe { hb::hb_font_funcs_get_empty() };
-        unsafe { Shared::from_raw(raw) }
+        unsafe { Shared::from_raw_ref(raw) }
     }
 }
 
