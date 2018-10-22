@@ -107,8 +107,8 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
 
 /// Extends the harfbuzz font to allow setting RustType as font funcs provider.
 pub trait SetRustTypeFuncs {
-    /// Let a font use rusttype's font API for getting information like the advance width of some
-    /// glyph or its extents.
+    /// Let a font use rusttype's font API for getting information like the
+    /// advance width of some glyph or its extents.
     fn set_rusttype_funcs(&mut self) -> Result<(), Error>;
 }
 

@@ -6,10 +6,11 @@ use std::mem;
 
 /// A type to represent 4-byte SFNT tags.
 ///
-/// Tables, features, etc. in OpenType and many other font formats use SFNT tags as identifiers.
-/// These are 4-bytes long and usually each byte represents an ASCII value. `Tag` provides methods
-/// to create such identifiers from individual `chars` or a `str` slice and to get the string
-/// representation of a `Tag`.
+/// Tables, features, etc. in OpenType and many other font formats use SFNT tags
+/// as identifiers. These are 4-bytes long and usually each byte represents an
+/// ASCII value. `Tag` provides methods to create such identifiers from
+/// individual `chars` or a `str` slice and to get the string representation of
+/// a `Tag`.
 #[derive(Copy, Clone, Hash, PartialEq, Eq)]
 pub struct Tag(pub hb::hb_tag_t);
 
@@ -59,7 +60,8 @@ impl Display for Tag {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-/// An Error generated when a `Tag` fails to parse from a `&str` with the `from_str` function.
+/// An Error generated when a `Tag` fails to parse from a `&str` with the
+/// `from_str` function.
 pub enum TagFromStrErr {
     /// The string contains non-ASCII characters.
     NonAscii,
@@ -72,9 +74,10 @@ use std::str::FromStr;
 
 impl FromStr for Tag {
     type Err = TagFromStrErr;
-    /// Parses a `Tag` from a `&str` that contains four or less ASCII characters. When the string's
-    /// length is smaller than 4 it is extended with `' '` (Space) characters. The remaining bytes
-    /// of strings longer than 4 bytes are ignored.
+    /// Parses a `Tag` from a `&str` that contains four or less ASCII
+    /// characters. When the string's length is smaller than 4 it is extended
+    /// with `' '` (Space) characters. The remaining bytes of strings longer
+    /// than 4 bytes are ignored.
     ///
     /// # Examples
     ///
@@ -144,18 +147,20 @@ impl FromStr for Language {
     }
 }
 
-/// A trait which is implemented for all harffbuzz wrapper structs. It exposes common functionality
-/// for converting from and to the underlying raw harfbuzz pointers that are useful for ffi.
+/// A trait which is implemented for all harffbuzz wrapper structs. It exposes
+/// common functionality for converting from and to the underlying raw harfbuzz
+/// pointers that are useful for ffi.
 ///
-/// This trait may only be implemented for structs that are zero-sized and is therefore unsafe to implement.
+/// This trait may only be implemented for structs that are zero-sized and is
+/// therefore unsafe to implement.
 pub unsafe trait HarfbuzzObject: Sized {
     /// Type of the raw harfbuzz object.
     type Raw;
 
     /// Creates a reference from a harfbuzz object pointer.
     ///
-    /// Unsafe because a raw pointer may be accessed. The reference count is not changed. Should not
-    /// be called directly by a library user.
+    /// Unsafe because a raw pointer may be accessed. The reference count is not
+    /// changed. Should not be called directly by a library user.
     ///
     /// Use the Owned and Shared abstractions instead.
     #[doc(hide)]
@@ -165,7 +170,8 @@ pub unsafe trait HarfbuzzObject: Sized {
 
     /// Returns the underlying harfbuzz object pointer.
     ///
-    /// The caller must ensure, that this pointer is not used after `self`'s destruction.
+    /// The caller must ensure, that this pointer is not used after `self`'s
+    /// destruction.
     fn as_raw(&self) -> *mut Self::Raw {
         unsafe { mem::transmute_copy(self) }
     }
@@ -175,8 +181,8 @@ pub unsafe trait HarfbuzzObject: Sized {
     /// Wraps a `hb_TYPE_reference()` call.
     unsafe fn reference(&self);
 
-    /// Decreases the reference count of the HarfBuzz object and destroys it if the reference count
-    /// reaches zero.
+    /// Decreases the reference count of the HarfBuzz object and destroys it if
+    /// the reference count reaches zero.
     ///
     /// Wraps a `hb_TYPE_destroy()` call.
     unsafe fn dereference(&self);
@@ -184,15 +190,16 @@ pub unsafe trait HarfbuzzObject: Sized {
 
 /// A smart pointer that wraps an atomically reference counted HarfBuzz object.
 ///
-/// Usually you don't create a `Shared` yourself, but get it from another function in this crate.
-/// You can just use the methods of the wrapped object through its `Deref` implementation.
+/// Usually you don't create a `Shared` yourself, but get it from another
+/// function in this crate. You can just use the methods of the wrapped object
+/// through its `Deref` implementation.
 ///
-/// A `Shared` is a safe wrapper for reference counted HarfBuzz objects and provides shared immutable
-/// access to its inner object. As HarfBuzz' objects are all thread-safe `Shared` implements `Send`
-/// and `Sync`.
+/// A `Shared` is a safe wrapper for reference counted HarfBuzz objects and
+/// provides shared immutable access to its inner object. As HarfBuzz' objects
+/// are all thread-safe `Shared` implements `Send` and `Sync`.
 ///
-/// Tries to mirror the stdlib `Arc` interface where applicable as HarfBuzz' reference counting has
-/// similar semantics.
+/// Tries to mirror the stdlib `Arc` interface where applicable as HarfBuzz'
+/// reference counting has similar semantics.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Shared<T: HarfbuzzObject> {
     object: T,
@@ -201,16 +208,17 @@ pub struct Shared<T: HarfbuzzObject> {
 impl<T: HarfbuzzObject> Shared<T> {
     /// Creates a `Shared` from a raw harfbuzz pointer.
     ///
-    /// Transfers ownership. _Use of the original pointer is now forbidden!_ Unsafe because
-    /// dereferencing a raw pointer is necessary.
+    /// Transfers ownership. _Use of the original pointer is now forbidden!_
+    /// Unsafe because dereferencing a raw pointer is necessary.
     pub unsafe fn from_raw_owned(raw: *mut T::Raw) -> Self {
         let object = T::from_raw(raw);
         Shared { object }
     }
 
-    /// Converts `self` into the underlying harfbuzz object pointer value. The resulting pointer
-    /// has to be manually destroyed using `hb_TYPE_destroy` or be converted back into the wrapper
-    /// using the `from_raw` function to avoid leaking memory.
+    /// Converts `self` into the underlying harfbuzz object pointer value. The
+    /// resulting pointer has to be manually destroyed using `hb_TYPE_destroy`
+    /// or be converted back into the wrapper using the `from_raw` function to
+    /// avoid leaking memory.
     pub fn into_raw(shared: Shared<T>) -> *mut T::Raw {
         let result = shared.object.as_raw();
         std::mem::forget(shared);
@@ -263,20 +271,22 @@ unsafe impl<T: HarfbuzzObject + Sync + Send> Sync for Shared<T> {}
 
 /// A smart pointer that wraps a singly owned harfbuzz object.
 ///
-/// A `Owned` is used to wrap freshly created owned HarfBuzz objects. It permits mutable, non-shared
-/// access to the enclosed HarfBuzz value so it can be used e.g. to set up a `Font` or `Face` after
-/// its creation.
+/// A `Owned` is used to wrap freshly created owned HarfBuzz objects. It permits
+/// mutable, non-shared access to the enclosed HarfBuzz value so it can be used
+/// e.g. to set up a `Font` or `Face` after its creation.
 ///
-/// There is no safe way to construct an `Owned` pointer and usually you don't need to create a
-/// `Owned` yourself, but get it from another function in this crate.
-/// You can just use the methods of the wrapped object through its `Deref` implementation.
+/// There is no safe way to construct an `Owned` pointer and usually you don't
+/// need to create a `Owned` yourself, but get it from another function in this
+/// crate. You can just use the methods of the wrapped object through its
+/// `Deref` implementation.
 ///
 /// Interaction with `Shared`
 /// -------------------------
-/// When you are finished mutating the inner value, you usually want to pass it to other HarfBuzz
-/// functions that expect shared access. Thus you need to convert the `Owned` to a `Shared` pointer
-/// using `.into()`. Note however that once a value is
-/// converted to  a `Shared<T>`, it will not possible to mutate it anymore.
+/// When you are finished mutating the inner value, you usually want to pass it
+/// to other HarfBuzz functions that expect shared access. Thus you need to
+/// convert the `Owned` to a `Shared` pointer using `.into()`. Note however that
+/// once a value is converted to  a `Shared<T>`, it will not possible to mutate
+/// it anymore.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Owned<T: HarfbuzzObject> {
     object: T,
@@ -285,19 +295,21 @@ pub struct Owned<T: HarfbuzzObject> {
 impl<T: HarfbuzzObject> Owned<T> {
     /// Creates a `Owned` safely wrapping a raw harfbuzz pointer.
     ///
-    /// This fully transfers ownership. _Use of the original pointer is now forbidden!_ Unsafe
-    /// because a dereference of a raw pointer is necessary.
+    /// This fully transfers ownership. _Use of the original pointer is now
+    /// forbidden!_ Unsafe because a dereference of a raw pointer is necessary.
     ///
-    /// Use this only to wrap freshly created HarfBuzz object that is not shared!
+    /// Use this only to wrap freshly created HarfBuzz object that is not
+    /// shared!
     pub unsafe fn from_raw(raw: *mut T::Raw) -> Self {
         Owned {
             object: T::from_raw(raw),
         }
     }
 
-    /// Converts `self` into the underlying harfbuzz object pointer value. The resulting pointer
-    /// has to be manually destroyed using `hb_TYPE_destroy` or be converted back into the wrapper
-    /// using the `from_raw` function to avoid leaking memory.
+    /// Converts `self` into the underlying harfbuzz object pointer value. The
+    /// resulting pointer has to be manually destroyed using `hb_TYPE_destroy`
+    /// or be converted back into the wrapper using the `from_raw` function to
+    /// avoid leaking memory.
     pub fn into_raw(owned: Owned<T>) -> *mut T::Raw {
         let result = owned.object.as_raw();
         std::mem::forget(owned);

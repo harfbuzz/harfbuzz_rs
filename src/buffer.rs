@@ -153,18 +153,23 @@ impl TypedBuffer {
     }
 }
 
-/// A `UnicodeBuffer` can be filled with unicode text and corresponding cluster indices.
+/// A `UnicodeBuffer` can be filled with unicode text and corresponding cluster
+/// indices.
 ///
-/// The buffer manages an allocation for the unicode codepoints to be shaped. This allocation however
-/// is reused for storing the results of the shaping operation in a `GlyphBuffer` object. The intended
-/// usage is to keep one (or e.g. one per thread) `UnicodeBuffer` around. When needed, you fill it with
-/// text that should be shaped and call `.shape()` on it. That method returns a `GlyphBuffer` object
-/// containing the shaped glyph indices. Once you got the needed information out of the `GlyphBuffer`
-/// you call its `.clear()` method which in turn gives you a fresh `UnicodeBuffer` (actually using the
-/// original allocation). This buffer can then be used to shape more text.
+/// The buffer manages an allocation for the unicode codepoints to be shaped.
+/// This allocation is reused for storing the results of the shaping operation
+/// in a `GlyphBuffer` object. The intended usage is to keep one (or e.g. one
+/// per thread) `UnicodeBuffer` around. When needed, you fill it with text that
+/// should be shaped and pass it as an argument to the `shape` function. That
+/// method returns a `GlyphBuffer` object containing the shaped glyph indices.
+/// Once you got the needed information out of the `GlyphBuffer` you call its
+/// `.clear()` method which in turn gives you a fresh `UnicodeBuffer` (also
+/// reusing the original allocation again). This buffer can then be used to
+/// shape more text.
 ///
-/// If you want to get a `UnicodeBuffer` from a pointer to a raw harfbuzz object, you need to use the
-/// `from_raw` static method on `TypedBuffer`. This ensures that a buffer of correct type is created.
+/// If you want to get a `UnicodeBuffer` from a pointer to a raw harfbuzz
+/// object, you need to use the `from_raw` static method on `TypedBuffer`. This
+/// ensures that a buffer of correct type is created.
 pub struct UnicodeBuffer(pub(crate) Owned<GenericBuffer>);
 impl UnicodeBuffer {
     /// Creates a new empty `Buffer`.
@@ -187,7 +192,8 @@ impl UnicodeBuffer {
 
     /// Returns the length of the data of the buffer.
     ///
-    /// This corresponds to the number of unicode codepoints contained in the buffer.
+    /// This corresponds to the number of unicode codepoints contained in the
+    /// buffer.
     ///
     /// # Examples
     /// ```
@@ -287,18 +293,21 @@ impl UnicodeBuffer {
         self.0.get_language()
     }
 
-    /// Guess the segment properties (direction, language, script) for the current buffer.
+    /// Guess the segment properties (direction, language, script) for the
+    /// current buffer.
     pub fn guess_segment_properties(mut self) -> UnicodeBuffer {
         self.0.guess_segment_properties();
         self
     }
 
-    /// Get the segment properties (direction, language, script) of the current buffer.
+    /// Get the segment properties (direction, language, script) of the current
+    /// buffer.
     pub fn get_segment_properties(&self) -> hb::hb_segment_properties_t {
         self.0.get_segment_properties()
     }
 
-    /// Clear the contents of the buffer (i.e. the stored string of unicode characters).
+    /// Clear the contents of the buffer (i.e. the stored string of unicode
+    /// characters).
     ///
     /// # Examples
     /// ```
@@ -335,9 +344,9 @@ impl std::default::Default for UnicodeBuffer {
 
 /// An iterator over the codepoints stored in a `UnicodeBuffer`.
 ///
-/// You get an iterator of this type from the `.codepoints()` method on `UnicodeBuffer`.
-/// I yields `u32`s that should be interpreted as unicode codepoints stored
-/// in the underlying buffer.
+/// You get an iterator of this type from the `.codepoints()` method on
+/// `UnicodeBuffer`. I yields `u32`s that should be interpreted as unicode
+/// codepoints stored in the underlying buffer.
 #[derive(Debug, Clone)]
 pub struct Codepoints<'a> {
     slice_iter: std::slice::Iter<'a, GlyphInfo>,
@@ -351,16 +360,19 @@ impl<'a> Iterator for Codepoints<'a> {
     }
 }
 
-/// A `GlyphBuffer` contains the resulting output information of the shaping process.
+/// A `GlyphBuffer` contains the resulting output information of the shaping
+/// process.
 ///
-/// An object of this type is obtained through the `shape` function of a `UnicodeBuffer`.
+/// An object of this type is obtained through the `shape` function of a
+/// `UnicodeBuffer`.
 pub struct GlyphBuffer(pub(crate) Owned<GenericBuffer>);
 
 impl GlyphBuffer {
     /// Returns the length of the data of the buffer.
     ///
-    /// When called before shaping this is the number of unicode codepoints contained in the
-    /// buffer. When called after shaping it returns the number of glyphs stored.
+    /// When called before shaping this is the number of unicode codepoints
+    /// contained in the buffer. When called after shaping it returns the number
+    /// of glyphs stored.
     pub fn len(&self) -> usize {
         self.0.len()
     }
@@ -395,8 +407,8 @@ impl GlyphBuffer {
         self.0.reverse_range(start, end)
     }
 
-    /// Clears the contents of the glyph buffer and returns an empty `UnicodeBuffer` reusing the
-    /// existing allocation.
+    /// Clears the contents of the glyph buffer and returns an empty
+    /// `UnicodeBuffer` reusing the existing allocation.
     pub fn clear(mut self) -> UnicodeBuffer {
         self.0.clear_contents();
         UnicodeBuffer(self.0)

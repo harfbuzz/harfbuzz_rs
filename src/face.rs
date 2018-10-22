@@ -35,7 +35,8 @@ impl<'a> Face<'a> {
         Face::new(blob, index)
     }
 
-    /// Create a new face from a closure that returns a raw [`Blob`](struct.Blob.html) of table
+    /// Create a new face from a closure that returns a raw
+    /// [`Blob`](struct.Blob.html) of table
     pub fn from_table_func<'b, F>(func: F) -> Owned<Face<'b>>
     where
         F: 'b + Send + Sync + FnMut(Tag) -> Option<Shared<Blob<'b>>>,
@@ -69,15 +70,6 @@ impl<'a> Face<'a> {
             Owned::from_raw(face)
         }
     }
-
-    //    /// Create a `Font` of this face. By default this will use harfbuzz' included opentype
-    // font
-    //    /// funcs for shaping and have no scale value set so that the returned values will be in
-    // font
-    //    /// space.
-    //    pub fn create_font(self) -> Owned<Font<'a>> {
-    //        Font::new(self)
-    //    }
 
     pub fn face_data(&self) -> &'a [u8] {
         unsafe {

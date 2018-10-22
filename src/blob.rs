@@ -12,24 +12,26 @@ use std::ptr::NonNull;
 
 use common::{HarfbuzzObject, Owned, Shared};
 
-/// A `Blob` manages raw data like e.g. file contents. It refers to a slice of bytes that can be
-/// either owned by the `Blob` or not.
+/// A `Blob` manages raw data like e.g. file contents. It refers to a slice of
+/// bytes that can be either owned by the `Blob` or not.
 ///
-/// Since it is a simple wrapper for `hb_blob_t` it can be used to construct `Font`s and `Face`s
-/// directly from memory.
+/// Since it is a simple wrapper for `hb_blob_t` it can be used to construct
+/// `Font`s and `Face`s directly from memory.
 ///
-/// To enable shared usage of its data it uses a reference counting mechanism making the `clone`
-/// operation very cheap as no data is cloned.
+/// To enable shared usage of its data it uses a reference counting mechanism
+/// making the `clone` operation very cheap as no data is cloned.
 ///
-/// A `Blob` implements `Into` for every type that satisfies the `AsRef<[u8]>' trait such as
-/// `Vec<u8>` and `Box<[u8]>` so owned blobs can be created easily from standard Rust objects.
+/// A `Blob` implements `Into` for every type that satisfies the `AsRef<[u8]>'
+/// trait such as `Vec<u8>` and `Box<[u8]>` so owned blobs can be created easily
+/// from standard Rust objects.
 #[repr(C)]
 pub struct Blob<'a> {
     _raw: NonNull<hb::hb_blob_t>,
     _marker: PhantomData<&'a mut [u8]>,
 }
 impl<'a> Blob<'a> {
-    /// Create a new `Blob` from the slice `bytes`. The blob will not own the slice's data.
+    /// Create a new `Blob` from the slice `bytes`. The blob will not own the
+    /// slice's data.
     pub fn with_bytes(bytes: &'a [u8]) -> Owned<Blob<'a>> {
         let hb_blob = unsafe {
             hb::hb_blob_create(
@@ -43,14 +45,15 @@ impl<'a> Blob<'a> {
         unsafe { Owned::from_raw(hb_blob) }
     }
 
-    /// Create a `Blob` from the contents of the file at `path` whose contents will be read into memory.
+    /// Create a `Blob` from the contents of the file at `path` whose contents
+    /// will be read into memory.
     ///
-    /// The result will be either a `Blob` that owns the file's contents or an error that happened while
-    /// trying to read the file.
+    /// The result will be either a `Blob` that owns the file's contents or an
+    /// error that happened while trying to read the file.
     ///
-    /// This can be a performance problem if the file is very big. If this turns out to be a
-    /// problem consider `mmap`ing the file or splitting it into smaller chunks before creating a
-    /// `Blob`.
+    /// This can be a performance problem if the file is very big. If this turns
+    /// out to be a problem consider `mmap`ing the file or splitting it into
+    /// smaller chunks before creating a `Blob`.
     pub fn from_file<P: AsRef<Path>>(path: P) -> std::io::Result<Shared<Blob<'static>>> {
         let mut file = File::open(path)?;
         let mut vec = Vec::new();
@@ -81,8 +84,9 @@ impl<'a> Blob<'a> {
         }
     }
 
-    /// Creates an immutable `Blob` that contains part of the data of the parent `Blob`. The parent
-    /// `Blob` will be immutable after this and the sub`Blob` cannot outlive its parent.
+    /// Creates an immutable `Blob` that contains part of the data of the parent
+    /// `Blob`. The parent `Blob` will be immutable after this and the sub`Blob`
+    /// cannot outlive its parent.
     ///
     /// ### Arguments
     /// * `offset`: Byte-offset of sub-blob within parent.
@@ -98,14 +102,16 @@ impl<'a> Blob<'a> {
         unsafe { hb::hb_blob_is_immutable(self.as_raw()) == 1 }
     }
 
-    /// Makes this blob immutable so the bytes it refers to will never change during its lifetime.
+    /// Makes this blob immutable so the bytes it refers to will never change
+    /// during its lifetime.
     pub fn make_immutable(&mut self) {
         unsafe { hb::hb_blob_make_immutable(self.as_raw()) }
     }
 
     /// Try to get a mutable slice of the `Blob`'s bytes, possibly copying them.
     ///
-    /// This returns `None` if the blob is immutable or memory allocation failed.
+    /// This returns `None` if the blob is immutable or memory allocation
+    /// failed.
     pub fn try_get_mut_data(&mut self) -> Option<&'a mut [u8]> {
         unsafe {
             let mut length = hb::hb_blob_get_length(self.as_raw());

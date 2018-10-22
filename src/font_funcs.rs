@@ -17,12 +17,14 @@ use std::marker::PhantomData;
 use std::panic;
 use std::ptr::NonNull;
 
-/// This Trait specifies the font callbacks that harfbuzz uses for its shaping. You shouldn't
-/// call these functions yourself. They are exposed through the `Font` wrapper.
+/// This Trait specifies the font callbacks that harfbuzz uses for its shaping.
+/// You shouldn't call these functions yourself. They are exposed through the
+/// `Font` wrapper.
 ///
-/// No function in this trait needs to be implemented, the default implementations simply return the
-/// parent font's data. If a `Font` is created directly from a face, its parent is the
-/// empty `Font` which returns null values for every font func.
+/// No function in this trait needs to be implemented, the default
+/// implementations simply return the parent font's data. If a `Font` is created
+/// directly from a face, its parent is the empty `Font` which returns null
+/// values for every font func.
 #[allow(unused_variables)]
 pub trait FontFuncs {
     fn get_font_h_extents(&self, font: &Font) -> Option<FontExtents> {
@@ -308,11 +310,13 @@ hb_callback!(
     }
 );
 
-/// A `FontFuncsImpl` contains implementations of the font callbacks that harfbuzz uses.
+/// A `FontFuncsImpl` contains implementations of the font callbacks that
+/// harfbuzz uses.
 ///
 /// It supports two ways to assign functions to specific font funcs. Either you
-/// can set a unique closure per font func or set the font funcs from a type that implements the
-/// `FontFuncs` trait using the `from_trait_impl` constructor.
+/// can set a unique closure per font func or set the font funcs from a type
+/// that implements the `FontFuncs` trait using the `from_trait_impl`
+/// constructor.
 ///
 /// # Examples
 ///
@@ -350,8 +354,8 @@ hb_callback!(
 /// }
 /// ```
 ///
-/// After creating font funcs they can be set on a font to change the font implementation that will
-/// be used by HarfBuzz while shaping.
+/// After creating font funcs they can be set on a font to change the font
+/// implementation that will be used by HarfBuzz while shaping.
 ///
 #[repr(C)]
 pub struct FontFuncsImpl<T> {
@@ -360,8 +364,8 @@ pub struct FontFuncsImpl<T> {
 }
 
 impl<T> FontFuncsImpl<T> {
-    /// Returns an empty `FontFuncsImpl`. Every font callback of the returned `FontFuncsImpl` gives
-    /// a null value regardless of its input.
+    /// Returns an empty `FontFuncsImpl`. Every font callback of the returned
+    /// `FontFuncsImpl` gives a null value regardless of its input.
     #[allow(unused)]
     pub fn empty() -> Shared<FontFuncsImpl<T>> {
         let raw = unsafe { hb::hb_font_funcs_get_empty() };
@@ -370,7 +374,8 @@ impl<T> FontFuncsImpl<T> {
 }
 
 impl<T: FontFuncs> FontFuncsImpl<T> {
-    /// Create a new `FontFuncsImpl` from the `FontFuncs`-trait implementation of `T`.
+    /// Create a new `FontFuncsImpl` from the `FontFuncs`-trait implementation
+    /// of `T`.
     ///
     /// # Examples
     ///

@@ -100,11 +100,11 @@ pub use common::*;
 pub use face::*;
 pub use font::*;
 
-/// Shape the contents of the buffer using the provided font and activating all OpenType features
-/// given in `features`.
+/// Shape the contents of the buffer using the provided font and activating all
+/// OpenType features given in `features`.
 ///
-/// This function consumes the `buffer` and returns a `GlyphBuffer` containing the
-/// resulting glyph indices and the corresponding positioning information.
+/// This function consumes the `buffer` and returns a `GlyphBuffer` containing
+/// the resulting glyph indices and the corresponding positioning information.
 pub fn shape(font: &Font, buffer: UnicodeBuffer, features: &[Feature]) -> GlyphBuffer {
     let buffer = buffer.guess_segment_properties();
     unsafe {
