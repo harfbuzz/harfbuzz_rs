@@ -206,7 +206,7 @@ pub struct Shared<T: HarfbuzzObject> {
 }
 
 impl<T: HarfbuzzObject> Shared<T> {
-    /// Creates a `Shared` from a raw harfbuzz pointer.
+    /// Creates a `Shared` from an owned raw harfbuzz pointer.
     ///
     /// Transfers ownership. _Use of the original pointer is now forbidden!_
     /// Unsafe because dereferencing a raw pointer is necessary.
@@ -225,6 +225,10 @@ impl<T: HarfbuzzObject> Shared<T> {
         result
     }
 
+    /// Creates a `Shared` by cloning a raw harfbuzz pointer.
+    ///
+    /// The original pointer can still be safely used but must be released
+    /// at the end to avoid memory leaks.
     pub unsafe fn from_raw_ref(raw: *mut T::Raw) -> Self {
         let object = T::from_raw(raw);
         object.reference();
@@ -233,6 +237,9 @@ impl<T: HarfbuzzObject> Shared<T> {
 }
 
 impl<T: HarfbuzzObject> Clone for Shared<T> {
+    /// Returns a copy and increases the reference count.
+    ///
+    /// This behaviour is exactly like `Arc` in the standard library.
     fn clone(&self) -> Self {
         unsafe { Self::from_raw_ref(self.object.as_raw()) }
     }

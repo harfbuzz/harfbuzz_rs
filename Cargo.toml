@@ -14,9 +14,8 @@ travis-ci = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master" }
 appveyor = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master", service = "github" }
 
 [features]
-default = ["rusttype", "font_parse"]
+default = ["rusttype"]
 
 [dependencies]
 harfbuzz-sys = "^0.2"
 rusttype = { version = "^0.7", optional = true }
-font_parse = { git = "https://github.com/manuel-rhdt/font_parse", optional = true }

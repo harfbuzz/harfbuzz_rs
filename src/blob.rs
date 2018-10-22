@@ -168,7 +168,7 @@ use std::convert::From;
 
 impl<'a, T> From<T> for Shared<Blob<'a>>
 where
-    T: 'static + Send + AsRef<[u8]>,
+    T: 'a + Send + AsRef<[u8]>,
 {
     fn from(container: T) -> Shared<Blob<'a>> {
         let len = container.as_ref().len();

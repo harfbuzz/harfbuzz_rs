@@ -17,9 +17,9 @@ pub struct Face<'a> {
 }
 
 impl<'a> Face<'a> {
-    /// Create a new `Face` from the data in `bytes`.
-    pub fn new<'b, T: Into<Shared<Blob<'b>>>>(bytes: T, index: u32) -> Owned<Face<'b>> {
-        let blob = bytes.into();
+    /// Create a new `Face` from the data.
+    pub fn new<'b, T: Into<Shared<Blob<'b>>>>(data: T, index: u32) -> Owned<Face<'b>> {
+        let blob = data.into();
         let hb_face = unsafe { hb::hb_face_create(Shared::into_raw(blob), index) };
         unsafe { Owned::from_raw(hb_face) }
     }
@@ -30,6 +30,8 @@ impl<'a> Face<'a> {
         Ok(Face::new(blob, index))
     }
 
+    /// Create a face from the bytes of a given slice and an index specifying
+    /// which font to read from an OpenType font collection.
     pub fn from_bytes<'b>(bytes: &'b [u8], index: u32) -> Owned<Face<'b>> {
         let blob = Blob::with_bytes(bytes);
         Face::new(blob, index)
@@ -78,6 +80,8 @@ impl<'a> Face<'a> {
         }
     }
 
+    /// Returns the slice of bytes for the table named `tag` or None if there is
+    /// no table with `tag`.
     pub fn table_with_tag(&self, tag: Tag) -> Option<&[u8]> {
         unsafe {
             let raw_blob = hb::hb_face_reference_table(self.as_raw(), tag.0);
@@ -110,6 +114,7 @@ impl<'a> Face<'a> {
         unsafe { hb::hb_face_set_glyph_count(self.as_raw(), count) };
     }
 
+    /// Returns the number of glyphs contained in the face.
     pub fn glyph_count(&self) -> u32 {
         unsafe { hb::hb_face_get_glyph_count(self.as_raw()) }
     }
