@@ -133,7 +133,9 @@ unsafe impl HarfbuzzObject for GenericBuffer {
 /// This type provides an interface to create one of the buffer types from a raw harfbuzz pointer.
 #[derive(Debug)]
 pub enum TypedBuffer {
+    /// Contains a `UnicodeBuffer`
     Unicode(UnicodeBuffer),
+    /// Contains a `GlyphBuffer`
     Glyphs(GlyphBuffer),
 }
 
@@ -363,8 +365,7 @@ impl<'a> Iterator for Codepoints<'a> {
 /// A `GlyphBuffer` contains the resulting output information of the shaping
 /// process.
 ///
-/// An object of this type is obtained through the `shape` function of a
-/// `UnicodeBuffer`.
+/// An object of this type is obtained through the `shape` function.
 pub struct GlyphBuffer(pub(crate) Owned<GenericBuffer>);
 
 impl GlyphBuffer {
