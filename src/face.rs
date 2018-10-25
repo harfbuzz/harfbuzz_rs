@@ -73,26 +73,26 @@ impl<'a> Face<'a> {
         }
     }
 
-    pub fn face_data(&self) -> &'a [u8] {
+    pub fn face_data(&self) -> Shared<Blob<'a>> {
         unsafe {
             let raw_blob = hb::hb_face_reference_blob(self.as_raw());
-            Blob::from_raw(raw_blob).get_data()
+            Shared::from_raw_owned(raw_blob)
         }
     }
 
     /// Returns the slice of bytes for the table named `tag` or None if there is
     /// no table with `tag`.
-    pub fn table_with_tag(&self, tag: Tag) -> Option<&[u8]> {
+    pub fn table_with_tag(&self, tag: Tag) -> Option<Shared<Blob<'a>>> {
         unsafe {
             let raw_blob = hb::hb_face_reference_table(self.as_raw(), tag.0);
             if raw_blob.is_null() {
                 None
             } else {
-                let blob = Blob::from_raw(raw_blob);
+                let blob: Shared<Blob> = Shared::from_raw_owned(raw_blob);
                 if blob.is_empty() {
                     None
                 } else {
-                    Some(blob.get_data())
+                    Some(blob)
                 }
             }
         }
@@ -145,9 +145,9 @@ mod tests {
         });
 
         let maxp_table = face.table_with_tag(Tag::new('m', 'a', 'x', 'p')).unwrap();
-        assert_eq!(maxp_table, b"maxp-table");
+        assert_eq!(maxp_table.as_ref(), b"maxp-table");
 
         let maxp_table = face.table_with_tag(Tag::new('h', 'h', 'e', 'a')).unwrap();
-        assert_eq!(maxp_table, b"hhea-table");
+        assert_eq!(&maxp_table.as_ref(), b"hhea-table");
     }
 }

@@ -76,7 +76,7 @@ impl<'a> Blob<'a> {
     }
 
     /// Get a slice of the `Blob`'s bytes.
-    pub fn get_data(&self) -> &'a [u8] {
+    pub fn get_data(&self) -> &[u8] {
         unsafe {
             let mut length = hb::hb_blob_get_length(self.as_raw());
             let data_ptr = hb::hb_blob_get_data(self.as_raw(), &mut length as *mut _);
