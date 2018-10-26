@@ -5,8 +5,7 @@ use std;
 use std::marker::PhantomData;
 
 use std::fmt;
-use std::fs::File;
-use std::io::Read;
+use std::fs;
 use std::path::Path;
 use std::ptr::NonNull;
 
@@ -70,9 +69,7 @@ impl<'a> Blob<'a> {
     /// out to be a problem consider `mmap`ing the file or splitting it into
     /// smaller chunks before creating a `Blob`.
     pub fn from_file<P: AsRef<Path>>(path: P) -> std::io::Result<Shared<Blob<'static>>> {
-        let mut file = File::open(path)?;
-        let mut vec = Vec::new();
-        file.read_to_end(&mut vec)?;
+        let vec = fs::read(path)?;
         Ok(vec.into())
     }
 
