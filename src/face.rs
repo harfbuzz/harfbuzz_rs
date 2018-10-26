@@ -12,8 +12,8 @@ use common::{HarfbuzzObject, Owned, Shared, Tag};
 /// A wrapper around `hb_face_t`.
 #[derive(Debug)]
 pub struct Face<'a> {
-    hb_face: NonNull<hb::hb_face_t>,
-    _marker: PhantomData<&'a [u8]>,
+    raw: NonNull<hb::hb_face_t>,
+    marker: PhantomData<&'a [u8]>,
 }
 
 impl<'a> Face<'a> {
@@ -122,6 +122,17 @@ impl<'a> Face<'a> {
 
 unsafe impl<'a> HarfbuzzObject for Face<'a> {
     type Raw = hb::hb_face_t;
+
+    unsafe fn from_raw(raw: *const hb::hb_face_t) -> Self {
+        Face {
+            raw: NonNull::new_unchecked(raw as *mut _),
+            marker: PhantomData,
+        }
+    }
+
+    fn as_raw(&self) -> *mut Self::Raw {
+        self.raw.as_ptr()
+    }
 
     unsafe fn reference(&self) {
         hb::hb_face_reference(self.as_raw());

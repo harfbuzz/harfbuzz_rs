@@ -359,8 +359,8 @@ hb_callback!(
 ///
 #[repr(C)]
 pub struct FontFuncsImpl<T> {
-    _raw: NonNull<hb::hb_font_funcs_t>,
-    _marker: PhantomData<T>,
+    raw: NonNull<hb::hb_font_funcs_t>,
+    marker: PhantomData<T>,
 }
 
 impl<T> FontFuncsImpl<T> {
@@ -656,6 +656,17 @@ impl<T> fmt::Debug for FontFuncsImpl<T> {
 
 unsafe impl<T> HarfbuzzObject for FontFuncsImpl<T> {
     type Raw = hb::hb_font_funcs_t;
+
+    unsafe fn from_raw(raw: *const Self::Raw) -> Self {
+        FontFuncsImpl {
+            raw: NonNull::new_unchecked(raw as *mut _),
+            marker: PhantomData
+        }
+    }
+
+    fn as_raw(&self) -> *mut Self::Raw {
+        self.raw.as_ptr()
+    }
 
     unsafe fn reference(&self) {
         hb::hb_font_funcs_reference(self.as_raw());

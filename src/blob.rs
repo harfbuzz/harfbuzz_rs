@@ -26,8 +26,8 @@ use common::{HarfbuzzObject, Owned, Shared};
 /// from standard Rust objects.
 #[repr(C)]
 pub struct Blob<'a> {
-    _raw: NonNull<hb::hb_blob_t>,
-    _marker: PhantomData<&'a mut [u8]>,
+    raw: NonNull<hb::hb_blob_t>,
+    marker: PhantomData<&'a [u8]>,
 }
 impl<'a> Blob<'a> {
     /// Create a new `Blob` from the slice `bytes`. The blob will not own the
@@ -138,6 +138,17 @@ impl<'a> fmt::Debug for Blob<'a> {
 
 unsafe impl<'a> HarfbuzzObject for Blob<'a> {
     type Raw = hb::hb_blob_t;
+
+    unsafe fn from_raw(raw: *const hb::hb_blob_t) -> Self {
+        Blob {
+            raw: NonNull::new_unchecked(raw as *mut _),
+            marker: PhantomData,
+        }
+    }
+
+    fn as_raw(&self) -> *mut hb::hb_blob_t {
+        self.raw.as_ptr()
+    }
 
     unsafe fn reference(&self) {
         hb::hb_blob_reference(self.as_raw());

@@ -10,7 +10,7 @@ pub type Feature = hb::hb_feature_t;
 
 #[derive(Debug)]
 pub(crate) struct GenericBuffer {
-    _raw: NonNull<hb::hb_buffer_t>,
+    raw: NonNull<hb::hb_buffer_t>,
 }
 impl GenericBuffer {
     pub(crate) fn new() -> Owned<GenericBuffer> {
@@ -120,6 +120,16 @@ impl GenericBuffer {
 
 unsafe impl HarfbuzzObject for GenericBuffer {
     type Raw = hb::hb_buffer_t;
+
+    unsafe fn from_raw(raw: *const Self::Raw) -> Self {
+        GenericBuffer {
+            raw: NonNull::new_unchecked(raw as *mut _),
+        }
+    }
+
+    fn as_raw(&self) -> *mut Self::Raw {
+        self.raw.as_ptr()
+    }
 
     unsafe fn reference(&self) {
         hb::hb_buffer_reference(self.as_raw());

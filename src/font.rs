@@ -28,8 +28,8 @@ pub(crate) extern "C" fn destroy_box<U>(ptr: *mut c_void) {
 #[derive(Debug)]
 #[repr(C)]
 pub struct Font<'a> {
-    _raw: NonNull<hb::hb_font_t>,
-    _marker: PhantomData<&'a hb::hb_font_t>,
+    raw: NonNull<hb::hb_font_t>,
+    marker: PhantomData<&'a hb::hb_font_t>,
 }
 
 impl<'a> Font<'a> {
@@ -307,6 +307,17 @@ impl<'a> Font<'a> {
 
 unsafe impl<'a> HarfbuzzObject for Font<'a> {
     type Raw = hb::hb_font_t;
+
+    unsafe fn from_raw(raw: *const Self::Raw) -> Self {
+        Font {
+            raw: NonNull::new_unchecked(raw as *mut _),
+            marker: PhantomData,
+        }
+    }
+
+    fn as_raw(&self) -> *mut Self::Raw {
+        self.raw.as_ptr()
+    }
 
     unsafe fn reference(&self) {
         hb::hb_font_reference(self.as_raw());

@@ -2,8 +2,6 @@ use hb;
 use std::borrow::Borrow;
 use std::ops::{Deref, DerefMut};
 
-use std::mem;
-
 /// A type to represent 4-byte SFNT tags.
 ///
 /// Tables, features, etc. in OpenType and many other font formats use SFNT tags
@@ -164,17 +162,13 @@ pub unsafe trait HarfbuzzObject: Sized {
     ///
     /// Use the Owned and Shared abstractions instead.
     #[doc(hide)]
-    unsafe fn from_raw(val: *const Self::Raw) -> Self {
-        mem::transmute_copy(&val)
-    }
+    unsafe fn from_raw(val: *const Self::Raw) -> Self;
 
     /// Returns the underlying harfbuzz object pointer.
     ///
     /// The caller must ensure, that this pointer is not used after `self`'s
     /// destruction.
-    fn as_raw(&self) -> *mut Self::Raw {
-        unsafe { mem::transmute_copy(self) }
-    }
+    fn as_raw(&self) -> *mut Self::Raw;
 
     /// Increases the reference count of the HarfBuzz object.
     ///
@@ -378,32 +372,44 @@ mod tests {
     // this is a mock struct for testing HarfbuzzObject's behaviour.
     #[derive(Debug)]
     struct ReferenceCounter {
-        rc: Cell<isize>,
+        rc: Rc<Cell<isize>>,
     }
 
-    unsafe impl HarfbuzzObject for *mut ReferenceCounter {
+    unsafe impl HarfbuzzObject for ReferenceCounter {
         type Raw = Cell<isize>;
+
+        unsafe fn from_raw(raw: *const Cell<isize>) -> Self {
+            ReferenceCounter {
+                rc: Rc::from_raw(raw as *mut _),
+            }
+        }
+
+        fn as_raw(&self) -> *mut Cell<isize> {
+            Rc::into_raw(self.rc.clone()) as *mut _
+        }
 
         unsafe fn reference(&self) {
             println!("referencing {:?}", self);
-            let rc = (**self).rc.get();
-            (**self).rc.set(rc + 1);
+            let rc = self.rc.get();
+            self.rc.set(rc + 1);
         }
 
         unsafe fn dereference(&self) {
             println!("dereferencing {:?}", self);
-            let rc = (**self).rc.get();
-            (**self).rc.set(rc - 1);
+            let rc = self.rc.get();
+            self.rc.set(rc - 1);
         }
     }
 
     #[test]
     fn reference_counting_shared() {
         // Mimic a C-API that returns a pointer to a reference counted value.
-        let object = Rc::new(ReferenceCounter { rc: Cell::new(1) });
-        let raw = Rc::into_raw(object.clone()) as *mut _;
+        let object = Rc::new(ReferenceCounter {
+            rc: Rc::new(Cell::new(1)),
+        });
+        let raw = object.as_raw();
 
-        let arc: Shared<*mut ReferenceCounter> = unsafe { Shared::from_raw_owned(raw) };
+        let arc: Shared<ReferenceCounter> = unsafe { Shared::from_raw_owned(raw) };
         assert_eq!(object.rc.get(), 1);
         {
             let arc2 = Shared::clone(&arc);
