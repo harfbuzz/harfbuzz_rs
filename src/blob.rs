@@ -45,6 +45,21 @@ impl<'a> Blob<'a> {
         unsafe { Owned::from_raw(hb_blob) }
     }
 
+    /// Create a new `Blob` from the mutable slice `bytes`. The blob will not own the
+    /// slice's data.
+    pub fn with_bytes_mut(bytes: &'a mut [u8]) -> Owned<Blob<'a>> {
+        let hb_blob = unsafe {
+            hb::hb_blob_create(
+                bytes.as_ptr() as *const i8,
+                bytes.len() as u32,
+                hb::HB_MEMORY_MODE_WRITABLE,
+                0 as *mut _,
+                None,
+            )
+        };
+        unsafe { Owned::from_raw(hb_blob) }
+    }
+
     /// Create a `Blob` from the contents of the file at `path` whose contents
     /// will be read into memory.
     ///
