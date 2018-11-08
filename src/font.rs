@@ -39,7 +39,15 @@ impl<'a> Font<'a> {
             let face = face.into();
             let raw_font = hb::hb_font_create(Shared::into_raw(face));
             // set default font funcs for a completely new font
-            // hb::hb_ot_font_set_funcs(raw_font);
+
+    /// Returns an empty font.
+    ///
+    /// This can be useful when you need a dummy font for whatever reason. Any
+    /// function you call on the empty font will return some reasonable default
+    /// value.
+    pub fn empty() -> Owned<Self> {
+        unsafe {
+            let raw_font = hb::hb_font_get_empty();
             Owned::from_raw(raw_font)
         }
     }
@@ -325,5 +333,17 @@ unsafe impl<'a> HarfbuzzObject for Font<'a> {
 
     unsafe fn dereference(&self) {
         hb::hb_font_destroy(self.as_raw());
+    }
+}
+
+impl<'a> Default for Owned<Font<'a>> {
+    fn default() -> Self {
+        Font::empty()
+    }
+}
+
+impl<'a> Default for Shared<Font<'a>> {
+    fn default() -> Self {
+        Font::empty().into()
     }
 }
