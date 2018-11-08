@@ -4,6 +4,10 @@ use std::ptr::NonNull;
 
 use common::{HarfbuzzObject, Language, Owned, Tag};
 
+use std::fmt;
+use std::io;
+use std::io::Read;
+
 pub type GlyphPosition = hb::hb_glyph_position_t;
 pub type GlyphInfo = hb::hb_glyph_info_t;
 pub type Feature = hb::hb_feature_t;
@@ -140,6 +144,97 @@ unsafe impl HarfbuzzObject for GenericBuffer {
     }
 }
 
+/// The serialization format used in `BufferSerializer`.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum SerializeFormat {
+    /// A human-readable, plain text format
+    Text,
+    /// A machine-readable JSON format.
+    Json,
+}
+
+impl From<SerializeFormat> for hb::hb_buffer_serialize_format_t {
+    fn from(fmt: SerializeFormat) -> Self {
+        match fmt {
+            SerializeFormat::Text => hb::HB_BUFFER_SERIALIZE_FORMAT_TEXT,
+            SerializeFormat::Json => hb::HB_BUFFER_SERIALIZE_FORMAT_JSON,
+        }
+    }
+}
+
+bitflags! {
+    /// Flags used for serialization with a `BufferSerializer`.
+    #[derive(Default)]
+    pub struct SerializeFlags: u32 {
+        /// Do not serialize glyph cluster.
+        const NO_CLUSTERS = hb::HB_BUFFER_SERIALIZE_FLAG_NO_CLUSTERS;
+        /// Do not serialize glyph position information.
+        const NO_POSITIONS = hb::HB_BUFFER_SERIALIZE_FLAG_NO_POSITIONS;
+        /// Do no serialize glyph name.
+        const NO_GLYPH_NAMES = hb::HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES;
+        /// Serialize glyph extents.
+        const GLYPH_EXTENTS = hb::HB_BUFFER_SERIALIZE_FLAG_GLYPH_EXTENTS;
+        /// Serialize glyph flags.
+        const GLYPH_FLAGS = hb::HB_BUFFER_SERIALIZE_FLAG_GLYPH_FLAGS;
+        /// Do not serialize glyph advances, glyph offsets will reflect absolute
+        /// glyph positions.
+        const NO_ADVANCES = hb::HB_BUFFER_SERIALIZE_FLAG_NO_ADVANCES;
+    }
+}
+
+/// A type that can be used to serialize a `GlyphBuffer`.
+///
+/// A `BufferSerializer` is obtained by calling the `GlyphBuffer::serializer`
+/// method and provides a `Read` implementation that allows you to read the
+/// serialized buffer contents.
+#[derive(Debug)]
+pub struct BufferSerializer<'a> {
+    font: Option<&'a crate::Font<'a>>,
+    buffer: &'a Owned<GenericBuffer>,
+    start: usize,
+    end: usize,
+    format: SerializeFormat,
+    flags: SerializeFlags,
+
+    bytes: io::Cursor<Vec<u8>>,
+}
+
+impl<'a> Read for BufferSerializer<'a> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        match self.bytes.read(buf) {
+            // if `bytes` is empty refill it
+            Ok(0) => {
+                if self.start >= self.end.saturating_sub(1) {
+                    return Ok(0);
+                }
+                let mut bytes_written = 0;
+                let num_serialized_items = unsafe {
+                    hb::hb_buffer_serialize_glyphs(
+                        self.buffer.as_raw(),
+                        self.start as u32,
+                        self.end as u32,
+                        self.bytes.get_mut().as_mut_ptr() as *mut _,
+                        self.bytes.get_ref().capacity() as u32,
+                        &mut bytes_written,
+                        self.font
+                            .map(|f| f.as_raw())
+                            .unwrap_or(std::ptr::null_mut()),
+                        self.format.into(),
+                        self.flags.bits(),
+                    )
+                };
+                self.start += num_serialized_items as usize;
+                self.bytes.set_position(0);
+                unsafe { self.bytes.get_mut().set_len(bytes_written as usize) };
+
+                self.read(buf)
+            }
+            Ok(size) => Ok(size),
+            Err(err) => Err(err),
+        }
+    }
+}
+
 /// This type provides an interface to create one of the buffer types from a raw harfbuzz pointer.
 #[derive(Debug)]
 pub enum TypedBuffer {
@@ -256,7 +351,7 @@ impl UnicodeBuffer {
     /// assert_eq!('b' as u32, iterator.next().unwrap());
     /// assert!(iterator.next().is_none());
     /// ```
-    pub fn codepoints<'a>(&'a self) -> Codepoints<'a> {
+    pub fn codepoints(&self) -> Codepoints<'_> {
         Codepoints {
             slice_iter: self.0.get_glyph_infos().iter(),
         }
@@ -424,13 +519,79 @@ impl GlyphBuffer {
         self.0.clear_contents();
         UnicodeBuffer(self.0)
     }
+
+    /// Returns a serializer that allows the contents of the buffer to be
+    /// converted into a human or machine readable representation.
+    ///
+    /// # Arguments
+    /// - `font`: Optionally a font can be provided for access to glyph names
+    ///   and glyph extents. If `None` is passed an empty font is assumed.
+    /// - `format`: The serialization format to use.
+    /// - `flags`: Allows you to control which information will be contained in
+    ///   the serialized output.
+    ///
+    /// # Examples
+    ///
+    /// Serialize the glyph buffer contents to a string using the textual format
+    /// without any special flags.
+    /// ```
+    /// use harfbuzz_rs::*;
+    /// use std::io::Read;
+    /// # use std::path::PathBuf;
+    /// # let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    /// # path.push("testfiles/SourceSansVariable-Roman.ttf");
+    /// let face = Face::from_file(path, 0).expect("Error reading font file.");
+    /// let font = Font::new(face);
+    ///
+    /// let buffer = UnicodeBuffer::new().add_str("ABC");
+    ///
+    /// let buffer = shape(&font, buffer, &[]);
+    ///
+    /// let mut string = String::new();
+    /// buffer
+    ///     .serializer(
+    ///         Some(&font),
+    ///         SerializeFormat::Text,
+    ///         SerializeFlags::default(),
+    ///     ).read_to_string(&mut string)
+    ///     .unwrap();
+    ///
+    /// assert_eq!(string, "gid2=0+520|gid3=1+574|gid4=2+562")
+    /// ```
+    pub fn serializer<'a>(
+        &'a self,
+        font: Option<&'a crate::Font<'a>>,
+        format: SerializeFormat,
+        flags: SerializeFlags,
+    ) -> BufferSerializer<'a> {
+        BufferSerializer {
+            font,
+            buffer: &self.0,
+            start: 0,
+            end: self.len(),
+            format,
+            flags,
+            bytes: io::Cursor::new(Vec::with_capacity(128)),
+        }
+    }
 }
 
-impl std::fmt::Debug for GlyphBuffer {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl fmt::Debug for GlyphBuffer {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         fmt.debug_struct("GlyphBuffer")
             .field("glyph_positions", &self.get_glyph_positions())
             .field("glyph_infos", &self.get_glyph_infos())
             .finish()
+    }
+}
+
+impl fmt::Display for GlyphBuffer {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        let mut serializer =
+            self.serializer(None, SerializeFormat::Text, SerializeFlags::default());
+        let mut string = String::new();
+        serializer.read_to_string(&mut string).unwrap();
+        write!(fmt, "{}", string)?;
+        Ok(())
     }
 }

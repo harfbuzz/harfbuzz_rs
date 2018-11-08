@@ -19,3 +19,4 @@ default = ["rusttype"]
 [dependencies]
 harfbuzz-sys = "^0.2"
 rusttype = { version = "^0.7", optional = true }
+bitflags = "^1"

@@ -78,6 +78,8 @@
 #![deny(missing_debug_implementations)]
 
 extern crate harfbuzz_sys as hb;
+#[macro_use]
+extern crate bitflags;
 
 mod blob;
 mod buffer;
