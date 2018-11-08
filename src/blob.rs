@@ -73,20 +73,6 @@ impl<'a> Blob<'a> {
         Ok(vec.into())
     }
 
-    /// Create a new mutable `Blob` from a slice of bytes.
-    pub fn with_mut_bytes(bytes: &mut [u8]) -> Owned<Blob> {
-        let hb_blob = unsafe {
-            hb::hb_blob_create(
-                bytes.as_ptr() as *const i8,
-                bytes.len() as u32,
-                hb::HB_MEMORY_MODE_WRITABLE,
-                0 as *mut _,
-                None,
-            )
-        };
-        unsafe { Owned::from_raw(hb_blob) }
-    }
-
     /// Get a slice of the `Blob`'s bytes.
     pub fn get_data(&self) -> &[u8] {
         unsafe {
