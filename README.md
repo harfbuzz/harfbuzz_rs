@@ -5,11 +5,11 @@
 [![Build Status](https://travis-ci.org/manuel-rhdt/harfbuzz_rs.svg?branch=master)](https://travis-ci.org/manuel-rhdt/harfbuzz_rs)
 [![Build status](https://ci.appveyor.com/api/projects/status/tg2xpx3am2iw7nxr?svg=true)](https://ci.appveyor.com/project/manuel-rhdt/harfbuzz-rs)
 
-
 `harfbuzz_rs` is a high-level interface to HarfBuzz, exposing its most important functionality
 in a safe manner using Rust.
 
 # What is HarfBuzz?
+
 HarfBuzz is a library for performing complex text layout. It does not perform any drawing. This
 is quite a low-level operation. If you want to simply draw some text on the screen choose
 another library. However if you want to build a library for drawing text on some canvas or
@@ -22,16 +22,11 @@ with some text and call the `shape` function.
 
 ```rust
 use harfbuzz_rs::*;
-use harfbuzz_rs::rusttype::SetRustTypeFuncs;
 
 let path = "path/to/some/font_file.otf";
 let index = 0; //< face index in the font file
 let face = Face::from_file(path, index)?;
 let mut font = Font::new(face);
-// Use RustType as provider for font information that harfbuzz needs.
-// You can also use a custom font implementation. For more information look
-// at the documentation for `FontFuncs`.
-font.set_rusttype_funcs()?;
 
 let buffer = UnicodeBuffer::new().add_str("Hello World!");
 let output = shape(&font, buffer, &[]);
@@ -53,6 +48,7 @@ for (position, info) in positions.iter().zip(infos) {
     println!("gid{:?}={:?}@{:?},{:?}+{:?}", gid, cluster, x_advance, x_offset, y_offset);
 }
 ```
+
 This should print out something similar to the following:
 
 ```text

@@ -23,9 +23,11 @@ Here you can look at what features are coming in the next version.
 
 ### Changed
 
-- Many improvementes to documentation
+- The rustup feature is no longer enabled by default
+- `SetRustTypeFuncs` is now deprecated in favor of
+  `create_harfbuzz_rusttype_font`
 - Internal representation of smart pointers (possibly more safe now)
-- `SetRustTypeFuncs` is now deprecated in favor of `create_harfbuzz_rusttype_font`
+- Many improvementes to documentation
 
 ## [0.3.0] 2018-08-26
 
