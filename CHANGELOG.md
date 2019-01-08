@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Here you can look at what features are coming in the next version.
 
+### Changed
+
+- removed kerning callbacks from FontFuncs (following the upstream harfbuzz
+  change)
+- updated to use Rust 2018
+
+## [0.3.0] 2019-01-08
+
 ### Added
 
 - constructor for `Blob` from a mutable slice
