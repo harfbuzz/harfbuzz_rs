@@ -1,11 +1,10 @@
 //! This module allows you to use rusttype to provide the font operations that harfbuzz needs.
 
-extern crate rusttype;
-
-pub use self::rusttype::Error;
-use self::rusttype::Font as RTFont;
-use self::rusttype::{Codepoint, GlyphId, Scale};
 use common::Tag;
+use rt;
+pub use rt::Error;
+use rt::Font as RTFont;
+use rt::{Codepoint, GlyphId, Scale};
 
 use face;
 use font;
@@ -34,6 +33,7 @@ fn get_font_height(font: &font::Font) -> Result<i32, Error> {
 }
 
 fn rusttype_font_from_face<'a>(face: &face::Face<'a>) -> Result<RTFont<'a>, Error> {
+    // It is unfortunate that we have to copy the face data here.
     let font_blob = face.face_data().as_ref().to_owned();
     let index = face.index();
     let collection = rusttype::FontCollection::from_bytes(font_blob)?;
@@ -102,13 +102,43 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
     }
 }
 
+use std::sync::Arc;
+
+/// Creates a new HarfBuzz `Font` object that uses RustType to provide font data.
+pub fn create_harfbuzz_rusttype_font(
+    bytes: impl Into<Arc<[u8]>>,
+    index: u32,
+) -> Result<crate::Owned<Font<'static>>, Error> {
+    let bytes = bytes.into();
+    let face = crate::Face::new(bytes.clone(), index);
+    let mut font = Font::new(face);
+
+    let rt_font = rt::FontCollection::from_bytes(bytes)?.font_at(index as usize)?;
+    let scaled_font = ScaledRusttypeFont {
+        font: rt_font,
+        scale: rusttype_scale_from_hb_font(&font)?,
+    };
+    font.set_font_funcs(scaled_font);
+
+    Ok(font)
+}
+
 /// Extends the harfbuzz font to allow setting RustType as font funcs provider.
+#[deprecated(since = "0.4.0")]
 pub trait SetRustTypeFuncs {
     /// Let a font use rusttype's font API for getting information like the
     /// advance width of some glyph or its extents.
+    ///
+    /// # Deprecated
+    ///
+    /// This function is deprecated because it doesn't fit well with the design
+    /// of RustType (Calling this method requires to make a copy of the font
+    /// data used). You should use `create_harfbuzz_rusttype_font` instead.
+    #[deprecated(since = "0.4.0")]
     fn set_rusttype_funcs(&mut self) -> Result<(), Error>;
 }
 
+#[allow(deprecated)]
 impl<'a> SetRustTypeFuncs for Font<'a> {
     fn set_rusttype_funcs(&mut self) -> Result<(), Error> {
         let font_data = ScaledRusttypeFont::from_hb_font(self)?;

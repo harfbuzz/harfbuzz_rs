@@ -24,10 +24,6 @@
 //! # let path = "testfiles/SourceSansVariable-Roman.ttf";
 //! let face = Face::from_file(path, index)?;
 //! let mut font = Font::new(face);
-//! // Use RustType as provider for font information that harfbuzz needs.
-//! // You can also use a custom font implementation. For more information look
-//! // at the documentation for `FontFuncs`.
-//! font.set_rusttype_funcs()?;
 //!
 //! let buffer = UnicodeBuffer::new().add_str("Hello World!");
 //! let output = shape(&font, buffer, &[]);
@@ -86,7 +82,10 @@ mod buffer;
 mod common;
 mod face;
 mod font;
-mod font_funcs;
+pub mod font_funcs;
+
+#[cfg(feature = "rusttype")]
+extern crate rusttype as rt;
 
 #[cfg(feature = "rusttype")]
 pub mod rusttype;

@@ -1,6 +1,5 @@
 extern crate harfbuzz_rs;
 
-use harfbuzz_rs::rusttype::SetRustTypeFuncs;
 use harfbuzz_rs::{shape, Face, Font, UnicodeBuffer};
 
 // Execute this file from the root directory of this repository.
@@ -22,8 +21,7 @@ fn main() {
     let index = 0;
     let path = "testfiles/SourceSansVariable-Roman.ttf";
     let face = Face::from_file(path, index).expect("Error reading font file.");
-    let mut font = Font::new(face);
-    font.set_rusttype_funcs().expect("An error occured");
+    let font = Font::new(face);
 
     // Create a buffer with some text, shape it...
     let buffer = UnicodeBuffer::new().add_str("Hello World!");
