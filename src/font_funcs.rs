@@ -328,6 +328,7 @@ hb_callback!(
 ///
 /// ```ignore
 /// use harfbuzz_rs::*;
+/// use harfbuzz_rs::font_funcs::FontFuncsImpl;
 /// use std::mem;
 ///
 /// let mut ffuncs: Owned<FontFuncsImpl<()>> = FontFuncsImpl::new();
@@ -341,6 +342,7 @@ hb_callback!(
 ///
 /// ```ignore
 /// use harfbuzz_rs::*;
+/// use harfbuzz_rs::font_funcs::FontFuncsImpl;
 ///
 /// // Dummy struct implementing FontFuncs
 /// struct MyFontData {
@@ -357,12 +359,7 @@ hb_callback!(
 ///     let font_funcs: Owned<FontFuncsImpl<MyFontData>> = FontFuncsImpl::from_trait_impl();
 /// }
 /// ```
-///
-/// After creating font funcs they can be set on a font to change the font
-/// implementation that will be used by HarfBuzz while shaping.
-///
-#[repr(C)]
-pub struct FontFuncsImpl<T> {
+pub(crate) struct FontFuncsImpl<T> {
     raw: NonNull<hb::hb_font_funcs_t>,
     marker: PhantomData<T>,
 }
@@ -378,30 +375,29 @@ impl<T> FontFuncsImpl<T> {
 }
 
 impl<T: FontFuncs> FontFuncsImpl<T> {
-    /// Create a new `FontFuncsImpl` from the `FontFuncs`-trait implementation
+    /// Create a new `FontFuncsImpl` from the `FontFuncs` trait implementation
     /// of `T`.
     ///
     /// # Examples
     ///
-    /// Supposing `MyFontData` is a struct that implements `FontFuncs`.
-    ///
     /// ```ignore
     /// use harfbuzz_rs::*;
-    ///
-    /// # // Dummy struct implementing FontFuncs
-    /// # struct MyFontData {
-    /// #    value: i32,
-    /// # }
-    /// # impl FontFuncs for MyFontData {
-    /// #     fn get_glyph_h_advance(&self, _: &Font, _: Glyph) -> Position {
-    /// #         self.value
-    /// #     }
-    /// #     // implement other trait functions...
-    /// # }
-    /// #
-    /// # fn main() {
-    /// let font_funcs: Owned<FontFuncsImpl<MyFontData>> = FontFuncsImpl::from_trait_impl();
-    /// # }
+    /// use harfbuzz_rs::font_funcs::FontFuncsImpl;
+    /// 
+    /// // Dummy struct implementing FontFuncs
+    /// struct MyFontData {
+    ///    value: i32,
+    /// }
+    /// impl FontFuncs for MyFontData {
+    ///     fn get_glyph_h_advance(&self, _: &Font, _: Glyph) -> Position {
+    ///         self.value
+    ///     }
+    ///     // implement other trait functions...
+    /// }
+    ///     
+    /// fn main() {
+    ///     let font_funcs: Owned<FontFuncsImpl<MyFontData>> = FontFuncsImpl::from_trait_impl();
+    /// }
     /// ```
     ///
     pub fn from_trait_impl() -> Owned<FontFuncsImpl<T>> {
