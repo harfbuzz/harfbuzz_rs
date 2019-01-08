@@ -1,4 +1,4 @@
-use hb;
+use crate::hb;
 use std;
 use std::os::raw::c_void;
 use std::ptr::NonNull;
@@ -6,8 +6,8 @@ use std::ptr::NonNull;
 use std::marker::PhantomData;
 use std::path::Path;
 
-use blob::Blob;
-use common::{HarfbuzzObject, Owned, Shared, Tag};
+use crate::blob::Blob;
+use crate::common::{HarfbuzzObject, Owned, Shared, Tag};
 
 /// A wrapper around `hb_face_t`.
 #[derive(Debug)]
@@ -157,7 +157,7 @@ unsafe impl<'a> Sync for Face<'a> {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use common::Tag;
+    use crate::common::Tag;
 
     #[test]
     fn test_face_from_table_func() {

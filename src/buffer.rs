@@ -1,8 +1,8 @@
-use hb;
+use crate::hb;
 use std;
 use std::ptr::NonNull;
 
-use common::{HarfbuzzObject, Language, Owned, Tag};
+use crate::common::{HarfbuzzObject, Language, Owned, Tag};
 
 use std::fmt;
 use std::io;

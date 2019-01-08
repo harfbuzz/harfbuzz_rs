@@ -89,11 +89,11 @@ extern crate rusttype as rt;
 #[cfg(feature = "rusttype")]
 pub mod rusttype;
 
-pub use blob::*;
-pub use buffer::*;
-pub use common::*;
-pub use face::*;
-pub use font::*;
+pub use crate::blob::*;
+pub use crate::buffer::*;
+pub use crate::common::*;
+pub use crate::face::*;
+pub use crate::font::*;
 
 /// Shape the contents of the buffer using the provided font and activating all
 /// OpenType features given in `features`.

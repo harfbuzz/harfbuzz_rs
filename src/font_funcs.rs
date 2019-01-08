@@ -7,10 +7,10 @@
 //!
 //! In the future there may be exposed other ways to create font funcs.
 
-use font::destroy_box;
-use {Font, FontExtents, Glyph, GlyphExtents, HarfbuzzObject, Owned, Position, Shared};
+use crate::font::destroy_box;
+use crate::{Font, FontExtents, Glyph, GlyphExtents, HarfbuzzObject, Owned, Position, Shared};
 
-use hb;
+use crate::hb;
 use std::os::raw::c_void;
 
 use std;

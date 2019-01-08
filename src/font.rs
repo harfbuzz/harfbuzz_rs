@@ -1,13 +1,13 @@
-use hb;
+use crate::hb;
 use std;
 use std::ptr::NonNull;
 
 use std::os::raw::c_void;
 
-use common::{HarfbuzzObject, Owned, Shared};
-use face::Face;
-pub use font_funcs::FontFuncs;
-use font_funcs::FontFuncsImpl;
+use crate::common::{HarfbuzzObject, Owned, Shared};
+use crate::face::Face;
+pub use crate::font_funcs::FontFuncs;
+use crate::font_funcs::FontFuncsImpl;
 
 use std::ffi::CStr;
 use std::marker::PhantomData;

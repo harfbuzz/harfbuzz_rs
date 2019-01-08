@@ -1,4 +1,4 @@
-use hb;
+use crate::hb;
 use std::os::raw::c_void;
 
 use std;
@@ -9,7 +9,7 @@ use std::fs;
 use std::path::Path;
 use std::ptr::NonNull;
 
-use common::{HarfbuzzObject, Owned, Shared};
+use crate::common::{HarfbuzzObject, Owned, Shared};
 
 /// A `Blob` manages raw data like e.g. file contents. It refers to a slice of
 /// bytes that can be either owned by the `Blob` or not.
