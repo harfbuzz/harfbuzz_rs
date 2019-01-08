@@ -14,7 +14,7 @@ travis-ci = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master" }
 appveyor = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master", service = "github" }
 
 [features]
-default = ["rusttype"]
+default = []
 
 [dependencies]
 harfbuzz-sys = "^0.2"
