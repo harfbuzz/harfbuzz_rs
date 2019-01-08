@@ -88,10 +88,10 @@ impl FromStr for Tag {
     /// ```
     ///
     fn from_str(s: &str) -> Result<Tag, TagFromStrErr> {
-        if s.is_ascii() == false {
+        if !s.is_ascii() {
             return Err(TagFromStrErr::NonAscii);
         }
-        if s.len() == 0 {
+        if s.is_empty() {
             return Err(TagFromStrErr::ZeroLengthString);
         }
         let len = std::cmp::max(s.len(), 4) as i32;

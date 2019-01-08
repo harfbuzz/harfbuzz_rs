@@ -68,10 +68,7 @@ impl<'a> ScaledRusttypeFont<'a> {
     fn from_hb_font<'b>(hb_font: &font::Font<'b>) -> Result<ScaledRusttypeFont<'b>, Error> {
         let font = rusttype_font_from_face(&hb_font.face())?;
         let scale = rusttype_scale_from_hb_font(hb_font)?;
-        Ok(ScaledRusttypeFont {
-            font: font,
-            scale: scale,
-        })
+        Ok(ScaledRusttypeFont { font, scale })
     }
 }
 
