@@ -15,7 +15,6 @@
 //! ```
 //! # extern crate harfbuzz_rs;
 //! use harfbuzz_rs::*;
-//! use harfbuzz_rs::rusttype::SetRustTypeFuncs;
 //!
 //! # fn try_main() -> Result<(), std::io::Error> {
 //!
