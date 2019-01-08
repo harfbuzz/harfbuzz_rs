@@ -1,6 +1,6 @@
 [package]
 name = "harfbuzz_rs"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Manuel Reinhardt <manuel.rhdt@gmail.com>"]
 description = "A high-level interface to HarfBuzz, exposing its most important functionality in a safe manner using Rust."
 repository = "https://github.com/manuel-rhdt/harfbuzz_rs"
