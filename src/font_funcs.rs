@@ -654,7 +654,7 @@ impl<T> FontFuncsImpl<T> {
 
 impl<T> fmt::Debug for FontFuncsImpl<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("FontFuncsImpl").finish()
+        f.debug_struct("FontFuncsImpl").field("raw", &self.as_raw()).finish()
     }
 }
 

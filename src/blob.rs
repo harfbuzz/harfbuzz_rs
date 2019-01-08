@@ -42,7 +42,7 @@ impl<'a> Blob<'a> {
                 bytes.as_ptr() as *const i8,
                 bytes.len() as u32,
                 hb::HB_MEMORY_MODE_READONLY,
-                0 as *mut _,
+                std::ptr::null_mut(),
                 None,
             )
         };
@@ -57,7 +57,7 @@ impl<'a> Blob<'a> {
                 bytes.as_ptr() as *const i8,
                 bytes.len() as u32,
                 hb::HB_MEMORY_MODE_WRITABLE,
-                0 as *mut _,
+                std::ptr::null_mut(),
                 None,
             )
         };
@@ -139,6 +139,7 @@ impl<'a> fmt::Debug for Blob<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Blob")
             .field("data", &self.get_data())
+            .field("is_immutable", &self.is_immutable())
             .finish()
     }
 }
