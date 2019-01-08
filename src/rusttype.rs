@@ -1,21 +1,20 @@
 //! This module allows you to use rusttype to provide the font operations that harfbuzz needs.
 
-use common::Tag;
-use rt;
-pub use rt::Error;
-use rt::Font as RTFont;
-use rt::{Codepoint, GlyphId, Scale};
+use crate::common::Tag;
+pub use rusttype::Error;
+use rusttype::Font as RTFont;
+use rusttype::{Codepoint, GlyphId, Scale};
 
-use face;
-use font;
-use font::{Font, FontFuncs, Glyph as GlyphIndex, GlyphExtents, Position};
+use crate::face;
+use crate::font;
+use crate::font::{Font, FontFuncs, Glyph as GlyphIndex, GlyphExtents, Position};
 
 use std;
 use std::fmt::Debug;
 use std::str::FromStr;
 
 // Work around weird rusttype scaling by reading the hhea table.
-fn get_font_height(font: &font::Font) -> Result<i32, Error> {
+fn get_font_height(font: &font::Font<'_>) -> Result<i32, Error> {
     let face = font.face();
     let tag = Tag::from_str("hhea").unwrap();
     let hhea_table = face.table_with_tag(tag).ok_or(Error::IllFormed)?;
@@ -40,7 +39,7 @@ fn rusttype_font_from_face<'a>(face: &face::Face<'a>) -> Result<RTFont<'a>, Erro
     collection.font_at(index as usize)
 }
 
-fn rusttype_scale_from_hb_font(font: &font::Font) -> Result<Scale, Error> {
+fn rusttype_scale_from_hb_font(font: &font::Font<'_>) -> Result<Scale, Error> {
     let font_height = get_font_height(font)? as f32;
     let em_scale = font.scale();
     let x_scale = em_scale.0 as f32;
@@ -57,7 +56,7 @@ struct ScaledRusttypeFont<'a> {
 }
 
 impl<'a> Debug for ScaledRusttypeFont<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ScaledRusttypeFont")
             .field("scale", &self.scale)
             .finish()
@@ -73,19 +72,12 @@ impl<'a> ScaledRusttypeFont<'a> {
 }
 
 impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
-    fn get_glyph_h_advance(&self, _: &Font, glyph: GlyphIndex) -> Position {
+    fn get_glyph_h_advance(&self, _: &Font<'_>, glyph: GlyphIndex) -> Position {
         let glyph = self.font.glyph(GlyphId(glyph));
         let glyph = glyph.scaled(self.scale);
         glyph.h_metrics().advance_width.round() as Position
     }
-
-    fn get_glyph_h_kerning(&self, _: &Font, left: GlyphIndex, right: GlyphIndex) -> Position {
-        self.font
-            .pair_kerning(self.scale, GlyphId(left), GlyphId(right))
-            .round() as Position
-    }
-
-    fn get_glyph_extents(&self, _: &Font, glyph: GlyphIndex) -> Option<GlyphExtents> {
+    fn get_glyph_extents(&self, _: &Font<'_>, glyph: GlyphIndex) -> Option<GlyphExtents> {
         let glyph = self.font.glyph(GlyphId(glyph));
         let glyph = glyph.scaled(self.scale);
         glyph.exact_bounding_box().map(|bbox| GlyphExtents {
@@ -95,8 +87,7 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
             height: (bbox.max.y - bbox.min.y).round() as i32,
         })
     }
-
-    fn get_nominal_glyph(&self, _: &font::Font, unicode: char) -> Option<GlyphIndex> {
+    fn get_nominal_glyph(&self, _: &font::Font<'_>, unicode: char) -> Option<GlyphIndex> {
         let glyph = self.font.glyph(Codepoint(unicode as u32));
         Some(glyph.id().0)
     }
@@ -113,7 +104,7 @@ pub fn create_harfbuzz_rusttype_font(
     let face = crate::Face::new(bytes.clone(), index);
     let mut font = Font::new(face);
 
-    let rt_font = rt::FontCollection::from_bytes(bytes)?.font_at(index as usize)?;
+    let rt_font = rusttype::FontCollection::from_bytes(bytes)?.font_at(index as usize)?;
     let scaled_font = ScaledRusttypeFont {
         font: rt_font,
         scale: rusttype_scale_from_hb_font(&font)?,

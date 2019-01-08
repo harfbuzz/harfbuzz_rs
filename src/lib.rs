@@ -72,7 +72,7 @@
 //! ```
 #![deny(missing_debug_implementations)]
 
-extern crate harfbuzz_sys as hb;
+use harfbuzz_sys as hb;
 #[macro_use]
 extern crate bitflags;
 
@@ -82,9 +82,6 @@ mod common;
 mod face;
 mod font;
 pub mod font_funcs;
-
-#[cfg(feature = "rusttype")]
-extern crate rusttype as rt;
 
 #[cfg(feature = "rusttype")]
 pub mod rusttype;
@@ -106,7 +103,7 @@ pub use crate::font::*;
 /// - `buffer` – a `UnicodeBuffer` that is filled with the text to be shaped and
 /// also contains metadata about the text in the form of segment properties.
 /// - `features` – a slice
-pub fn shape(font: &Font, buffer: UnicodeBuffer, features: &[Feature]) -> GlyphBuffer {
+pub fn shape(font: &Font<'_>, buffer: UnicodeBuffer, features: &[Feature]) -> GlyphBuffer {
     let buffer = buffer.guess_segment_properties();
     unsafe {
         hb::hb_shape(

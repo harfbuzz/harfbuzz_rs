@@ -439,7 +439,7 @@ impl UnicodeBuffer {
 }
 
 impl std::fmt::Debug for UnicodeBuffer {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_struct("UnicodeBuffer")
             .field("content", &self.string_lossy())
             .field("direction", &self.get_direction())
@@ -583,7 +583,7 @@ impl GlyphBuffer {
 }
 
 impl fmt::Debug for GlyphBuffer {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt.debug_struct("GlyphBuffer")
             .field("glyph_positions", &self.get_glyph_positions())
             .field("glyph_infos", &self.get_glyph_infos())
@@ -592,7 +592,7 @@ impl fmt::Debug for GlyphBuffer {
 }
 
 impl fmt::Display for GlyphBuffer {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut serializer =
             self.serializer(None, SerializeFormat::Text, SerializeFlags::default());
         let mut string = String::new();

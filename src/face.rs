@@ -96,7 +96,7 @@ impl<'a> Face<'a> {
             if raw_blob.is_null() {
                 None
             } else {
-                let blob: Shared<Blob> = Shared::from_raw_owned(raw_blob);
+                let blob: Shared<Blob<'_>> = Shared::from_raw_owned(raw_blob);
                 if blob.is_empty() {
                     None
                 } else {

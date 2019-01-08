@@ -37,7 +37,7 @@ impl Tag {
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 impl Debug for Tag {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let string = self.tag_to_string();
         let mut chars = string.chars().chain(std::iter::repeat('\u{FFFD}'));
         write!(
@@ -52,7 +52,7 @@ impl Debug for Tag {
 }
 
 impl Display for Tag {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.tag_to_string())
     }
 }
@@ -108,14 +108,14 @@ impl Default for Language {
 }
 
 impl Debug for Language {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "Language(\"{}\")", self)
     }
 }
 
 use std::ffi::CStr;
 impl Display for Language {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let string = unsafe {
             let char_ptr = hb::hb_language_to_string(self.0);
             if char_ptr.is_null() {

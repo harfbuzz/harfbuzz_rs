@@ -207,7 +207,7 @@ impl<'a> Font<'a> {
     }
 
     // scale from parent font
-    pub(crate) fn parent_scale_x_distance(&self, f: impl Fn(&Font) -> Position) -> Position {
+    pub(crate) fn parent_scale_x_distance(&self, f: impl Fn(&Font<'_>) -> Position) -> Position {
         let x_scale = self.scale().0;
         if let Some(parent) = self.parent() {
             let parent_x_scale = parent.scale().0;
@@ -223,7 +223,7 @@ impl<'a> Font<'a> {
     }
 
     // scale from parent font
-    pub(crate) fn parent_scale_y_distance(&self, f: impl Fn(&Font) -> Position) -> Position {
+    pub(crate) fn parent_scale_y_distance(&self, f: impl Fn(&Font<'_>) -> Position) -> Position {
         let y_scale = self.scale().0;
         if let Some(parent) = self.parent() {
             let parent_y_scale = parent.scale().0;
@@ -329,14 +329,6 @@ impl<'a> Font<'a> {
                 None
             }
         }
-    }
-
-    pub fn get_glyph_h_kerning(&self, left: Glyph, right: Glyph) -> Position {
-        unsafe { hb::hb_font_get_glyph_h_kerning(self.as_raw(), left, right) }
-    }
-
-    pub fn get_glyph_v_kerning(&self, before: Glyph, after: Glyph) -> Position {
-        unsafe { hb::hb_font_get_glyph_v_kerning(self.as_raw(), before, after) }
     }
 
     pub fn get_glyph_extents(&self, glyph: Glyph) -> Option<GlyphExtents> {

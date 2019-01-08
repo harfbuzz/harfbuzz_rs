@@ -1,4 +1,4 @@
-extern crate harfbuzz_rs;
+
 
 use harfbuzz_rs::{shape, Face, Font, UnicodeBuffer};
 

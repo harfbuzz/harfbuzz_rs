@@ -139,7 +139,7 @@ unsafe impl<'a> Send for Blob<'a> {}
 unsafe impl<'a> Sync for Blob<'a> {}
 
 impl<'a> fmt::Debug for Blob<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Blob")
             .field("data", &self.get_data())
             .field("is_immutable", &self.is_immutable())
@@ -222,7 +222,7 @@ mod tests {
     #[test]
     fn test_vec_to_blob_conversion() {
         let a_vec: Vec<u8> = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-        let blob: Shared<Blob> = a_vec.into();
+        let blob: Shared<Blob<'_>> = a_vec.into();
 
         assert_eq!(blob.len(), 11);
 
