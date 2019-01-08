@@ -409,6 +409,9 @@ impl<'a> Font<'a> {
     }
 }
 
+unsafe impl<'a> Send for Font<'a> {}
+unsafe impl<'a> Sync for Font<'a> {}
+
 unsafe impl<'a> HarfbuzzObject for Font<'a> {
     type Raw = hb::hb_font_t;
 

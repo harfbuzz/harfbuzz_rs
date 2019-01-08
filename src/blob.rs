@@ -135,6 +135,9 @@ impl<'a> Blob<'a> {
     }
 }
 
+unsafe impl<'a> Send for Blob<'a> {}
+unsafe impl<'a> Sync for Blob<'a> {}
+
 impl<'a> fmt::Debug for Blob<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Blob")

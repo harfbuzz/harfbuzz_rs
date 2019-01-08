@@ -151,6 +151,9 @@ unsafe impl<'a> HarfbuzzObject for Face<'a> {
     }
 }
 
+unsafe impl<'a> Send for Face<'a> {}
+unsafe impl<'a> Sync for Face<'a> {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
