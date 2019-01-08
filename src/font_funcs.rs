@@ -31,7 +31,7 @@ use std::ptr::NonNull;
 /// values for every font func.
 #[allow(unused_variables)]
 pub trait FontFuncs {
-    fn get_font_h_extents(&self, font: &Font) -> Option<FontExtents> {
+    fn get_font_h_extents(&self, font: &Font<'_>) -> Option<FontExtents> {
         font.parent()?
             .get_font_h_extents()
             .map(|extents| FontExtents {
@@ -41,7 +41,7 @@ pub trait FontFuncs {
                 ..extents
             })
     }
-    fn get_font_v_extents(&self, font: &Font) -> Option<FontExtents> {
+    fn get_font_v_extents(&self, font: &Font<'_>) -> Option<FontExtents> {
         font.parent()?
             .get_font_v_extents()
             .map(|extents| FontExtents {
@@ -51,40 +51,34 @@ pub trait FontFuncs {
                 ..extents
             })
     }
-    fn get_nominal_glyph(&self, font: &Font, unicode: char) -> Option<Glyph> {
+    fn get_nominal_glyph(&self, font: &Font<'_>, unicode: char) -> Option<Glyph> {
         font.parent()?.get_nominal_glyph(unicode)
     }
     fn get_variation_glyph(
         &self,
-        font: &Font,
+        font: &Font<'_>,
         unicode: char,
         variation_sel: char,
     ) -> Option<Glyph> {
         font.parent()?.get_variation_glyph(unicode, variation_sel)
     }
-    fn get_glyph_h_advance(&self, font: &Font, glyph: Glyph) -> Position {
+    fn get_glyph_h_advance(&self, font: &Font<'_>, glyph: Glyph) -> Position {
         font.parent_scale_x_distance(|parent| parent.get_glyph_h_advance(glyph))
     }
-    fn get_glyph_v_advance(&self, font: &Font, glyph: Glyph) -> Position {
+    fn get_glyph_v_advance(&self, font: &Font<'_>, glyph: Glyph) -> Position {
         font.parent_scale_y_distance(|parent| parent.get_glyph_v_advance(glyph))
     }
-    fn get_glyph_h_origin(&self, font: &Font, glyph: Glyph) -> Option<(Position, Position)> {
+    fn get_glyph_h_origin(&self, font: &Font<'_>, glyph: Glyph) -> Option<(Position, Position)> {
         font.parent()?
             .get_glyph_h_origin(glyph)
             .map(|x| font.parent_scale_position(x))
     }
-    fn get_glyph_v_origin(&self, font: &Font, glyph: Glyph) -> Option<(Position, Position)> {
+    fn get_glyph_v_origin(&self, font: &Font<'_>, glyph: Glyph) -> Option<(Position, Position)> {
         font.parent()?
             .get_glyph_v_origin(glyph)
             .map(|x| font.parent_scale_position(x))
     }
-    fn get_glyph_h_kerning(&self, font: &Font, left: Glyph, right: Glyph) -> Position {
-        font.parent_scale_x_distance(|parent| parent.get_glyph_h_kerning(left, right))
-    }
-    fn get_glyph_v_kerning(&self, font: &Font, before: Glyph, after: Glyph) -> Position {
-        font.parent_scale_y_distance(|parent| parent.get_glyph_v_kerning(before, after))
-    }
-    fn get_glyph_extents(&self, font: &Font, glyph: Glyph) -> Option<GlyphExtents> {
+    fn get_glyph_extents(&self, font: &Font<'_>, glyph: Glyph) -> Option<GlyphExtents> {
         font.parent()?
             .get_glyph_extents(glyph)
             .map(|extents| GlyphExtents {
@@ -97,7 +91,7 @@ pub trait FontFuncs {
     }
     fn get_glyph_contour_point(
         &self,
-        font: &Font,
+        font: &Font<'_>,
         glyph: Glyph,
         point_index: u32,
     ) -> Option<(Position, Position)> {
@@ -105,10 +99,10 @@ pub trait FontFuncs {
             .get_glyph_contour_point(glyph, point_index)
             .map(|x| font.parent_scale_position(x))
     }
-    fn get_glyph_name(&self, font: &Font, glyph: Glyph) -> Option<String> {
+    fn get_glyph_name(&self, font: &Font<'_>, glyph: Glyph) -> Option<String> {
         font.parent()?.get_glyph_name(glyph)
     }
-    fn get_glyph_from_name(&self, font: &Font, name: &str) -> Option<Glyph> {
+    fn get_glyph_from_name(&self, font: &Font<'_>, name: &str) -> Option<Glyph> {
         font.parent()?.get_glyph_from_name(name)
     }
 }
@@ -125,7 +119,7 @@ macro_rules! hb_callback {
                 $arg: $datatype,
             )*
             closure_data: *mut c_void,
-        ) -> $ret where F: Fn(&Font, &T, $($closure_arg),*) -> $closure_ret {
+        ) -> $ret where F: Fn(&Font<'_>, &T, $($closure_arg),*) -> $closure_ret {
             let catch_result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
                 let font_data = unsafe { &*(font_data as *const T) };
                 let font = unsafe { Font::from_raw(font) };
@@ -225,14 +219,6 @@ hb_callback!(
                 0
             }
         }
-    }
-);
-
-hb_callback!(
-    rust_get_glyph_kerning_closure<before: hb::hb_codepoint_t, after: hb::hb_codepoint_t> -> Position {
-        argument Glyph => before,
-        argument Glyph => after,
-        return pos: Position => pos
     }
 );
 
@@ -417,12 +403,6 @@ impl<T: FontFuncs> FontFuncsImpl<T> {
         self.set_glyph_v_advance_func(|font, data, glyph| data.get_glyph_v_advance(font, glyph));
         self.set_glyph_h_origin_func(|font, data, glyph| data.get_glyph_h_origin(font, glyph));
         self.set_glyph_v_origin_func(|font, data, glyph| data.get_glyph_v_origin(font, glyph));
-        self.set_glyph_h_kerning_func(|font, data, before, after| {
-            data.get_glyph_h_kerning(font, before, after)
-        });
-        self.set_glyph_v_kerning_func(|font, data, before, after| {
-            data.get_glyph_v_kerning(font, before, after)
-        });
         self.set_glyph_extents_func(|font, data, glyph| data.get_glyph_extents(font, glyph));
         self.set_glyph_contour_point_func(|font, data, glyph, index| {
             data.get_glyph_contour_point(font, glyph, index)
@@ -439,7 +419,7 @@ impl<T> FontFuncsImpl<T> {
 
     pub fn set_font_h_extents_func<F>(&mut self, func: F)
     where
-        F: Fn(&Font, &T) -> Option<FontExtents>,
+        F: Fn(&Font<'_>, &T) -> Option<FontExtents>,
     {
         let user_data = Box::new(func);
         unsafe {
@@ -454,7 +434,7 @@ impl<T> FontFuncsImpl<T> {
 
     pub fn set_font_v_extents_func<F>(&mut self, func: F)
     where
-        F: Fn(&Font, &T) -> Option<FontExtents>,
+        F: Fn(&Font<'_>, &T) -> Option<FontExtents>,
     {
         let user_data = Box::new(func);
         unsafe {
@@ -469,7 +449,7 @@ impl<T> FontFuncsImpl<T> {
 
     pub fn set_nominal_glyph_func<F>(&mut self, func: F)
     where
-        F: Fn(&Font, &T, char) -> Option<Glyph>,
+        F: Fn(&Font<'_>, &T, char) -> Option<Glyph>,
     {
         let user_data = Box::new(func);
         unsafe {
@@ -484,7 +464,7 @@ impl<T> FontFuncsImpl<T> {
 
     pub fn set_variation_glyph_func<F>(&mut self, func: F)
     where
-        F: Fn(&Font, &T, char, char) -> Option<Glyph>,
+        F: Fn(&Font<'_>, &T, char, char) -> Option<Glyph>,
     {
         let user_data = Box::new(func);
         unsafe {
@@ -499,7 +479,7 @@ impl<T> FontFuncsImpl<T> {
 
     pub fn set_glyph_h_advance_func<F>(&mut self, func: F)
     where
-        F: Fn(&Font, &T, Glyph) -> Position,
+        F: Fn(&Font<'_>, &T, Glyph) -> Position,
     {
         let user_data = Box::new(func);
         unsafe {
@@ -514,7 +494,7 @@ impl<T> FontFuncsImpl<T> {
 
     pub fn set_glyph_v_advance_func<F>(&mut self, func: F)
     where
-        F: Fn(&Font, &T, Glyph) -> Position,
+        F: Fn(&Font<'_>, &T, Glyph) -> Position,
     {
         let user_data = Box::new(func);
         unsafe {
@@ -529,7 +509,7 @@ impl<T> FontFuncsImpl<T> {
 
     pub fn set_glyph_h_origin_func<F>(&mut self, func: F)
     where
-        F: Fn(&Font, &T, Glyph) -> Option<(Position, Position)>,
+        F: Fn(&Font<'_>, &T, Glyph) -> Option<(Position, Position)>,
     {
         let user_data = Box::new(func);
         unsafe {
@@ -544,7 +524,7 @@ impl<T> FontFuncsImpl<T> {
 
     pub fn set_glyph_v_origin_func<F>(&mut self, func: F)
     where
-        F: Fn(&Font, &T, Glyph) -> Option<(Position, Position)>,
+        F: Fn(&Font<'_>, &T, Glyph) -> Option<(Position, Position)>,
     {
         let user_data = Box::new(func);
         unsafe {
@@ -557,39 +537,9 @@ impl<T> FontFuncsImpl<T> {
         }
     }
 
-    pub fn set_glyph_h_kerning_func<F>(&mut self, func: F)
-    where
-        F: Fn(&Font, &T, Glyph, Glyph) -> Position,
-    {
-        let user_data = Box::new(func);
-        unsafe {
-            hb::hb_font_funcs_set_glyph_h_kerning_func(
-                self.as_raw(),
-                Some(rust_get_glyph_kerning_closure::<T, F>),
-                Box::into_raw(user_data) as *mut _,
-                Some(destroy_box::<F>),
-            );
-        }
-    }
-
-    pub fn set_glyph_v_kerning_func<F>(&mut self, func: F)
-    where
-        F: Fn(&Font, &T, Glyph, Glyph) -> Position,
-    {
-        let user_data = Box::new(func);
-        unsafe {
-            hb::hb_font_funcs_set_glyph_v_kerning_func(
-                self.as_raw(),
-                Some(rust_get_glyph_kerning_closure::<T, F>),
-                Box::into_raw(user_data) as *mut _,
-                Some(destroy_box::<F>),
-            );
-        }
-    }
-
     pub fn set_glyph_extents_func<F>(&mut self, func: F)
     where
-        F: Fn(&Font, &T, Glyph) -> Option<GlyphExtents>,
+        F: Fn(&Font<'_>, &T, Glyph) -> Option<GlyphExtents>,
     {
         let user_data = Box::new(func);
         unsafe {
@@ -604,7 +554,7 @@ impl<T> FontFuncsImpl<T> {
 
     pub fn set_glyph_contour_point_func<F>(&mut self, func: F)
     where
-        F: Fn(&Font, &T, Glyph, u32) -> Option<(Position, Position)>,
+        F: Fn(&Font<'_>, &T, Glyph, u32) -> Option<(Position, Position)>,
     {
         let user_data = Box::new(func);
         unsafe {
@@ -619,7 +569,7 @@ impl<T> FontFuncsImpl<T> {
 
     pub fn set_glyph_name_func<F>(&mut self, func: F)
     where
-        F: Fn(&Font, &T, Glyph) -> Option<String>,
+        F: Fn(&Font<'_>, &T, Glyph) -> Option<String>,
     {
         let user_data = Box::new(func);
         unsafe {
@@ -634,7 +584,7 @@ impl<T> FontFuncsImpl<T> {
 
     pub fn set_glyph_from_name_func<F>(&mut self, func: F)
     where
-        F: Fn(&Font, &T, &str) -> Option<Glyph>,
+        F: Fn(&Font<'_>, &T, &str) -> Option<Glyph>,
     {
         let user_data = Box::new(func);
         unsafe {
@@ -649,7 +599,7 @@ impl<T> FontFuncsImpl<T> {
 }
 
 impl<T> fmt::Debug for FontFuncsImpl<T> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("FontFuncsImpl").field("raw", &self.as_raw()).finish()
     }
 }
