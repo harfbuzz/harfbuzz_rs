@@ -21,30 +21,84 @@ pub(crate) extern "C" fn destroy_box<U>(ptr: *mut c_void) {
     unsafe { Box::from_raw(ptr as *mut U) };
 }
 
-/// A font is the most important concept in harfbuzz.
+/// A type representing a single font (i.e. a specific combination of typeface
+/// and typesize).
 ///
-/// A font can be created either as a subfont of an existing font or directly from a `Face` using
-/// its `create_font` function.
-#[derive(Debug)]
-#[repr(C)]
+/// # Font Funcs
+///
+/// A font is one of the most important structures in harfbuzz. It coordinates
+/// how glyph information is accessed during shaping. This is done through
+/// so-called font funcs.
+///
+/// You can manually define new font funcs according to your needs, in most
+/// cases though the default font funcs provided by HarfBuzz will suffice. In
+/// that case the creation of a usable font amounts to calling the `Font::new`
+/// constructor with the desired `Face`.
+///
+/// # Parents and Children
+///
+/// Every font except the empty font has a parent font. If a font does not have
+/// some font func set, it will automatically use the parent's implementation of
+/// that font func. This behavior is useful to effectively "subclass" font
+/// objects to use different font function implementations for some font funcs
+/// while reusing the parent's implementation for the remaining funcs.
+///
+/// Since every font created by `Font::new` by default uses HarfBuzz's internal
+/// font funcs they can be used as a fallback mechanism by only customizing the
+/// font funcs of a sub-font.
+///
+/// # Examples
+///
+/// Create a simple font from a `Face` using the default font funcs:
+///
+/// ```
+/// use harfbuzz_rs::*;
+/// # use std::path::PathBuf;
+/// # let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+/// # path.push("testfiles/SourceSansVariable-Roman.ttf");
+/// let face = Face::from_file(path, 0).expect("Error reading font file.");
+/// let font = Font::new(face);
+/// ```
+#[derive(Debug, PartialEq, Eq)]
 pub struct Font<'a> {
     raw: NonNull<hb::hb_font_t>,
     marker: PhantomData<&'a hb::hb_font_t>,
 }
 
 impl<'a> Font<'a> {
-    /// Create a new font with a specified `Face`.
+    /// Create a new font from the specified `Face`.
+    ///
+    /// This is the default constructor of `Font`. In many cases it is the best
+    /// choice if you simply want to shape some text.
+    ///
+    /// The default parent of a font created by this function is the empty font.
+    ///
+    /// # Font Functions
+    ///
+    /// The font returned by this function uses the font funcs that come with
+    /// HarfBuzz for OpenType Fonts. The font funcs can be overwritten using
+    /// `Font::set_font_funcs`.
+    ///
+    /// # Errors
+    ///
+    /// If for some reason no valid font can be constructed this function will
+    /// return the empty font.
     pub fn new<T: Into<Shared<Face<'a>>>>(face: T) -> Owned<Self> {
         unsafe {
             let face = face.into();
             let raw_font = hb::hb_font_create(Shared::into_raw(face));
             // set default font funcs for a completely new font
+            hb::hb_ot_font_set_funcs(raw_font);
+            Owned::from_raw(raw_font)
+        }
+    }
 
     /// Returns an empty font.
     ///
     /// This can be useful when you need a dummy font for whatever reason. Any
     /// function you call on the empty font will return some reasonable default
-    /// value.
+    /// value. An empty font is the only font whose `.parent()` method returns
+    /// `None`.
     pub fn empty() -> Owned<Self> {
         unsafe {
             let raw_font = hb::hb_font_get_empty();
@@ -52,13 +106,49 @@ impl<'a> Font<'a> {
         }
     }
 
-    /// Create a new sub font from the current font that by default inherits its parent font's
-    /// face, scale, ppem and font funcs.
+    /// Create a new sub font from the current font that by default inherits its
+    /// parent font's face, scale, ppem and font funcs.
+    ///
+    /// The sub-font's parent will be the font on which this method is called.
+    ///
+    /// Creating sub-fonts is especially useful if you want to overwrite some of
+    /// the font funcs of an already existing font.
+    ///
+    /// # Examples
+    /// ```
+    /// use harfbuzz_rs::*;
+    /// # use std::path::PathBuf;
+    /// # let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    /// # path.push("testfiles/SourceSansVariable-Roman.ttf");
+    /// let face = Face::from_file(path, 0).expect("Error reading font file.");
+    /// let font = Font::new(face).to_shared();
+    ///
+    /// let sub_font = Font::create_sub_font(font.clone());
+    /// // we know that sub_font has a parent
+    /// assert_eq!(sub_font.parent().unwrap(), font);
+    /// ```
     pub fn create_sub_font<T: Into<Shared<Self>>>(font: T) -> Owned<Self> {
         unsafe { Owned::from_raw(hb::hb_font_create_sub_font(font.into().as_raw())) }
     }
 
-    /// Returns the parent font.
+    /// Returns a shared pointer to the parent font.
+    ///
+    /// If `self` is the empty font it returns `None`.
+    ///
+    /// # See also
+    ///
+    /// [`create_sub_font`](./struct.Font.html#method.create_sub_font)
+    ///
+    /// # Examples
+    ///
+    /// The empty font (and only it) has no parent:
+    ///
+    /// ```
+    /// use harfbuzz_rs::Font;
+    ///
+    /// let font = Font::empty();
+    /// assert_eq!(font.parent(), None);
+    /// ```
     pub fn parent(&self) -> Option<Shared<Self>> {
         unsafe {
             let parent = hb::hb_font_get_parent(self.as_raw());
@@ -71,17 +161,19 @@ impl<'a> Font<'a> {
         }
     }
 
-    /// Returns the face which was used to create the font.
+    /// Returns a shared pointer to the face from which this font was created.
     pub fn face(&self) -> Shared<Face<'a>> {
         unsafe { Shared::from_raw_ref(hb::hb_font_get_face(self.as_raw())) }
     }
 
+    /// Returns the EM scale of the font.
     pub fn scale(&self) -> (i32, i32) {
         let mut result = (0i32, 0i32);
         unsafe { hb::hb_font_get_scale(self.as_raw(), &mut result.0, &mut result.1) };
         result
     }
 
+    /// Sets the EM scale of the font.
     pub fn set_scale(&mut self, x: i32, y: i32) {
         unsafe { hb::hb_font_set_scale(self.as_raw(), x, y) };
     }
@@ -96,6 +188,8 @@ impl<'a> Font<'a> {
         unsafe { hb::hb_font_set_ppem(self.as_raw(), x, y) };
     }
 
+    /// Sets the font functions that this font will have from a value that
+    /// implements [`FontFuncs`](./font_funcs/trait.FontFuncs.html).
     pub fn set_font_funcs<FuncsType>(&mut self, funcs: FuncsType)
     where
         FuncsType: 'a + Send + Sync + FontFuncs,
@@ -201,10 +295,12 @@ impl<'a> Font<'a> {
         }
     }
 
+    /// Get the horizontal advance width of a glyph.
     pub fn get_glyph_h_advance(&self, glyph: Glyph) -> Position {
         unsafe { hb::hb_font_get_glyph_h_advance(self.as_raw(), glyph) }
     }
 
+    /// Get the vertical advance width of a glyph.
     pub fn get_glyph_v_advance(&self, glyph: Glyph) -> Position {
         unsafe { hb::hb_font_get_glyph_v_advance(self.as_raw(), glyph) }
     }

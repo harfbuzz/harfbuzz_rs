@@ -14,15 +14,20 @@ use common::{HarfbuzzObject, Owned, Shared};
 /// A `Blob` manages raw data like e.g. file contents. It refers to a slice of
 /// bytes that can be either owned by the `Blob` or not.
 ///
-/// Since it is a simple wrapper for `hb_blob_t` it can be used to construct
-/// `Font`s and `Face`s directly from memory.
+/// It is used to provide access to memory for `Face` and `Font`. Typically it
+/// contains the raw font data (e.g. an entire font file or font tables). To enable
+/// shared usage of its data it uses a reference counting mechanism making the
+/// `clone` operation very cheap as no data is cloned.
 ///
-/// To enable shared usage of its data it uses a reference counting mechanism
-/// making the `clone` operation very cheap as no data is cloned.
+/// # Construction
 ///
-/// A `Blob` implements `Into` for every type that satisfies the `AsRef<[u8]>'
+/// A `Blob` implements `Into` for every type that satisfies the `AsRef<[u8]>`
 /// trait such as `Vec<u8>` and `Box<[u8]>` so owned blobs can be created easily
 /// from standard Rust objects.
+///
+/// You can also create `Blob`s that contain borrowed data using the constructors
+/// `Blob::with_bytes` and `Blob::with_bytes_mut` for immutable and mutable access
+/// respectively.
 #[repr(C)]
 pub struct Blob<'a> {
     raw: NonNull<hb::hb_blob_t>,
@@ -96,6 +101,10 @@ impl<'a> Blob<'a> {
     }
 
     /// Returns true if the blob is immutable.
+    ///
+    /// HarfBuzz internally uses this value to make sure the blob is not mutated
+    /// after being shared. In Rust this is not really necessary due to the borrow
+    /// checker. This method is provided regardless for completeness.
     pub fn is_immutable(&self) -> bool {
         unsafe { hb::hb_blob_is_immutable(self.as_raw()) == 1 }
     }

@@ -18,6 +18,9 @@ pub struct Face<'a> {
 
 impl<'a> Face<'a> {
     /// Create a new `Face` from the data.
+    ///
+    /// If `data` is not a valid font then this function returns an empty proxy
+    /// value.
     pub fn new<'b, T: Into<Shared<Blob<'b>>>>(data: T, index: u32) -> Owned<Face<'b>> {
         let blob = data.into();
         let hb_face = unsafe { hb::hb_face_create(Shared::into_raw(blob), index) };
@@ -25,6 +28,11 @@ impl<'a> Face<'a> {
     }
 
     /// Create a new face from the contents of the file at `path`.
+    ///
+    /// This function reads the contents of the file at `path` into memory,
+    /// creates a `Blob` and then calls `Face::new`.
+    ///
+    /// See also the discussion in `Blob::from_file`.
     pub fn from_file<P: AsRef<Path>>(path: P, index: u32) -> std::io::Result<Owned<Face<'static>>> {
         let blob = Blob::from_file(path)?;
         Ok(Face::new(blob, index))
@@ -38,7 +46,7 @@ impl<'a> Face<'a> {
     }
 
     /// Create a new face from a closure that returns a raw
-    /// [`Blob`](struct.Blob.html) of table
+    /// [`Blob`](struct.Blob.html) of table data.
     pub fn from_table_func<'b, F>(func: F) -> Owned<Face<'b>>
     where
         F: 'b + Send + Sync + FnMut(Tag) -> Option<Shared<Blob<'b>>>,

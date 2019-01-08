@@ -245,6 +245,8 @@ pub enum TypedBuffer {
 }
 
 impl TypedBuffer {
+    /// Takes ownership of the raw `hb_buffer_t` object and converts it to are
+    /// `TypedBuffer`. If no safe conversion is possible returns `None`.
     pub unsafe fn take_from_raw(raw: *mut hb::hb_buffer_t) -> Option<TypedBuffer> {
         let generic_buf: Owned<GenericBuffer> = Owned::from_raw(raw);
         let content_type = generic_buf.content_type();
@@ -263,6 +265,8 @@ impl TypedBuffer {
 /// A `UnicodeBuffer` can be filled with unicode text and corresponding cluster
 /// indices.
 ///
+/// # Usage
+///
 /// The buffer manages an allocation for the unicode codepoints to be shaped.
 /// This allocation is reused for storing the results of the shaping operation
 /// in a `GlyphBuffer` object. The intended usage is to keep one (or e.g. one
@@ -273,6 +277,8 @@ impl TypedBuffer {
 /// `.clear()` method which in turn gives you a fresh `UnicodeBuffer` (also
 /// reusing the original allocation again). This buffer can then be used to
 /// shape more text.
+///
+/// # Interaction with the raw harfbuzz API
 ///
 /// If you want to get a `UnicodeBuffer` from a pointer to a raw harfbuzz
 /// object, you need to use the `from_raw` static method on `TypedBuffer`. This

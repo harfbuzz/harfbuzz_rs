@@ -3,6 +3,10 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
+//! Contains the `FontFuncs` trait. 
+//!
+//! In the future there may be exposed other ways to create font funcs.
+
 use font::destroy_box;
 use {Font, FontExtents, Glyph, GlyphExtents, HarfbuzzObject, Owned, Position, Shared};
 

@@ -233,7 +233,7 @@ impl<T: HarfbuzzObject> Shared<T> {
 impl<T: HarfbuzzObject> Clone for Shared<T> {
     /// Returns a copy and increases the reference count.
     ///
-    /// This behaviour is exactly like `Arc` in the standard library.
+    /// This behaviour is exactly like `Arc::clone` in the standard library.
     fn clone(&self) -> Self {
         unsafe { Self::from_raw_ref(self.object.as_raw()) }
     }
@@ -315,6 +315,18 @@ impl<T: HarfbuzzObject> Owned<T> {
         let result = owned.object.as_raw();
         std::mem::forget(owned);
         result
+    }
+
+    /// Demotes an `Owned` pointer to a `Shared` pointer.
+    ///
+    /// Use this method when you don't need exclusive (mutable) access to the
+    /// object anymore. For differences between `Owned` and `Shared` pointers
+    /// see the documentation on the respective structs.
+    ///
+    /// Note that `Shared<T>` also implements `From<Owned<T>>` which allows
+    /// implicit conversions in many functions.
+    pub fn to_shared(self) -> Shared<T> {
+        self.into()
     }
 }
 

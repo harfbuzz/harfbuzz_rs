@@ -101,6 +101,12 @@ pub use font::*;
 ///
 /// This function consumes the `buffer` and returns a `GlyphBuffer` containing
 /// the resulting glyph indices and the corresponding positioning information.
+///
+/// # Arguments
+/// - `font` – a reference to the harfbuzz font used to shape the text.
+/// - `buffer` – a `UnicodeBuffer` that is filled with the text to be shaped and
+/// also contains metadata about the text in the form of segment properties.
+/// - `features` – a slice
 pub fn shape(font: &Font, buffer: UnicodeBuffer, features: &[Feature]) -> GlyphBuffer {
     let buffer = buffer.guess_segment_properties();
     unsafe {
