@@ -382,9 +382,9 @@ mod tests {
     }
 
     // this is a mock struct for testing HarfbuzzObject's behaviour.
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     struct ReferenceCounter {
-        rc: Rc<Cell<isize>>,
+        share_count: Rc<Cell<isize>>,
     }
 
     unsafe impl HarfbuzzObject for ReferenceCounter {
@@ -392,47 +392,56 @@ mod tests {
 
         unsafe fn from_raw(raw: *const Cell<isize>) -> Self {
             ReferenceCounter {
-                rc: Rc::from_raw(raw as *mut _),
+                share_count: Rc::from_raw(raw as *mut _),
             }
         }
 
         fn as_raw(&self) -> *mut Cell<isize> {
-            Rc::into_raw(self.rc.clone()) as *mut _
+            Rc::into_raw(self.share_count.clone()) as *mut _
         }
 
         unsafe fn reference(&self) {
             println!("referencing {:?}", self);
-            let rc = self.rc.get();
-            self.rc.set(rc + 1);
+            let rc = self.share_count.get();
+            self.share_count.set(rc + 1);
         }
 
         unsafe fn dereference(&self) {
             println!("dereferencing {:?}", self);
-            let rc = self.rc.get();
-            self.rc.set(rc - 1);
+            let rc = self.share_count.get();
+            self.share_count.set(rc - 1);
         }
     }
 
     #[test]
     fn reference_counting_shared() {
         // Mimic a C-API that returns a pointer to a reference counted value.
-        let object = Rc::new(ReferenceCounter {
-            rc: Rc::new(Cell::new(1)),
-        });
+        let object = ReferenceCounter {
+            share_count: Rc::new(Cell::new(1)),
+        };
+
+        // this clones the underlying `Rc`
         let raw = object.as_raw();
 
-        let arc: Shared<ReferenceCounter> = unsafe { Shared::from_raw_owned(raw) };
-        assert_eq!(object.rc.get(), 1);
-        {
-            let arc2 = Shared::clone(&arc);
-            assert_eq!(object.rc.get(), 2);
-            mem::drop(arc2);
-        }
-        assert_eq!(object.rc.get(), 1);
-        mem::drop(arc);
-        assert_eq!(object.rc.get(), 0);
+        // so we expect two shared owners
+        assert_eq!(Rc::strong_count(&object.share_count), 2);
 
-        // don't leak memory
-        let _ = unsafe { Rc::from_raw(raw) };
+        let shared: Shared<ReferenceCounter> = unsafe { Shared::from_raw_owned(raw) };
+
+        assert_eq!(shared.share_count.get(), 1);
+        {
+            // we create another `Shared` pointer...
+            let shared2 = Shared::clone(&shared);
+            // which clones
+            assert_eq!(shared.share_count.get(), 2);
+            mem::drop(shared2);
+        }
+        assert_eq!(shared.share_count.get(), 1);
+        mem::drop(shared);
+
+        assert_eq!(object.share_count.get(), 0);
+
+        // ensure there are no dangling references
+        assert_eq!(Rc::strong_count(&object.share_count), 1);
     }
 }
