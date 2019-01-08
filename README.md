@@ -68,4 +68,4 @@ gid2=11@276,0+0
 
 # Optional Features
 
-If you do not want to use rusttype's font functions you can disable the "rusttype" feature.
+If you want to use rusttype as font functions enable the `rusttype` feature.
