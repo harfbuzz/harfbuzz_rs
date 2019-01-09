@@ -10,10 +10,13 @@ use std::ops::{Deref, DerefMut};
 /// individual `chars` or a `str` slice and to get the string representation of
 /// a `Tag`.
 #[derive(Copy, Clone, Hash, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct Tag(pub hb::hb_tag_t);
 
 impl Tag {
     /// Create a `Tag` from its four-char textual representation.
+    ///
+    /// All the arguments must be ASCII values.
     ///
     /// # Examples
     ///
@@ -23,7 +26,7 @@ impl Tag {
     /// assert_eq!(cmap_tag.to_string(), "cmap")
     /// ```
     ///
-    pub fn new(a: char, b: char, c: char, d: char) -> Self {
+    pub const fn new(a: char, b: char, c: char, d: char) -> Self {
         Tag(((a as u32) << 24) | ((b as u32) << 16) | ((c as u32) << 8) | (d as u32))
     }
 
@@ -32,6 +35,23 @@ impl Tag {
         unsafe { hb::hb_tag_to_string(self.0, buf.as_mut_ptr() as *mut _) };
         String::from_utf8_lossy(&buf).into()
     }
+
+    /// Returns tag as 4-element byte array.
+    ///
+    /// # Examples
+    /// ```
+    /// # use harfbuzz_rs::Tag;
+    /// let tag = Tag::new('a', 'b', 'c', 'd');
+    /// assert_eq!(&tag.to_bytes(), b"abcd");
+    /// ```
+    pub const fn to_bytes(self) -> [u8; 4] {
+        [
+            (self.0 >> 24 & 0xff) as u8,
+            (self.0 >> 16 & 0xff) as u8,
+            (self.0 >> 8 & 0xff) as u8,
+            (self.0 >> 0 & 0xff) as u8,
+        ]
+}
 }
 
 use std::fmt;
