@@ -51,7 +51,7 @@ impl Tag {
             (self.0 >> 8 & 0xff) as u8,
             (self.0 >> 0 & 0xff) as u8,
         ]
-}
+    }
 }
 
 use std::fmt;
@@ -116,6 +116,43 @@ impl FromStr for Tag {
         }
         let len = std::cmp::max(s.len(), 4) as i32;
         unsafe { Ok(Tag(hb::hb_tag_from_string(s.as_ptr() as *mut _, len))) }
+    }
+}
+
+/// Defines the direction in which text is to be read.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum Direction {
+    /// Initial, unset direction.
+    Invalid,
+    /// Text is set horizontally from left to right.
+    Ltr,
+    /// Text is set horizontally from right to left.
+    Rtl,
+    /// Text is set vertically from top to bottom.
+    Ttb,
+    /// Text is set vertically from bottom to top.
+    Btt,
+}
+
+impl Direction {
+    pub fn to_raw(self) -> hb::hb_direction_t {
+        match self {
+            Direction::Invalid => hb::HB_DIRECTION_INVALID,
+            Direction::Ltr => hb::HB_DIRECTION_LTR,
+            Direction::Rtl => hb::HB_DIRECTION_RTL,
+            Direction::Ttb => hb::HB_DIRECTION_TTB,
+            Direction::Btt => hb::HB_DIRECTION_BTT,
+        }
+    }
+
+    pub fn from_raw(dir: hb::hb_direction_t) -> Self {
+        match dir {
+            hb::HB_DIRECTION_LTR => Direction::Ltr,
+            hb::HB_DIRECTION_RTL => Direction::Rtl,
+            hb::HB_DIRECTION_TTB => Direction::Ttb,
+            hb::HB_DIRECTION_BTT => Direction::Btt,
+            _ => Direction::Invalid,
+        }
     }
 }
 

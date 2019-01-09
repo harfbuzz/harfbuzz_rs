@@ -92,6 +92,8 @@ pub use crate::common::*;
 pub use crate::face::*;
 pub use crate::font::*;
 
+pub type Feature = hb::hb_feature_t;
+
 /// Shape the contents of the buffer using the provided font and activating all
 /// OpenType features given in `features`.
 ///

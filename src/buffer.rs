@@ -2,7 +2,7 @@ use crate::hb;
 use std;
 use std::ptr::NonNull;
 
-use crate::common::{HarfbuzzObject, Language, Owned, Tag};
+use crate::common::{Direction, HarfbuzzObject, Language, Owned, Tag};
 
 use std::fmt;
 use std::io;
@@ -10,7 +10,7 @@ use std::io::Read;
 
 pub type GlyphPosition = hb::hb_glyph_position_t;
 pub type GlyphInfo = hb::hb_glyph_info_t;
-pub type Feature = hb::hb_feature_t;
+pub type SegmentProperties = hb::hb_segment_properties_t;
 
 #[derive(Debug)]
 pub(crate) struct GenericBuffer {
@@ -43,13 +43,13 @@ impl GenericBuffer {
         }
     }
 
-    pub(crate) fn set_direction(&mut self, direction: hb::hb_direction_t) {
-        unsafe { hb::hb_buffer_set_direction(self.as_raw(), direction) };
+    pub(crate) fn set_direction(&mut self, direction: Direction) {
+        unsafe { hb::hb_buffer_set_direction(self.as_raw(), direction.to_raw()) };
     }
 
     /// Returns the `Buffer`'s text direction.
-    pub(crate) fn get_direction(&self) -> hb::hb_direction_t {
-        unsafe { hb::hb_buffer_get_direction(self.as_raw()) }
+    pub(crate) fn get_direction(&self) -> Direction {
+        Direction::from_raw(unsafe { hb::hb_buffer_get_direction(self.as_raw()) })
     }
 
     pub(crate) fn set_language(&mut self, lang: Language) {
@@ -77,7 +77,7 @@ impl GenericBuffer {
         unsafe { hb::hb_buffer_guess_segment_properties(self.as_raw()) };
     }
 
-    pub(crate) fn get_segment_properties(&self) -> hb::hb_segment_properties_t {
+    pub(crate) fn get_segment_properties(&self) -> SegmentProperties {
         unsafe {
             let mut segment_props: hb::hb_segment_properties_t = std::mem::uninitialized();
             hb::hb_buffer_get_segment_properties(self.as_raw(), &mut segment_props as *mut _);
@@ -373,13 +373,13 @@ impl UnicodeBuffer {
     }
 
     /// Set the text direction of the `Buffer`'s contents.
-    pub fn set_direction(mut self, direction: hb::hb_direction_t) -> UnicodeBuffer {
+    pub fn set_direction(mut self, direction: Direction) -> UnicodeBuffer {
         self.0.set_direction(direction);
         self
     }
 
     /// Returns the `Buffer`'s text direction.
-    pub fn get_direction(&self) -> hb::hb_direction_t {
+    pub fn get_direction(&self) -> Direction {
         self.0.get_direction()
     }
 
@@ -415,7 +415,7 @@ impl UnicodeBuffer {
 
     /// Get the segment properties (direction, language, script) of the current
     /// buffer.
-    pub fn get_segment_properties(&self) -> hb::hb_segment_properties_t {
+    pub fn get_segment_properties(&self) -> SegmentProperties {
         self.0.get_segment_properties()
     }
 
@@ -458,7 +458,7 @@ impl std::default::Default for UnicodeBuffer {
 /// An iterator over the codepoints stored in a `UnicodeBuffer`.
 ///
 /// You get an iterator of this type from the `.codepoints()` method on
-/// `UnicodeBuffer`. I yields `u32`s that should be interpreted as unicode
+/// `UnicodeBuffer`. It yields `u32`s that should be interpreted as unicode
 /// codepoints stored in the underlying buffer.
 #[derive(Debug, Clone)]
 pub struct Codepoints<'a> {
