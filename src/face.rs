@@ -27,6 +27,12 @@ impl<'a> Face<'a> {
         unsafe { Owned::from_raw(hb_face) }
     }
 
+    /// Returns a "null" face.
+    pub fn empty() -> Owned<Face<'static>> {
+        let hb_face = unsafe { hb::hb_face_get_empty() };
+        unsafe { Owned::from_raw(hb_face) }
+    }
+
     /// Create a new face from the contents of the file at `path`.
     ///
     /// This function reads the contents of the file at `path` into memory,
