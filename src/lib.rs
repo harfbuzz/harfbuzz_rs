@@ -92,26 +92,115 @@ pub use crate::common::*;
 pub use crate::face::*;
 pub use crate::font::*;
 
-pub type Feature = hb::hb_feature_t;
+use std::ops::{Bound, RangeBounds};
+use std::os::raw::c_uint;
+
+/// A feature tag with an according length were it should be applied.
+///
+/// You can pass a slice of `Feature`s to `shape` that will be activated for the
+/// corresponding slices of input.
+///
+/// # Examples
+///
+/// Shape some text using the `calt` (Contextual Alternatives) feature.
+///
+/// ```
+/// use harfbuzz_rs::{Face, Font, UnicodeBuffer, shape, Feature, Tag};
+///
+/// let path = "testfiles/SourceSansVariable-Roman.ttf";
+/// let face = Face::from_file(path, 0).expect("could not load face");
+/// let font = Font::new(face);
+///
+/// let buffer = UnicodeBuffer::new().add_str("Hello World!");
+///
+/// // contextual alternatives feature
+/// let feature_tag = Tag::new('c', 'a', 'l', 't');
+///
+/// // use the feature on the entire input
+/// let feature_range = 0..;
+/// let feature = Feature::new(feature_tag, 0, feature_range);
+///
+/// let output = shape(&font, buffer, &[feature]);
+/// ```
+#[derive(Debug, Copy, Clone)]
+#[repr(transparent)]
+pub struct Feature(hb::hb_feature_t);
+
+impl Feature {
+    /// Create a new `Feature` struct.
+    ///
+    /// # Arguments
+    ///
+    /// - `tag`: The OpenType feature tag to use.
+    /// - `value`: Some OpenType features accept different values to change
+    ///   their behaviour.
+    /// - `range`: The character range that should be affected by this feature.
+    pub fn new(tag: Tag, value: u32, range: impl RangeBounds<usize>) -> Feature {
+        // We have to do careful bounds checking since c_uint may be of
+        // different sizes on different platforms. We do assume that
+        // sizeof(usize) >= sizeof(c_uint).
+        const MAX_UINT: usize = c_uint::max_value() as usize;
+        let start = match range.start_bound() {
+            Bound::Included(&included) => included.min(MAX_UINT) as c_uint,
+            Bound::Excluded(&excluded) => excluded.min(MAX_UINT - 1) as c_uint + 1,
+            Bound::Unbounded => 0,
+        };
+        let end = match range.end_bound() {
+            Bound::Included(&included) => included.min(MAX_UINT) as c_uint,
+            Bound::Excluded(&excluded) => excluded.saturating_sub(1).min(MAX_UINT) as c_uint,
+            Bound::Unbounded => c_uint::max_value(),
+        };
+
+        Feature(hb::hb_feature_t {
+            tag: tag.0,
+            value,
+            start,
+            end,
+        })
+    }
+
+    pub fn tag(&self) -> Tag {
+        Tag(self.0.tag)
+    }
+
+    pub fn value(&self) -> u32 {
+        self.0.value
+    }
+
+    pub fn start(&self) -> usize {
+        self.0.start as usize
+    }
+
+    pub fn end(&self) -> usize {
+        self.0.end as usize
+    }
+}
 
 /// Shape the contents of the buffer using the provided font and activating all
 /// OpenType features given in `features`.
 ///
 /// This function consumes the `buffer` and returns a `GlyphBuffer` containing
 /// the resulting glyph indices and the corresponding positioning information.
+/// Once all the information from the `GlyphBuffer` has been processed as
+/// necessary you can reuse the `GlyphBuffer` as an `UnicodeBuffer` (using
+/// `GlyphBuffer::clear_contents`) and use that to call `shape` again with new
+/// data.
+///
+/// By default some basic OpenType features are enabled according to the
+/// language and the script set in the buffer.
 ///
 /// # Arguments
 /// - `font` – a reference to the harfbuzz font used to shape the text.
 /// - `buffer` – a `UnicodeBuffer` that is filled with the text to be shaped and
 /// also contains metadata about the text in the form of segment properties.
-/// - `features` – a slice
+/// - `features` – a slice of additional features to activate
 pub fn shape(font: &Font<'_>, buffer: UnicodeBuffer, features: &[Feature]) -> GlyphBuffer {
     let buffer = buffer.guess_segment_properties();
     unsafe {
         hb::hb_shape(
             font.as_raw(),
             buffer.0.as_raw(),
-            features.as_ptr(),
+            features.as_ptr() as *mut _,
             features.len() as u32,
         )
     };
@@ -122,4 +211,36 @@ pub fn shape(font: &Font<'_>, buffer: UnicodeBuffer, features: &[Feature]) -> Gl
 mod tests {
     #[test]
     fn it_works() {}
+
+    fn assert_feature(feat: Feature, tag: Tag, value: u32, start: usize, end: usize) {
+        assert_eq!(feat.tag(), tag);
+        assert_eq!(feat.value(), value);
+        assert_eq!(feat.start(), start);
+        assert_eq!(feat.end(), end);
+    }
+
+    use super::{Feature, Tag};
+    #[test]
+    fn feature_new() {
+        let tag = Tag::new('a', 'b', 'c', 'd');
+        const UINT_MAX: usize = std::os::raw::c_uint::max_value() as usize;
+
+        let feature = Feature::new(tag, 100, 2..100);
+        assert_feature(feature, tag, 100, 2, 99);
+
+        let feature = Feature::new(tag, 100, 2..=100);
+        assert_feature(feature, tag, 100, 2, 100);
+
+        let feature = Feature::new(tag, 100, 2..);
+        assert_feature(feature, tag, 100, 2, UINT_MAX);
+
+        let feature = Feature::new(tag, 100, ..100);
+        assert_feature(feature, tag, 100, 0, 99);
+
+        let feature = Feature::new(tag, 100, ..=100);
+        assert_feature(feature, tag, 100, 0, 100);
+
+        let feature = Feature::new(tag, 100, ..);
+        assert_feature(feature, tag, 100, 0, UINT_MAX);
+    }
 }
