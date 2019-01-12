@@ -96,6 +96,20 @@ impl<'a> FontFuncs for ScaledRusttypeFont<'a> {
 use std::sync::Arc;
 
 /// Creates a new HarfBuzz `Font` object that uses RustType to provide font data.
+/// 
+/// # Examples
+/// 
+/// Create a basic font that uses rusttype font funcs:
+/// ```
+/// use std::fs;
+/// use std::sync::Arc;
+/// 
+/// use harfbuzz_rs::rusttype::create_harfbuzz_rusttype_font;
+/// 
+/// let path = "testfiles/SourceSansVariable-Roman.ttf";
+/// let bytes: Arc<[u8]> = fs::read(path).unwrap().into();
+/// let font = create_harfbuzz_rusttype_font(bytes, 0);
+/// ```
 pub fn create_harfbuzz_rusttype_font(
     bytes: impl Into<Arc<[u8]>>,
     index: u32,

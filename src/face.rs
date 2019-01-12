@@ -10,6 +10,12 @@ use crate::blob::Blob;
 use crate::common::{HarfbuzzObject, Owned, Shared, Tag};
 
 /// A wrapper around `hb_face_t`.
+///
+/// An excerpt from harfbuzz documentation:
+/// > Font face is objects represent a single face in a font family. More
+/// > exactly, a font face represents a single face in a binary font file. Font
+/// > faces are typically built from a binary blob and a face index. Font faces
+/// > are used to create fonts.
 #[derive(Debug)]
 pub struct Face<'a> {
     raw: NonNull<hb::hb_face_t>,
@@ -19,9 +25,8 @@ pub struct Face<'a> {
 impl<'a> Face<'a> {
     /// Create a new `Face` from the data.
     ///
-    /// If `data` is not a valid font then this function returns an empty proxy
-    /// value.
-    pub fn new<'b, T: Into<Shared<Blob<'b>>>>(data: T, index: u32) -> Owned<Face<'b>> {
+    /// If `data` is not a valid font then this function returns the empty face.
+    pub fn new<T: Into<Shared<Blob<'a>>>>(data: T, index: u32) -> Owned<Face<'a>> {
         let blob = data.into();
         let hb_face = unsafe { hb::hb_face_create(Shared::into_raw(blob), index) };
         unsafe { Owned::from_raw(hb_face) }
