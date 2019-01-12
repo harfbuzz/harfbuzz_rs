@@ -9,11 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Here you can look at what features are coming in the next version.
 
+### Added
+
+- `Face::empty` constructor as a simple way to construct the empty face
+- `Feature` struct that wraps `hb_feature_t` and has an easy to use constructor.
+
 ### Changed
 
 - removed kerning callbacks from FontFuncs (following the upstream harfbuzz
   change)
 - updated to use Rust 2018
+- Further improved docs
 
 ## [0.3.0] 2019-01-08
 
