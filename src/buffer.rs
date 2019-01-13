@@ -2,15 +2,104 @@ use crate::hb;
 use std;
 use std::ptr::NonNull;
 
-use crate::common::{Direction, HarfbuzzObject, Language, Owned, Tag};
+use crate::common::{Direction, HarfbuzzObject, Language, Owned, Script, Tag};
+use crate::font::Position;
 
 use std::fmt;
 use std::io;
 use std::io::Read;
 
-pub type GlyphPosition = hb::hb_glyph_position_t;
-pub type GlyphInfo = hb::hb_glyph_info_t;
-pub type SegmentProperties = hb::hb_segment_properties_t;
+#[derive(Copy, Clone, Debug)]
+#[repr(C)]
+pub struct SegmentProperties {
+    pub direction: Direction,
+    pub script: Script,
+    pub language: Language,
+}
+
+impl SegmentProperties {
+    pub fn from_raw(raw: hb::hb_segment_properties_t) -> Self {
+        let direction = Direction::from_raw(raw.direction);
+        let script = Script(raw.script);
+        let language = Language(raw.language);
+        SegmentProperties {
+            direction,
+            script,
+            language,
+        }
+    }
+
+    pub fn into_raw(self) -> hb::hb_segment_properties_t {
+        hb::hb_segment_properties_t {
+            direction: self.direction.to_raw(),
+            script: self.script.0,
+            language: self.language.0,
+            reserved1: std::ptr::null_mut(),
+            reserved2: std::ptr::null_mut(),
+        }
+    }
+}
+
+/// `GlyphPosition` is the structure that holds the positions of the glyph in
+/// both horizontal and vertical directions. All positions in `GlyphPosition`
+/// are relative to the current point.
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct GlyphPosition {
+    /// how much the line advances after drawing this glyph when setting text in
+    /// horizontal direction.
+    pub x_advance: Position,
+    /// how much the line advances after drawing this glyph when setting text in
+    /// vertical direction.
+    pub y_advance: Position,
+    /// how much the glyph moves on the X-axis before drawing it, this should not
+    /// affect how much the line advances.
+    pub x_offset: Position,
+    /// how much the glyph moves on the Y-axis before drawing it, this should
+    /// not affect how much the line advances.
+    pub y_offset: Position,
+    var: hb::hb_var_int_t,
+}
+
+/// A set of flags that may be set during shaping on each glyph.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct GlyphFlags(pub hb::hb_glyph_flags_t);
+
+impl GlyphFlags {
+    /// If `true`, indicates that if input text is broken at the beginning of
+    /// the cluster this glyph is part of, then both sides need to be re-shaped,
+    /// as the result might be different. On the flip side, it means that when
+    /// this function returns `false`, then it's safe to break the glyph-run at
+    /// the beginning of this cluster, and the two sides represent the exact
+    /// same result one would get if breaking input text at the beginning of
+    /// this cluster and shaping the two sides separately. This can be used to
+    /// optimize paragraph layout, by avoiding re-shaping of each line after
+    /// line-breaking, or limiting the reshaping to a small piece around the
+    /// breaking point only.
+    pub fn unsafe_to_break(&self) -> bool {
+        self.0 & hb::HB_GLYPH_FLAG_UNSAFE_TO_BREAK == hb::HB_GLYPH_FLAG_UNSAFE_TO_BREAK
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+#[repr(C)]
+pub struct GlyphInfo {
+    pub codepoint: u32,
+    mask: hb::hb_mask_t,
+    pub cluster: u32,
+    var1: hb::hb_var_int_t,
+    var2: hb::hb_var_int_t,
+}
+
+impl GlyphInfo {
+    pub fn glyph_flags(&self) -> GlyphFlags {
+        GlyphFlags(unsafe { hb::hb_glyph_info_get_glyph_flags(self.as_raw()) })
+    }
+
+    fn as_raw(&self) -> *const hb::hb_glyph_info_t {
+        (self as *const GlyphInfo) as *const _
+    }
+}
 
 #[derive(Debug)]
 pub(crate) struct GenericBuffer {
@@ -81,7 +170,7 @@ impl GenericBuffer {
         unsafe {
             let mut segment_props: hb::hb_segment_properties_t = std::mem::uninitialized();
             hb::hb_buffer_get_segment_properties(self.as_raw(), &mut segment_props as *mut _);
-            segment_props
+            SegmentProperties::from_raw(segment_props)
         }
     }
 
@@ -94,7 +183,7 @@ impl GenericBuffer {
             let mut length: u32 = 0;
             let glyph_pos =
                 hb::hb_buffer_get_glyph_positions(self.as_raw(), &mut length as *mut u32);
-            std::slice::from_raw_parts(glyph_pos, length as usize)
+            std::slice::from_raw_parts(glyph_pos as *const _, length as usize)
         }
     }
 
@@ -102,7 +191,7 @@ impl GenericBuffer {
         unsafe {
             let mut length: u32 = 0;
             let glyph_infos = hb::hb_buffer_get_glyph_infos(self.as_raw(), &mut length as *mut u32);
-            std::slice::from_raw_parts(glyph_infos, length as usize)
+            std::slice::from_raw_parts(glyph_infos as *const _, length as usize)
         }
     }
 
@@ -600,4 +689,23 @@ impl fmt::Display for GlyphBuffer {
         write!(fmt, "{}", string)?;
         Ok(())
     }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use std::mem::{align_of, size_of};
+
+    fn memory_layout_equal<T, U>() {
+        assert_eq!(size_of::<T>(), size_of::<U>());
+        assert_eq!(align_of::<T>(), align_of::<U>());
+    }
+
+    #[test]
+    fn test_memory_layouts() {
+        memory_layout_equal::<hb::hb_glyph_position_t, GlyphPosition>();
+        memory_layout_equal::<hb::hb_glyph_info_t, GlyphInfo>();
+    }
+
 }
