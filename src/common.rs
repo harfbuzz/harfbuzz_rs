@@ -156,7 +156,7 @@ impl Direction {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Language(pub hb::hb_language_t);
 
 impl Default for Language {
@@ -203,7 +203,7 @@ impl FromStr for Language {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Script(pub hb::hb_script_t);
 
 impl Script {

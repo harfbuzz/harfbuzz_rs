@@ -9,7 +9,7 @@ use std::fmt;
 use std::io;
 use std::io::Read;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[repr(C)]
 pub struct SegmentProperties {
     pub direction: Direction,
@@ -59,6 +59,23 @@ pub struct GlyphPosition {
     /// not affect how much the line advances.
     pub y_offset: Position,
     var: hb::hb_var_int_t,
+}
+
+impl GlyphPosition {
+    pub const fn new(
+        x_advance: Position,
+        y_advance: Position,
+        x_offset: Position,
+        y_offset: Position,
+    ) -> Self {
+        GlyphPosition {
+            x_advance,
+            y_advance,
+            x_offset,
+            y_offset,
+            var: hb::hb_var_int_t { u32: 0 },
+        }
+    }
 }
 
 /// A set of flags that may be set during shaping on each glyph.
