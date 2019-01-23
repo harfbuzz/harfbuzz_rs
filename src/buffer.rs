@@ -135,15 +135,16 @@ impl GenericBuffer {
         self.len() == 0
     }
 
-    pub(crate) fn add_str(&mut self, string: &str) {
+    pub(crate) fn add_str_item(&mut self, string: &str, item_start: usize, item_len: usize) {
+        assert!(item_start + item_len <= string.len());
         let utf8_ptr = string.as_ptr() as *const i8;
         unsafe {
             hb::hb_buffer_add_utf8(
                 self.as_raw(),
                 utf8_ptr,
-                string.len() as i32,
-                0,
-                string.len() as i32,
+                string.len() as os::raw::c_int,
+                item_start as os::raw::c_uint,
+                item_len as os::raw::c_int,
             );
         }
     }
@@ -436,7 +437,11 @@ impl UnicodeBuffer {
 
     /// Add the string slice `str_slice` to the `Buffer`'s array of codepoints.
     ///
+    /// When shaping part of a larger text (e.g. a run of text from a paragraph)
+    /// it is preferable to use `add_str_item` instead.
+    ///
     /// # Examples
+    ///
     /// ```
     /// use harfbuzz_rs::UnicodeBuffer;
     ///
@@ -444,8 +449,50 @@ impl UnicodeBuffer {
     /// let buffer = buffer.add_str(" World");
     /// assert_eq!(buffer.string_lossy(), "Hello World");
     /// ```
+    ///
     pub fn add_str(mut self, str_slice: &str) -> UnicodeBuffer {
-        self.0.add_str(str_slice);
+        self.0.add_str_item(str_slice, 0, str_slice.len());
+        self
+    }
+
+    /// Add a string item to the buffer, providing context.
+    ///
+    /// Only the `item` string gets added to the buffer and will be shaped.
+    /// `context` provides extra information to the shaper, allowing, for
+    /// example, to do cross-run Arabic shaping or properly handle combining
+    /// marks at the start of a run.
+    ///
+    /// When shaping part of a larger text (e.g. a run of text from a paragraph)
+    /// you should pass the whole paragraph to this function as `context`
+    /// whereas `item` refers only to the part of the string to be shaped.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `item` is not a substring of `context`. Note that `item` must
+    /// reside in the same allocation as `context`!
+    ///
+    /// # Examples
+    ///
+    /// We only want to shape the string `World` as part of the sentence `Hello
+    /// World!`.
+    ///
+    /// ```
+    /// use harfbuzz_rs::UnicodeBuffer;
+    ///
+    /// let string = "Hello World!";
+    ///
+    /// // the range 6..11 corresponds to `World`
+    /// assert_eq!(&string[6..11], "World");
+    ///
+    /// let buffer = UnicodeBuffer::new().add_str_item(string, &string[6..11]);
+    /// assert_eq!(buffer.string_lossy(), "World");
+    /// ```
+    pub fn add_str_item(mut self, context: &str, item: &str) -> UnicodeBuffer {
+        const PANIC_MSG: &'static str = "`item` must be a substring of `context`";
+        let offset =
+            usize::checked_sub(item.as_ptr() as _, context.as_ptr() as _).expect(PANIC_MSG);
+        assert!(offset + item.len() <= context.len(), PANIC_MSG);
+        self.0.add_str_item(context, offset, item.len());
         self
     }
 
@@ -724,4 +771,23 @@ mod test {
         memory_layout_equal::<hb::hb_glyph_info_t, GlyphInfo>();
     }
 
+    #[test]
+    #[should_panic(expected = "must be a substring of")]
+    fn test_str_item_different_allocations() {
+        UnicodeBuffer::new().add_str_item("Test", "String");
+    }
+
+    #[test]
+    #[should_panic(expected = "must be a substring of")]
+    fn test_str_item_not_substring() {
+        let string = "Test String";
+        UnicodeBuffer::new().add_str_item(&string[0..5], &string[4..6]);
+    }
+
+    #[test]
+    #[should_panic(expected = "must be a substring of")]
+    fn test_str_item_not_substring2() {
+        let string = "Test String";
+        UnicodeBuffer::new().add_str_item(&string[4..], &string[0..5]);
+    }
 }
