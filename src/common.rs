@@ -156,6 +156,7 @@ impl Direction {
     }
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Language(pub hb::hb_language_t);
 
 impl Default for Language {
@@ -199,6 +200,23 @@ impl FromStr for Language {
         } else {
             Ok(Language(lang))
         }
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Script(pub hb::hb_script_t);
+
+impl Script {
+    pub fn from_iso15924_tag(tag: Tag) -> Self {
+        Script(unsafe { hb::hb_script_from_iso15924_tag(tag.0) })
+    }
+
+    pub fn to_iso15924_tag(self) -> Tag {
+        Tag(unsafe { hb::hb_script_to_iso15924_tag(self.0) })
+    }
+
+    pub fn horizontal_direction(self) -> Direction {
+        Direction::from_raw(unsafe { hb::hb_script_get_horizontal_direction(self.0) })
     }
 }
 

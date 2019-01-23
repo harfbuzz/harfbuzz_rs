@@ -24,6 +24,8 @@ pub(crate) extern "C" fn destroy_box<U>(ptr: *mut c_void) {
 /// A type representing a single font (i.e. a specific combination of typeface
 /// and typesize).
 ///
+/// It safely wraps `hb_font_t`.
+///
 /// # Font Funcs
 ///
 /// A font is one of the most important structures in harfbuzz. It coordinates
