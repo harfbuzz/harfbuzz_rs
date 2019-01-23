@@ -72,7 +72,9 @@
 //! ```
 #![deny(missing_debug_implementations)]
 
-use harfbuzz_sys as hb;
+/// Reexported `harfbuzz_sys` crate to directly access the C API whenever no
+/// adequate wrapper is provided.
+pub use harfbuzz_sys as hb;
 #[macro_use]
 extern crate bitflags;
 
@@ -209,6 +211,13 @@ pub fn shape(font: &Font<'_>, buffer: UnicodeBuffer, features: &[Feature]) -> Gl
 
 #[cfg(test)]
 mod tests {
+    use std::mem::{align_of, size_of};
+
+    pub(crate) fn assert_memory_layout_equal<T, U>() {
+        assert_eq!(size_of::<T>(), size_of::<U>());
+        assert_eq!(align_of::<T>(), align_of::<U>());
+    }
+
     #[test]
     fn it_works() {}
 

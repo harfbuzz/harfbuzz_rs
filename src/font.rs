@@ -13,9 +13,37 @@ use std::ffi::CStr;
 use std::marker::PhantomData;
 
 pub type Glyph = u32;
-pub type FontExtents = hb::hb_font_extents_t;
-pub type GlyphExtents = hb::hb_glyph_extents_t;
 pub type Position = hb::hb_position_t;
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+pub struct FontExtents {
+    pub ascender: Position,
+    pub descender: Position,
+    pub line_gap: Position,
+    pub(crate) reserved: [Position; 9],
+}
+
+impl FontExtents {
+    pub fn new(ascender: Position, descender: Position, line_gap: Position) -> FontExtents {
+        FontExtents {
+            ascender,
+            descender,
+            line_gap,
+            ..Default::default()
+        }
+    }
+
+    pub fn into_raw(self) -> hb::hb_font_extents_t {
+        unsafe { std::mem::transmute(self) }
+    }
+
+    pub fn from_raw(raw: hb::hb_font_extents_t) -> FontExtents {
+        unsafe { std::mem::transmute(raw) }
+    }
+}
+
+pub type GlyphExtents = hb::hb_glyph_extents_t;
 
 pub(crate) extern "C" fn destroy_box<U>(ptr: *mut c_void) {
     unsafe { Box::from_raw(ptr as *mut U) };
@@ -250,8 +278,11 @@ impl<'a> Font<'a> {
 
     pub fn get_font_h_extents(&self) -> Option<FontExtents> {
         unsafe {
-            let mut extents = std::mem::uninitialized::<FontExtents>();
-            let result = hb::hb_font_get_h_extents(self.as_raw(), &mut extents);
+            let mut extents = FontExtents::default();
+            let result = hb::hb_font_get_h_extents(
+                self.as_raw(),
+                &mut extents as *mut FontExtents as *mut _,
+            );
             if result == 1 {
                 Some(extents)
             } else {
@@ -263,7 +294,10 @@ impl<'a> Font<'a> {
     pub fn get_font_v_extents(&self) -> Option<FontExtents> {
         unsafe {
             let mut extents = std::mem::uninitialized::<FontExtents>();
-            let result = hb::hb_font_get_v_extents(self.as_raw(), &mut extents);
+            let result = hb::hb_font_get_v_extents(
+                self.as_raw(),
+                &mut extents as *mut FontExtents as *mut _,
+            );
             if result == 1 {
                 Some(extents)
             } else {
@@ -438,5 +472,16 @@ impl<'a> Default for Owned<Font<'a>> {
 impl<'a> Default for Shared<Font<'a>> {
     fn default() -> Self {
         Font::empty().into()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::tests::assert_memory_layout_equal;
+
+    #[test]
+    fn test_font_extents_layout() {
+        assert_memory_layout_equal::<FontExtents, hb::hb_font_extents_t>()
     }
 }

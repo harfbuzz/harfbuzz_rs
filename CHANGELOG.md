@@ -15,6 +15,7 @@ Here you can look at what features are coming in the next version.
 - `Feature` struct that wraps `hb_feature_t` and has an easy to use constructor.
 - Add `UnicodeBuffer::add_str_item` to allow providing context to the string
   being shaped.
+- Add `UnicodeBuffer::preallocate`
 
 ### Changed
 

@@ -127,6 +127,12 @@ impl GenericBuffer {
         unsafe { Owned::from_raw(buffer) }
     }
 
+    #[allow(unused)]
+    pub(crate) fn empty() -> Owned<GenericBuffer> {
+        let buffer = unsafe { hb::hb_buffer_get_empty() };
+        unsafe { Owned::from_raw(buffer) }
+    }
+
     pub(crate) fn len(&self) -> usize {
         unsafe { hb::hb_buffer_get_length(self.as_raw()) as usize }
     }
@@ -189,6 +195,11 @@ impl GenericBuffer {
             hb::hb_buffer_get_segment_properties(self.as_raw(), &mut segment_props as *mut _);
             SegmentProperties::from_raw(segment_props)
         }
+    }
+
+    pub(crate) fn pre_allocate(&mut self, size: usize) {
+        let size = size.min(std::os::raw::c_uint::max_value() as usize);
+        unsafe { hb::hb_buffer_pre_allocate(self.as_raw(), size as _) };
     }
 
     pub(crate) fn clear_contents(&mut self) {
@@ -571,6 +582,11 @@ impl UnicodeBuffer {
         self.0.get_segment_properties()
     }
 
+    /// Pre-allocate the buffer to hold a string at least `size` codepoints.
+    pub fn pre_allocate(&mut self, size: usize) {
+        self.0.pre_allocate(size)
+    }
+
     /// Clear the contents of the buffer (i.e. the stored string of unicode
     /// characters).
     ///
@@ -755,20 +771,20 @@ impl fmt::Display for GlyphBuffer {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
-
-    use std::mem::{align_of, size_of};
-
-    fn memory_layout_equal<T, U>() {
-        assert_eq!(size_of::<T>(), size_of::<U>());
-        assert_eq!(align_of::<T>(), align_of::<U>());
-    }
+    use crate::tests::assert_memory_layout_equal;
 
     #[test]
     fn test_memory_layouts() {
-        memory_layout_equal::<hb::hb_glyph_position_t, GlyphPosition>();
-        memory_layout_equal::<hb::hb_glyph_info_t, GlyphInfo>();
+        assert_memory_layout_equal::<hb::hb_glyph_position_t, GlyphPosition>();
+        assert_memory_layout_equal::<hb::hb_glyph_info_t, GlyphInfo>();
+    }
+
+    #[test]
+    fn test_str_item_heap() {
+        let string = String::from("Test String for test");
+        UnicodeBuffer::new().add_str_item(&string, &string[5..10]);
     }
 
     #[test]
