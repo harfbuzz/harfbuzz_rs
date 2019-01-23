@@ -1,13 +1,12 @@
-use crate::hb;
-use std;
-use std::ptr::NonNull;
-
 use crate::common::{Direction, HarfbuzzObject, Language, Owned, Script, Tag};
 use crate::font::Position;
+use crate::hb;
 
 use std::fmt;
 use std::io;
 use std::io::Read;
+use std::os;
+use std::ptr::NonNull;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[repr(C)]
