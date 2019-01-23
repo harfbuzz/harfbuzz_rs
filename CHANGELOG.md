@@ -13,11 +13,13 @@ Here you can look at what features are coming in the next version.
 
 - `Face::empty` constructor as a simple way to construct the empty face
 - `Feature` struct that wraps `hb_feature_t` and has an easy to use constructor.
+- Add `UnicodeBuffer::add_str_item` to allow providing context to the string
+  being shaped.
 
 ### Changed
 
 - removed kerning callbacks from FontFuncs (following the upstream harfbuzz
-  change)
+  change). This also enabled updating to harfbuzz-sys 0.3.
 - updated to use Rust 2018
 - Further improved docs
 
