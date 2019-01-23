@@ -771,20 +771,20 @@ impl fmt::Display for GlyphBuffer {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
-
-    use std::mem::{align_of, size_of};
-
-    fn memory_layout_equal<T, U>() {
-        assert_eq!(size_of::<T>(), size_of::<U>());
-        assert_eq!(align_of::<T>(), align_of::<U>());
-    }
+    use crate::tests::assert_memory_layout_equal;
 
     #[test]
     fn test_memory_layouts() {
-        memory_layout_equal::<hb::hb_glyph_position_t, GlyphPosition>();
-        memory_layout_equal::<hb::hb_glyph_info_t, GlyphInfo>();
+        assert_memory_layout_equal::<hb::hb_glyph_position_t, GlyphPosition>();
+        assert_memory_layout_equal::<hb::hb_glyph_info_t, GlyphInfo>();
+    }
+
+    #[test]
+    fn test_str_item_heap() {
+        let string = String::from("Test String for test");
+        UnicodeBuffer::new().add_str_item(&string, &string[5..10]);
     }
 
     #[test]

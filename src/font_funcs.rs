@@ -139,10 +139,10 @@ macro_rules! hb_callback {
 }
 
 hb_callback!(
-    rust_get_font_extents_closure<metrics: *mut FontExtents> -> hb::hb_bool_t {
+    rust_get_font_extents_closure<metrics: *mut hb::hb_font_extents_t> -> hb::hb_bool_t {
         return value: Option<FontExtents> => {
             if let Some(extents) = value {
-                unsafe { *metrics = extents };
+                unsafe { *metrics = extents.into_raw() };
                 1
             } else {
                 0
