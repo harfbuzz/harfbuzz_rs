@@ -127,6 +127,12 @@ impl GenericBuffer {
         unsafe { Owned::from_raw(buffer) }
     }
 
+    #[allow(unused)]
+    pub(crate) fn empty() -> Owned<GenericBuffer> {
+        let buffer = unsafe { hb::hb_buffer_get_empty() };
+        unsafe { Owned::from_raw(buffer) }
+    }
+
     pub(crate) fn len(&self) -> usize {
         unsafe { hb::hb_buffer_get_length(self.as_raw()) as usize }
     }
