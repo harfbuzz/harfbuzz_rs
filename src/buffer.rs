@@ -191,6 +191,11 @@ impl GenericBuffer {
         }
     }
 
+    pub(crate) fn pre_allocate(&mut self, size: usize) {
+        let size = size.min(std::os::raw::c_uint::max_value() as usize);
+        unsafe { hb::hb_buffer_pre_allocate(self.as_raw(), size as _) };
+    }
+
     pub(crate) fn clear_contents(&mut self) {
         unsafe { hb::hb_buffer_clear_contents(self.as_raw()) };
     }
@@ -569,6 +574,11 @@ impl UnicodeBuffer {
     /// buffer.
     pub fn get_segment_properties(&self) -> SegmentProperties {
         self.0.get_segment_properties()
+    }
+
+    /// Pre-allocate the buffer to hold a string at least `size` codepoints.
+    pub fn pre_allocate(&mut self, size: usize) {
+        self.0.pre_allocate(size)
     }
 
     /// Clear the contents of the buffer (i.e. the stored string of unicode
