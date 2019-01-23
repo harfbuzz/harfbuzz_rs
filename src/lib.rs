@@ -72,7 +72,9 @@
 //! ```
 #![deny(missing_debug_implementations)]
 
-use harfbuzz_sys as hb;
+/// Reexported `harfbuzz_sys` crate to directly access the C API whenever no
+/// adequate wrapper is provided.
+pub use harfbuzz_sys as hb;
 #[macro_use]
 extern crate bitflags;
 
