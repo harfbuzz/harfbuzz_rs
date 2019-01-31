@@ -5,20 +5,21 @@
 [![Build Status](https://travis-ci.org/manuel-rhdt/harfbuzz_rs.svg?branch=master)](https://travis-ci.org/manuel-rhdt/harfbuzz_rs)
 [![Build status](https://ci.appveyor.com/api/projects/status/tg2xpx3am2iw7nxr?svg=true)](https://ci.appveyor.com/project/manuel-rhdt/harfbuzz-rs)
 
-`harfbuzz_rs` is a high-level interface to HarfBuzz, exposing its most important functionality
-in a safe manner using Rust.
+`harfbuzz_rs` is a high-level interface to HarfBuzz, exposing its most important
+functionality in a safe manner using Rust.
 
 # What is HarfBuzz?
 
-HarfBuzz is a library for performing complex text layout. It does not perform any drawing. This
-is quite a low-level operation. If you want to simply draw some text on the screen choose
-another library. However if you want to build a library for drawing text on some canvas or
-need a lot of control on advanced text layout then this is the right library to use.
+HarfBuzz is a library for performing complex text layout. It does not perform
+any drawing. This is quite a low-level operation. If you want to simply draw
+some text on the screen you should maybe choose another more high-level library.
+However if you want to build a library for drawing text on some canvas or need a
+lot of control on advanced text layout then this is the right library to use.
 
 # Getting Started
 
-To shape a simple string of text you just create a `Font` from a font file, fill a `Buffer`
-with some text and call the `shape` function.
+To shape a simple string of text you just create a `Font` from a font file, fill
+a `Buffer` with some text and call the `shape` function.
 
 ```rust
 use harfbuzz_rs::*;

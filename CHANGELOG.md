@@ -5,17 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [1.0] 2019-01-31
 
-Here you can look at what features are coming in the next version.
+This is the 1.0 release of harfbuzz_rs. There are still many API's left to be
+covered by this crate however I think the current API should be able to remain
+stable.
 
 ### Added
 
 - `Face::empty` constructor as a simple way to construct the empty face
-- `Feature` struct that wraps `hb_feature_t` and has an easy to use constructor.
-- Add `UnicodeBuffer::add_str_item` to allow providing context to the string
+- `Feature` struct that wraps `hb_feature_t` and has an easy to use constructor
+- `UnicodeBuffer::add_str_item` to allow providing context to the string
   being shaped.
-- Add `UnicodeBuffer::preallocate`
+- `UnicodeBuffer::preallocate`
+- Reexport of `harfbuzz_sys` as `hb` to facilitate use of unwrapped functions
 
 ### Changed
 
@@ -24,7 +27,7 @@ Here you can look at what features are coming in the next version.
 - updated to use Rust 2018
 - Further improved docs
 
-## [0.3.0] 2019-01-08
+## [0.4.0] 2019-01-08
 
 ### Added
 

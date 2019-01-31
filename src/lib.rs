@@ -74,6 +74,8 @@
 
 /// Reexported `harfbuzz_sys` crate to directly access the C API whenever no
 /// adequate wrapper is provided.
+// This will hopefully not cause backwards compability concerns since harfbuzz
+// tries to be backwards compatible.
 pub use harfbuzz_sys as hb;
 #[macro_use]
 extern crate bitflags;
@@ -97,7 +99,8 @@ pub use crate::font::*;
 use std::ops::{Bound, RangeBounds};
 use std::os::raw::c_uint;
 
-/// A feature tag with an according length were it should be applied.
+/// A feature tag with an accompanying range specifying on which subslice of
+/// `shape`s input it should be applied.
 ///
 /// You can pass a slice of `Feature`s to `shape` that will be activated for the
 /// corresponding slices of input.
