@@ -499,7 +499,7 @@ impl UnicodeBuffer {
     /// assert_eq!(buffer.string_lossy(), "World");
     /// ```
     pub fn add_str_item(mut self, context: &str, item: &str) -> UnicodeBuffer {
-        const PANIC_MSG: &'static str = "`item` must be a substring of `context`";
+        const PANIC_MSG: &str = "`item` must be a substring of `context`";
         let offset =
             usize::checked_sub(item.as_ptr() as _, context.as_ptr() as _).expect(PANIC_MSG);
         assert!(offset + item.len() <= context.len(), PANIC_MSG);
