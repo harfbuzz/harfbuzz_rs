@@ -143,7 +143,7 @@ impl GenericBuffer {
 
     pub(crate) fn add_str_item(&mut self, string: &str, item_start: usize, item_len: usize) {
         assert!(item_start + item_len <= string.len());
-        let utf8_ptr = string.as_ptr() as *const i8;
+        let utf8_ptr = string.as_ptr() as *const _;
         unsafe {
             hb::hb_buffer_add_utf8(
                 self.as_raw(),

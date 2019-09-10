@@ -39,7 +39,7 @@ impl<'a> Blob<'a> {
     pub fn with_bytes(bytes: &'a [u8]) -> Owned<Blob<'a>> {
         let hb_blob = unsafe {
             hb::hb_blob_create(
-                bytes.as_ptr() as *const i8,
+                bytes.as_ptr() as *const _,
                 bytes.len() as u32,
                 hb::HB_MEMORY_MODE_READONLY,
                 std::ptr::null_mut(),
@@ -54,7 +54,7 @@ impl<'a> Blob<'a> {
     pub fn with_bytes_mut(bytes: &'a mut [u8]) -> Owned<Blob<'a>> {
         let hb_blob = unsafe {
             hb::hb_blob_create(
-                bytes.as_ptr() as *const i8,
+                bytes.as_ptr() as *const _,
                 bytes.len() as u32,
                 hb::HB_MEMORY_MODE_WRITABLE,
                 std::ptr::null_mut(),
@@ -204,7 +204,7 @@ where
 
         let hb_blob = unsafe {
             hb::hb_blob_create(
-                ptr as *const i8,
+                ptr as *const _,
                 len as u32,
                 hb::HB_MEMORY_MODE_READONLY,
                 data as *mut _,
