@@ -67,6 +67,10 @@ gid69=10@528,0+0
 gid2=11@276,0+0
 ```
 
+# Supported HarfBuzz versions
+
+This crate is tested to work with harfbuzz versions 2.0 and higher. Older versions may work as well but not sure. I recommend statically linking the harfbuzz library provided by the `harfbuzz-sys` crate.
+
 # Optional Features
 
 If you want to use rusttype as font functions enable the `rusttype` feature.
