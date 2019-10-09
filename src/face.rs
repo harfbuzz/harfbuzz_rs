@@ -28,7 +28,7 @@ impl<'a> Face<'a> {
     /// If `data` is not a valid font then this function returns the empty face.
     pub fn new<T: Into<Shared<Blob<'a>>>>(data: T, index: u32) -> Owned<Face<'a>> {
         let blob = data.into();
-        let hb_face = unsafe { hb::hb_face_create(Shared::into_raw(blob), index) };
+        let hb_face = unsafe { hb::hb_face_create(blob.as_raw(), index) };
         unsafe { Owned::from_raw(hb_face) }
     }
 
