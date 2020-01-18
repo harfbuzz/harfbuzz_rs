@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] 2020-01-18
+
+### Fixed
+
+- Builds on Android now [#20](https://github.com/manuel-rhdt/harfbuzz_rs/pull/20)
+- Memory leak on face creation
+- Memory leak on font creation [#22](https://github.com/manuel-rhdt/harfbuzz_rs/pull/22)
+- BufferSerializer now correctly serializes a single glyph [#23](https://github.com/manuel-rhdt/harfbuzz_rs/issues/23)
+
 ## [1.0] 2019-01-31
 
 This is the 1.0 release of harfbuzz_rs. There are still many API's left to be
