@@ -45,6 +45,7 @@ impl Tag {
     /// assert_eq!(&tag.to_bytes(), b"abcd");
     /// ```
     pub const fn to_bytes(self) -> [u8; 4] {
+        #[allow(clippy::identity_op)]
         [
             (self.0 >> 24 & 0xff) as u8,
             (self.0 >> 16 & 0xff) as u8,
@@ -224,6 +225,8 @@ impl Script {
 /// common functionality for converting from and to the underlying raw harfbuzz
 /// pointers that are useful for ffi.
 ///
+/// # Safety
+///
 /// This trait may only be implemented for structs that are zero-sized and is
 /// therefore unsafe to implement.
 pub unsafe trait HarfbuzzObject: Sized {
@@ -248,12 +251,24 @@ pub unsafe trait HarfbuzzObject: Sized {
     /// Increases the reference count of the HarfBuzz object.
     ///
     /// Wraps a `hb_TYPE_reference()` call.
+    ///
+    /// # Safety
+    ///
+    /// While no undefined behavior can be introduced only by increasing the
+    /// reference count (I think) this method is still marked unsafe since there
+    /// should be no need for it to be called from safe code.
     unsafe fn reference(&self);
 
     /// Decreases the reference count of the HarfBuzz object and destroys it if
     /// the reference count reaches zero.
     ///
     /// Wraps a `hb_TYPE_destroy()` call.
+    ///
+    /// # Safety
+    ///
+    /// You always have to call `reference` first before using this method.
+    /// Otherwise you might accidentally hold on to already destroyed objects
+    /// and causing UB.
     unsafe fn dereference(&self);
 }
 
@@ -277,6 +292,8 @@ pub struct Shared<T: HarfbuzzObject> {
 impl<T: HarfbuzzObject> Shared<T> {
     /// Creates a `Shared` from an owned raw harfbuzz pointer.
     ///
+    /// # Safety
+    ///
     /// Transfers ownership. _Use of the original pointer is now forbidden!_
     /// Unsafe because dereferencing a raw pointer is necessary.
     pub unsafe fn from_raw_owned(raw: *mut T::Raw) -> Self {
@@ -295,9 +312,18 @@ impl<T: HarfbuzzObject> Shared<T> {
     }
 
     /// Creates a `Shared` by cloning a raw harfbuzz pointer.
+
     ///
-    /// The original pointer can still be safely used but must be released
-    /// at the end to avoid memory leaks.
+    /// The original pointer can still be safely used but must be released at
+    /// the end to avoid memory leaks.
+    ///
+    /// # Safety
+    ///
+    /// `raw` must be a valid pointer to the corresponding harfbuzz object or
+    /// the behavior is undefined.
+    ///
+    /// Internally this method increases the reference count of `raw` so it is
+    /// safe to call `hb_destroy_[...]` on `raw` after using `from_raw_ref`.
     pub unsafe fn from_raw_ref(raw: *mut T::Raw) -> Self {
         let object = T::from_raw(raw);
         object.reference();
@@ -371,11 +397,14 @@ pub struct Owned<T: HarfbuzzObject> {
 impl<T: HarfbuzzObject> Owned<T> {
     /// Creates a `Owned` safely wrapping a raw harfbuzz pointer.
     ///
+    /// # Safety
+    ///
     /// This fully transfers ownership. _Use of the original pointer is now
     /// forbidden!_ Unsafe because a dereference of a raw pointer is necessary.
     ///
     /// Use this only to wrap freshly created HarfBuzz object that is not
-    /// shared!
+    /// shared! Otherwise it is possible to have aliasing mutable references
+    /// from safe code
     pub unsafe fn from_raw(raw: *mut T::Raw) -> Self {
         Owned {
             object: T::from_raw(raw),
@@ -400,6 +429,7 @@ impl<T: HarfbuzzObject> Owned<T> {
     ///
     /// Note that `Shared<T>` also implements `From<Owned<T>>` which allows
     /// implicit conversions in many functions.
+    #[allow(clippy::wrong_self_convention)] //< backward compatibility is more important than clippy
     pub fn to_shared(self) -> Shared<T> {
         self.into()
     }

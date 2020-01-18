@@ -51,8 +51,8 @@ pub struct GlyphPosition {
     /// how much the line advances after drawing this glyph when setting text in
     /// vertical direction.
     pub y_advance: Position,
-    /// how much the glyph moves on the X-axis before drawing it, this should not
-    /// affect how much the line advances.
+    /// how much the glyph moves on the X-axis before drawing it, this should
+    /// not affect how much the line advances.
     pub x_offset: Position,
     /// how much the glyph moves on the Y-axis before drawing it, this should
     /// not affect how much the line advances.
@@ -81,6 +81,7 @@ impl GlyphPosition {
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct GlyphFlags(pub hb::hb_glyph_flags_t);
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
 impl GlyphFlags {
     /// If `true`, indicates that if input text is broken at the beginning of
     /// the cluster this glyph is part of, then both sides need to be re-shaped,
@@ -352,7 +353,8 @@ impl<'a> Read for BufferSerializer<'a> {
     }
 }
 
-/// This type provides an interface to create one of the buffer types from a raw harfbuzz pointer.
+/// This type provides an interface to create one of the buffer types from a raw
+/// harfbuzz pointer.
 #[derive(Debug)]
 pub enum TypedBuffer {
     /// Contains a `UnicodeBuffer`
@@ -364,6 +366,11 @@ pub enum TypedBuffer {
 impl TypedBuffer {
     /// Takes ownership of the raw `hb_buffer_t` object and converts it to are
     /// `TypedBuffer`. If no safe conversion is possible returns `None`.
+    ///
+    /// # Safety
+    ///
+    /// Marked as unsafe because it acceses a raw pointer. Internally calls
+    /// `Owned::from_raw` and therefore the same ownership considerations apply.
     pub unsafe fn take_from_raw(raw: *mut hb::hb_buffer_t) -> Option<TypedBuffer> {
         let generic_buf: Owned<GenericBuffer> = Owned::from_raw(raw);
         let content_type = generic_buf.content_type();

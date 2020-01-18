@@ -1,5 +1,3 @@
-
-
 use harfbuzz_rs::{shape, Face, Font, UnicodeBuffer};
 
 // Execute this file from the root directory of this repository.

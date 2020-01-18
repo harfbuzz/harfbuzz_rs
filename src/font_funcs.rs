@@ -86,7 +86,6 @@ pub trait FontFuncs {
                 y_bearing: font.parent_scale_y_distance(|_| extents.y_bearing),
                 width: font.parent_scale_x_distance(|_| extents.width),
                 height: font.parent_scale_y_distance(|_| extents.height),
-                ..extents
             })
     }
     fn get_glyph_contour_point(
@@ -112,6 +111,7 @@ macro_rules! hb_callback {
         $(argument $closure_arg:ty => $expr:expr,)*
         return $closure_ret_id:ident: $closure_ret:ty => $ret_expr:expr
     }) => {
+        #[allow(clippy::let_and_return)]
         extern "C" fn $func_name<T, F>(
             font: *mut hb::hb_font_t,
             font_data: *mut c_void,
@@ -364,9 +364,7 @@ hb_callback!(
 ///     // implementations of other functions...
 /// }
 ///
-/// fn main() {
-///     let font_funcs: Owned<FontFuncsImpl<MyFontData>> = FontFuncsImpl::from_trait_impl();
-/// }
+/// let font_funcs: Owned<FontFuncsImpl<MyFontData>> = FontFuncsImpl::from_trait_impl();
 /// ```
 pub(crate) struct FontFuncsImpl<T> {
     raw: NonNull<hb::hb_font_funcs_t>,
@@ -404,9 +402,7 @@ impl<T: FontFuncs> FontFuncsImpl<T> {
     ///     // implement other trait functions...
     /// }
     ///     
-    /// fn main() {
-    ///     let font_funcs: Owned<FontFuncsImpl<MyFontData>> = FontFuncsImpl::from_trait_impl();
-    /// }
+    /// let font_funcs: Owned<FontFuncsImpl<MyFontData>> = FontFuncsImpl::from_trait_impl();
     /// ```
     ///
     pub fn from_trait_impl() -> Owned<FontFuncsImpl<T>> {

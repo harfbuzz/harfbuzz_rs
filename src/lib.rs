@@ -13,7 +13,6 @@
 //! with some text and call the `shape` function.
 //!
 //! ```
-//! # extern crate harfbuzz_rs;
 //! use harfbuzz_rs::*;
 //!
 //! # fn try_main() -> Result<(), std::io::Error> {
@@ -50,9 +49,7 @@
 //! # Ok(())
 //! # }
 //! #
-//! # fn main() {
-//! #   try_main().unwrap();
-//! # }
+//! # try_main().unwrap();
 //! ```
 //! This should print out something similar to the following:
 //!
