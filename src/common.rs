@@ -4,6 +4,14 @@ use std::ops::{Deref, DerefMut};
 
 /// A type to represent 4-byte SFNT tags.
 ///
+/// The easiest way to create a tag is by using its `From<&[u8; 4]>` impl:
+///
+/// ```
+/// # use harfbuzz_rs::Tag;
+/// let tag: Tag = b"abcd".into();
+/// assert_eq!(&tag.to_bytes(), b"abcd");
+/// ```
+///
 /// Tables, features, etc. in OpenType and many other font formats use SFNT tags
 /// as identifiers. These are 4-bytes long and usually each byte represents an
 /// ASCII value. `Tag` provides methods to create such identifiers from
@@ -69,6 +77,23 @@ impl Debug for Tag {
             chars.next().unwrap(),
             chars.next().unwrap()
         )
+    }
+}
+
+impl<'a> From<&'a [u8; 4]> for Tag {
+    fn from(byte_array: &'a [u8; 4]) -> Tag {
+        Tag::new(
+            byte_array[0] as char,
+            byte_array[1] as char,
+            byte_array[2] as char,
+            byte_array[3] as char,
+        )
+    }
+}
+
+impl From<Tag> for [u8; 4] {
+    fn from(tag: Tag) -> [u8; 4] {
+        tag.to_bytes()
     }
 }
 

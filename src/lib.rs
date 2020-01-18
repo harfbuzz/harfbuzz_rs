@@ -116,7 +116,7 @@ use std::os::raw::c_uint;
 /// let buffer = UnicodeBuffer::new().add_str("Hello World!");
 ///
 /// // contextual alternatives feature
-/// let feature_tag = Tag::new('c', 'a', 'l', 't');
+/// let feature_tag = b"calt";
 ///
 /// // use the feature on the entire input
 /// let feature_range = 0..;
@@ -137,7 +137,7 @@ impl Feature {
     /// - `value`: Some OpenType features accept different values to change
     ///   their behaviour.
     /// - `range`: The character range that should be affected by this feature.
-    pub fn new(tag: Tag, value: u32, range: impl RangeBounds<usize>) -> Feature {
+    pub fn new(tag: impl Into<Tag>, value: u32, range: impl RangeBounds<usize>) -> Feature {
         // We have to do careful bounds checking since c_uint may be of
         // different sizes on different platforms. We do assume that
         // sizeof(usize) >= sizeof(c_uint).
@@ -154,7 +154,7 @@ impl Feature {
         };
 
         Feature(hb::hb_feature_t {
-            tag: tag.0,
+            tag: tag.into().0,
             value,
             start,
             end,
@@ -231,7 +231,7 @@ mod tests {
     use super::{Feature, Tag};
     #[test]
     fn feature_new() {
-        let tag = Tag::new('a', 'b', 'c', 'd');
+        let tag = b"abcd".into();
         const UINT_MAX: usize = std::os::raw::c_uint::max_value() as usize;
 
         let feature = Feature::new(tag, 100, 2..100);

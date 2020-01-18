@@ -101,9 +101,9 @@ impl<'a> Face<'a> {
 
     /// Returns the slice of bytes for the table named `tag` or None if there is
     /// no table with `tag`.
-    pub fn table_with_tag(&self, tag: Tag) -> Option<Shared<Blob<'a>>> {
+    pub fn table_with_tag(&self, tag: impl Into<Tag>) -> Option<Shared<Blob<'a>>> {
         unsafe {
-            let raw_blob = hb::hb_face_reference_table(self.as_raw(), tag.0);
+            let raw_blob = hb::hb_face_reference_table(self.as_raw(), tag.into().0);
             if raw_blob.is_null() {
                 None
             } else {
@@ -168,7 +168,6 @@ unsafe impl<'a> Sync for Face<'a> {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::common::Tag;
 
     #[test]
     fn test_face_from_table_func() {
@@ -177,10 +176,10 @@ mod tests {
             Some(content.into_bytes().into())
         });
 
-        let maxp_table = face.table_with_tag(Tag::new('m', 'a', 'x', 'p')).unwrap();
+        let maxp_table = face.table_with_tag(b"maxp").unwrap();
         assert_eq!(maxp_table.as_ref(), b"maxp-table");
 
-        let maxp_table = face.table_with_tag(Tag::new('h', 'h', 'e', 'a')).unwrap();
+        let maxp_table = face.table_with_tag(b"hhea").unwrap();
         assert_eq!(&maxp_table.as_ref(), b"hhea-table");
     }
 }
