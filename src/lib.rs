@@ -209,6 +209,19 @@ pub fn shape(font: &Font<'_>, buffer: UnicodeBuffer, features: &[Feature]) -> Gl
     GlyphBuffer(buffer.0)
 }
 
+pub fn shape_with(
+    font: &Font<'_>,
+    buffer: &mut UnicodeBuffer,
+    features: &[Feature],
+    then: impl FnOnce(&mut GlyphBuffer),
+) {
+    let b = std::mem::replace(buffer, UnicodeBuffer::empty());
+    let b = b.guess_segment_properties();
+    let mut glyph_buffer = shape(font, b, features);
+    then(&mut glyph_buffer);
+    *buffer = glyph_buffer.clear();
+}
+
 #[cfg(test)]
 mod tests {
     use std::mem::{align_of, size_of};

@@ -128,7 +128,6 @@ impl GenericBuffer {
         unsafe { Owned::from_raw(buffer) }
     }
 
-    #[allow(unused)]
     pub(crate) fn empty() -> Owned<GenericBuffer> {
         let buffer = unsafe { hb::hb_buffer_get_empty() };
         unsafe { Owned::from_raw(buffer) }
@@ -420,6 +419,16 @@ impl UnicodeBuffer {
     /// ```
     pub fn new() -> UnicodeBuffer {
         UnicodeBuffer(GenericBuffer::new())
+    }
+
+    pub(crate) fn empty() -> UnicodeBuffer {
+        UnicodeBuffer(GenericBuffer::empty())
+    }
+
+    pub fn modify(&mut self, mutator: impl FnOnce(UnicodeBuffer) -> UnicodeBuffer) {
+        let buffer = std::mem::replace(self, UnicodeBuffer::empty());
+        let buffer = mutator(buffer);
+        *self = buffer;
     }
 
     /// Converts this buffer to a raw harfbuzz object pointer.
