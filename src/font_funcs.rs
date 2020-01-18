@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-//! Contains the `FontFuncs` trait. 
+//! Contains the `FontFuncs` trait.
 //!
 //! In the future there may be exposed other ways to create font funcs.
 
@@ -152,7 +152,10 @@ hb_callback!(
 );
 
 hb_callback!(
-    rust_get_nominal_glyph_closure<unicode: hb::hb_codepoint_t, glyph: *mut hb::hb_codepoint_t> -> hb::hb_bool_t {
+    rust_get_nominal_glyph_closure<
+        unicode: hb::hb_codepoint_t, 
+        glyph: *mut hb::hb_codepoint_t> 
+    -> hb::hb_bool_t {
         argument char => {
             match std::char::from_u32(unicode) {
                 Some(character) => character,
@@ -206,7 +209,11 @@ hb_callback!(
 );
 
 hb_callback!(
-    rust_get_glyph_origin_closure<glyph: hb::hb_codepoint_t, x: *mut Position, y: *mut Position> -> hb::hb_bool_t {
+    rust_get_glyph_origin_closure<
+        glyph: hb::hb_codepoint_t, 
+        x: *mut Position, 
+        y: *mut Position>
+    -> hb::hb_bool_t {
         argument Glyph => glyph,
         return pos: Option<(Position, Position)> => {
             if let Some((x_origin, y_origin)) = pos {
@@ -223,7 +230,10 @@ hb_callback!(
 );
 
 hb_callback!(
-    rust_get_glyph_extents_closure<glyph: hb::hb_codepoint_t, extents: *mut hb::hb_glyph_extents_t> -> hb::hb_bool_t {
+    rust_get_glyph_extents_closure<
+        glyph: hb::hb_codepoint_t, 
+        extents: *mut hb::hb_glyph_extents_t>
+    -> hb::hb_bool_t {
         argument Glyph => glyph,
         return value: Option<GlyphExtents> => {
             match value {
@@ -238,7 +248,12 @@ hb_callback!(
 );
 
 hb_callback!(
-    rust_get_glyph_contour_point_closure<glyph: hb::hb_codepoint_t, point: u32, x: *mut Position, y: *mut Position> -> hb::hb_bool_t {
+    rust_get_glyph_contour_point_closure<
+        glyph: hb::hb_codepoint_t, 
+        point: u32, 
+        x: *mut Position, 
+        y: *mut Position>
+    -> hb::hb_bool_t {
         argument Glyph => glyph,
         argument u32 => point,
         return value: Option<(Position, Position)> => {
@@ -255,7 +270,11 @@ hb_callback!(
 );
 
 hb_callback!(
-    rust_get_glyph_name_closure<glyph: hb::hb_codepoint_t, name: *mut std::os::raw::c_char, size: u32> -> hb::hb_bool_t {
+    rust_get_glyph_name_closure<
+        glyph: hb::hb_codepoint_t, 
+        name: *mut std::os::raw::c_char, 
+        size: u32>
+    -> hb::hb_bool_t {
         argument Glyph => glyph,
         return value: Option<String> => {
             let mut name = unsafe { std::slice::from_raw_parts_mut(name as *mut u8, size as usize) };
@@ -273,7 +292,11 @@ hb_callback!(
 );
 
 hb_callback!(
-    rust_get_glyph_from_name_closure<name: *const std::os::raw::c_char, size: i32, glyph: *mut hb::hb_codepoint_t> -> hb::hb_bool_t {
+    rust_get_glyph_from_name_closure<
+        name: *const std::os::raw::c_char,
+        size: i32,
+        glyph: *mut hb::hb_codepoint_t>
+    -> hb::hb_bool_t {
         argument &str => {
             let string = match size {
                 // `name` is null-terminated
@@ -369,7 +392,7 @@ impl<T: FontFuncs> FontFuncsImpl<T> {
     /// ```ignore
     /// use harfbuzz_rs::*;
     /// use harfbuzz_rs::font_funcs::FontFuncsImpl;
-    /// 
+    ///
     /// // Dummy struct implementing FontFuncs
     /// struct MyFontData {
     ///    value: i32,
@@ -600,7 +623,9 @@ impl<T> FontFuncsImpl<T> {
 
 impl<T> fmt::Debug for FontFuncsImpl<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("FontFuncsImpl").field("raw", &self.as_raw()).finish()
+        f.debug_struct("FontFuncsImpl")
+            .field("raw", &self.as_raw())
+            .finish()
     }
 }
 
@@ -610,7 +635,7 @@ unsafe impl<T> HarfbuzzObject for FontFuncsImpl<T> {
     unsafe fn from_raw(raw: *const Self::Raw) -> Self {
         FontFuncsImpl {
             raw: NonNull::new_unchecked(raw as *mut _),
-            marker: PhantomData
+            marker: PhantomData,
         }
     }
 
