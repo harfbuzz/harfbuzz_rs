@@ -192,7 +192,7 @@ impl GenericBuffer {
 
     pub(crate) fn get_segment_properties(&self) -> SegmentProperties {
         unsafe {
-            let mut segment_props: hb::hb_segment_properties_t = std::mem::uninitialized();
+            let mut segment_props: hb::hb_segment_properties_t = std::mem::zeroed();
             hb::hb_buffer_get_segment_properties(self.as_raw(), &mut segment_props as *mut _);
             SegmentProperties::from_raw(segment_props)
         }

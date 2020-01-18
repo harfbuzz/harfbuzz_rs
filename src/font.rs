@@ -293,7 +293,7 @@ impl<'a> Font<'a> {
 
     pub fn get_font_v_extents(&self) -> Option<FontExtents> {
         unsafe {
-            let mut extents = std::mem::uninitialized::<FontExtents>();
+            let mut extents = std::mem::zeroed::<FontExtents>();
             let result = hb::hb_font_get_v_extents(
                 self.as_raw(),
                 &mut extents as *mut FontExtents as *mut _,
@@ -369,7 +369,7 @@ impl<'a> Font<'a> {
 
     pub fn get_glyph_extents(&self, glyph: Glyph) -> Option<GlyphExtents> {
         unsafe {
-            let mut extents = std::mem::uninitialized::<GlyphExtents>();
+            let mut extents = std::mem::zeroed::<GlyphExtents>();
             let result = hb::hb_font_get_glyph_extents(self.as_raw(), glyph, &mut extents);
             if result == 1 {
                 Some(extents)
