@@ -322,7 +322,7 @@ impl<'a> Read for BufferSerializer<'a> {
         match self.bytes.read(buf) {
             // if `bytes` is empty refill it
             Ok(0) => {
-                if self.start >= self.end.saturating_sub(1) {
+                if self.start > self.end.saturating_sub(1) {
                     return Ok(0);
                 }
                 let mut bytes_written = 0;
@@ -781,6 +781,7 @@ impl fmt::Display for GlyphBuffer {
 mod tests {
     use super::*;
     use crate::tests::assert_memory_layout_equal;
+    use crate::{shape, Face, Font};
 
     #[test]
     fn test_memory_layouts() {
@@ -812,5 +813,60 @@ mod tests {
     fn test_str_item_not_substring2() {
         let string = "Test String";
         UnicodeBuffer::new().add_str_item(&string[4..], &string[0..5]);
+    }
+
+    #[test]
+    fn test_glyph_buffer_serialization_single_char() {
+        let path = "testfiles/SourceSansVariable-Roman.ttf";
+        let face = Face::from_file(path, 0).unwrap();
+        let font = Font::new(face);
+        let buffer = UnicodeBuffer::new().add_str("A");
+        let glyph_buffer = shape(&font, buffer, &[]);
+
+        // serializes only glyph indices
+        let mut serializer = glyph_buffer.serializer(
+            Some(&font),
+            SerializeFormat::Text,
+            SerializeFlags::NO_ADVANCES
+                | SerializeFlags::NO_CLUSTERS
+                | SerializeFlags::NO_POSITIONS
+                | SerializeFlags::NO_GLYPH_NAMES,
+        );
+        let mut string = String::new();
+        serializer.read_to_string(&mut string).unwrap();
+        assert_eq!(
+            string.parse::<u32>().unwrap(),
+            glyph_buffer.get_glyph_infos()[0].codepoint
+        );
+    }
+
+    #[test]
+    fn test_glyph_buffer_serialization_text() {
+        let path = "testfiles/SourceSansVariable-Roman.ttf";
+        let face = Face::from_file(path, 0).unwrap();
+        let font = Font::new(face);
+        let buffer = UnicodeBuffer::new().add_str("Hello 🌍");
+        let glyph_buffer = shape(&font, buffer, &[]);
+
+        // serializes only glyph indices
+        let mut serializer = glyph_buffer.serializer(
+            Some(&font),
+            SerializeFormat::Text,
+            SerializeFlags::NO_ADVANCES
+                | SerializeFlags::NO_CLUSTERS
+                | SerializeFlags::NO_POSITIONS
+                | SerializeFlags::NO_GLYPH_NAMES,
+        );
+        let mut string = String::new();
+        serializer.read_to_string(&mut string).unwrap();
+        for (serialized_glyph, glyph_info) in string
+            .split_terminator('|')
+            .zip(glyph_buffer.get_glyph_infos())
+        {
+            assert_eq!(
+                serialized_glyph.parse::<u32>().unwrap(),
+                glyph_info.codepoint
+            );
+        }
     }
 }
