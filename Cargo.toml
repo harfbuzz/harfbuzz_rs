@@ -1,12 +1,17 @@
 [package]
 name = "harfbuzz_rs"
-version = "1.0.1"
+version = "1.1.0"
 authors = ["Manuel Reinhardt <manuel.rhdt@gmail.com>"]
 description = "A high-level interface to HarfBuzz, exposing its most important functionality in a safe manner using Rust."
 repository = "https://github.com/manuel-rhdt/harfbuzz_rs"
 readme = "README.md"
 keywords = ["text", "ffi", "textlayout", "shaping", "harfbuzz"]
-categories = ["api-bindings", "external-ffi-bindings", "internationalization", "text-processing"]
+categories = [
+    "api-bindings",
+    "external-ffi-bindings",
+    "internationalization",
+    "text-processing"
+]
 license = "MIT"
 edition = "2018"
 
@@ -18,6 +23,6 @@ appveyor = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master", service 
 default = []
 
 [dependencies]
-harfbuzz-sys = "^0.4"
-rusttype = { version = "^0.7", optional = true }
+harfbuzz-sys = ">= 0.3"
+rusttype = { version = ">= 0.7", optional = true }
 bitflags = "^1"
