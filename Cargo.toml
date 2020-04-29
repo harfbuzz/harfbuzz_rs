@@ -18,6 +18,6 @@ appveyor = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master", service 
 default = []
 
 [dependencies]
-harfbuzz-sys = "^0.3"
+harfbuzz-sys = "^0.4"
 rusttype = { version = "^0.7", optional = true }
 bitflags = "^1"
