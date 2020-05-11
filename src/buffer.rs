@@ -118,6 +118,38 @@ impl GlyphInfo {
     }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum ClusterLevel {
+    MonotoneGraphemes,
+    MonotoneCharacters,
+    Characters,
+}
+
+impl ClusterLevel {
+    pub fn from_raw(raw: hb::hb_buffer_cluster_level_t) -> Self {
+        match raw {
+            hb::HB_BUFFER_CLUSTER_LEVEL_MONOTONE_GRAPHEMES => ClusterLevel::MonotoneGraphemes,
+            hb::HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS => ClusterLevel::MonotoneCharacters,
+            hb::HB_BUFFER_CLUSTER_LEVEL_CHARACTERS => ClusterLevel::Characters,
+            _ => panic!("received unrecognized HB_BUFFER_CLUSTER_LEVEL"),
+        }
+    }
+
+    pub fn into_raw(self) -> hb::hb_buffer_cluster_level_t {
+        match self {
+            ClusterLevel::MonotoneGraphemes => hb::HB_BUFFER_CLUSTER_LEVEL_MONOTONE_GRAPHEMES,
+            ClusterLevel::MonotoneCharacters => hb::HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS,
+            ClusterLevel::Characters => hb::HB_BUFFER_CLUSTER_LEVEL_CHARACTERS,
+        }
+    }
+}
+
+impl Default for ClusterLevel {
+    fn default() -> Self {
+        ClusterLevel::MonotoneGraphemes
+    }
+}
+
 #[derive(Debug)]
 pub(crate) struct GenericBuffer {
     raw: NonNull<hb::hb_buffer_t>,
@@ -196,6 +228,14 @@ impl GenericBuffer {
             hb::hb_buffer_get_segment_properties(self.as_raw(), &mut segment_props as *mut _);
             SegmentProperties::from_raw(segment_props)
         }
+    }
+
+    pub(crate) fn set_cluster_level(&mut self, cluster_level: ClusterLevel) {
+        unsafe { hb::hb_buffer_set_cluster_level(self.as_raw(), cluster_level.into_raw()) }
+    }
+
+    pub(crate) fn get_cluster_level(&self) -> ClusterLevel {
+        ClusterLevel::from_raw(unsafe { hb::hb_buffer_get_cluster_level(self.as_raw()) })
     }
 
     pub(crate) fn pre_allocate(&mut self, size: usize) {
@@ -589,6 +629,16 @@ impl UnicodeBuffer {
         self.0.get_segment_properties()
     }
 
+    /// Set the cluster level of the buffer.
+    pub fn set_cluster_level(&mut self, cluster_level: ClusterLevel) {
+        self.0.set_cluster_level(cluster_level)
+    }
+
+    /// Retrieve the cluster level of the buffer.
+    pub fn get_cluster_level(&self) -> ClusterLevel {
+        self.0.get_cluster_level()
+    }
+
     /// Pre-allocate the buffer to hold a string at least `size` codepoints.
     pub fn pre_allocate(&mut self, size: usize) {
         self.0.pre_allocate(size)
@@ -620,6 +670,7 @@ impl std::fmt::Debug for UnicodeBuffer {
             .field("direction", &self.get_direction())
             .field("language", &self.get_language())
             .field("script", &self.get_script())
+            .field("cluster_level", &self.get_cluster_level())
             .finish()
     }
 }
