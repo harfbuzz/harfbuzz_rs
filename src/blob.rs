@@ -64,6 +64,35 @@ impl<'a> Blob<'a> {
         unsafe { Owned::from_raw(hb_blob) }
     }
 
+    /// Create a new `Blob` from a type that owns a byte slice, effectively handing over
+    /// ownership of its data to the blob.
+    pub fn with_bytes_owned<T: 'a + Send>(
+        bytes_owner: T,
+        projector: impl Fn(&T) -> &[u8],
+    ) -> Owned<Blob<'a>> {
+        let boxxed = Box::new(bytes_owner);
+        let slice = projector(&boxxed);
+        let len = slice.len();
+        let ptr = slice.as_ptr();
+
+        let data = Box::into_raw(boxxed);
+
+        extern "C" fn destroy<U>(ptr: *mut c_void) {
+            unsafe { Box::from_raw(ptr as *mut U) };
+        }
+
+        let hb_blob = unsafe {
+            hb::hb_blob_create(
+                ptr as *const _,
+                len as u32,
+                hb::HB_MEMORY_MODE_READONLY,
+                data as *mut _,
+                Some(destroy::<T>),
+            )
+        };
+        unsafe { Owned::from_raw(hb_blob) }
+    }
+
     /// Create a `Blob` from the contents of the file at `path` whose contents
     /// will be read into memory.
     ///
@@ -193,25 +222,8 @@ where
     T: 'a + Send + AsRef<[u8]>,
 {
     fn from(container: T) -> Shared<Blob<'a>> {
-        let len = container.as_ref().len();
-        let ptr = container.as_ref().as_ptr();
-
-        let data = Box::into_raw(Box::new(container));
-
-        extern "C" fn destroy<U>(ptr: *mut c_void) {
-            unsafe { Box::from_raw(ptr as *mut U) };
-        }
-
-        let hb_blob = unsafe {
-            hb::hb_blob_create(
-                ptr as *const _,
-                len as u32,
-                hb::HB_MEMORY_MODE_READONLY,
-                data as *mut _,
-                Some(destroy::<T>),
-            )
-        };
-        unsafe { Shared::from_raw_owned(hb_blob) }
+        let blob = Blob::with_bytes_owned(container, |t| t.as_ref());
+        blob.into()
     }
 }
 
@@ -246,5 +258,23 @@ mod tests {
             assert_eq!(*num, counter);
             counter += 1;
         }
+    }
+
+    #[test]
+    fn test_arc_vec_to_blob_conversion() {
+        let rc_slice: Arc<Vec<u8>> = Arc::new(vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+        let blob: Owned<Blob<'static>> = Blob::with_bytes_owned(rc_slice.clone(), |t| &*t);
+        assert_eq!(Arc::strong_count(&rc_slice), 2);
+
+        assert_eq!(blob.len(), 11);
+
+        let mut counter: u8 = 1;
+        for num in blob.iter() {
+            assert_eq!(*num, counter);
+            counter += 1;
+        }
+
+        std::mem::drop(blob);
+        assert_eq!(Arc::strong_count(&rc_slice), 1);
     }
 }
