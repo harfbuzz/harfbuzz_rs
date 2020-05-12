@@ -445,7 +445,7 @@ unsafe impl<'a> HarfbuzzObject for Font<'a> {
 
     unsafe fn from_raw(raw: *const Self::Raw) -> Self {
         Font {
-            raw: NonNull::new_unchecked(raw as *mut _),
+            raw: NonNull::new(raw as *mut _).unwrap(),
             marker: PhantomData,
         }
     }

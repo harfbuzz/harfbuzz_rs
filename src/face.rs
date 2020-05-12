@@ -144,7 +144,7 @@ unsafe impl<'a> HarfbuzzObject for Face<'a> {
 
     unsafe fn from_raw(raw: *const hb::hb_face_t) -> Self {
         Face {
-            raw: NonNull::new_unchecked(raw as *mut _),
+            raw: NonNull::new(raw as *mut _).unwrap(),
             marker: PhantomData,
         }
     }

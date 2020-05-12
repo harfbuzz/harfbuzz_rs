@@ -285,7 +285,7 @@ unsafe impl HarfbuzzObject for GenericBuffer {
 
     unsafe fn from_raw(raw: *const Self::Raw) -> Self {
         GenericBuffer {
-            raw: NonNull::new_unchecked(raw as *mut _),
+            raw: NonNull::new(raw as *mut _).unwrap(),
         }
     }
 

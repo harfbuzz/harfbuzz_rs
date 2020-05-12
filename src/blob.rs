@@ -181,7 +181,7 @@ unsafe impl<'a> HarfbuzzObject for Blob<'a> {
 
     unsafe fn from_raw(raw: *const hb::hb_blob_t) -> Self {
         Blob {
-            raw: NonNull::new_unchecked(raw as *mut _),
+            raw: NonNull::new(raw as *mut _).unwrap(),
             marker: PhantomData,
         }
     }

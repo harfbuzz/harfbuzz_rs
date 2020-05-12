@@ -146,15 +146,15 @@ hb_callback!(
                 1
             } else {
                 0
-            } 
+            }
         }
     }
 );
 
 hb_callback!(
     rust_get_nominal_glyph_closure<
-        unicode: hb::hb_codepoint_t, 
-        glyph: *mut hb::hb_codepoint_t> 
+        unicode: hb::hb_codepoint_t,
+        glyph: *mut hb::hb_codepoint_t>
     -> hb::hb_bool_t {
         argument char => {
             match std::char::from_u32(unicode) {
@@ -175,8 +175,8 @@ hb_callback!(
 
 hb_callback!(
     rust_get_variation_glyph_closure<
-            unicode: hb::hb_codepoint_t, 
-            variation_selector: hb::hb_codepoint_t, 
+            unicode: hb::hb_codepoint_t,
+            variation_selector: hb::hb_codepoint_t,
             glyph: *mut hb::hb_codepoint_t> -> hb::hb_bool_t {
         argument char => {
             match std::char::from_u32(unicode) {
@@ -210,8 +210,8 @@ hb_callback!(
 
 hb_callback!(
     rust_get_glyph_origin_closure<
-        glyph: hb::hb_codepoint_t, 
-        x: *mut Position, 
+        glyph: hb::hb_codepoint_t,
+        x: *mut Position,
         y: *mut Position>
     -> hb::hb_bool_t {
         argument Glyph => glyph,
@@ -231,7 +231,7 @@ hb_callback!(
 
 hb_callback!(
     rust_get_glyph_extents_closure<
-        glyph: hb::hb_codepoint_t, 
+        glyph: hb::hb_codepoint_t,
         extents: *mut hb::hb_glyph_extents_t>
     -> hb::hb_bool_t {
         argument Glyph => glyph,
@@ -249,9 +249,9 @@ hb_callback!(
 
 hb_callback!(
     rust_get_glyph_contour_point_closure<
-        glyph: hb::hb_codepoint_t, 
-        point: u32, 
-        x: *mut Position, 
+        glyph: hb::hb_codepoint_t,
+        point: u32,
+        x: *mut Position,
         y: *mut Position>
     -> hb::hb_bool_t {
         argument Glyph => glyph,
@@ -271,8 +271,8 @@ hb_callback!(
 
 hb_callback!(
     rust_get_glyph_name_closure<
-        glyph: hb::hb_codepoint_t, 
-        name: *mut std::os::raw::c_char, 
+        glyph: hb::hb_codepoint_t,
+        name: *mut std::os::raw::c_char,
         size: u32>
     -> hb::hb_bool_t {
         argument Glyph => glyph,
@@ -630,7 +630,7 @@ unsafe impl<T> HarfbuzzObject for FontFuncsImpl<T> {
 
     unsafe fn from_raw(raw: *const Self::Raw) -> Self {
         FontFuncsImpl {
-            raw: NonNull::new_unchecked(raw as *mut _),
+            raw: NonNull::new(raw as *mut _).unwrap(),
             marker: PhantomData,
         }
     }
