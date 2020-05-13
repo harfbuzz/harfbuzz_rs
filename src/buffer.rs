@@ -630,8 +630,9 @@ impl UnicodeBuffer {
     }
 
     /// Set the cluster level of the buffer.
-    pub fn set_cluster_level(&mut self, cluster_level: ClusterLevel) {
-        self.0.set_cluster_level(cluster_level)
+    pub fn set_cluster_level(mut self, cluster_level: ClusterLevel) -> UnicodeBuffer {
+        self.0.set_cluster_level(cluster_level);
+        self
     }
 
     /// Retrieve the cluster level of the buffer.
