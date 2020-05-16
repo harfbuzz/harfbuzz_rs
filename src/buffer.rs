@@ -297,6 +297,10 @@ impl GenericBuffer {
         unsafe { hb::hb_buffer_reverse_range(self.as_raw(), start as u32, end as u32) }
     }
 
+    pub(crate) fn set_content_type(&self, content_type: hb::hb_buffer_content_type_t) {
+        unsafe { hb::hb_buffer_set_content_type(self.as_raw(), content_type) }
+    }
+
     pub(crate) fn content_type(&self) -> hb::hb_buffer_content_type_t {
         unsafe { hb::hb_buffer_get_content_type(self.as_raw()) }
     }
@@ -471,6 +475,11 @@ impl TypedBuffer {
 /// ensures that a buffer of correct type is created.
 pub struct UnicodeBuffer(pub(crate) Owned<GenericBuffer>);
 impl UnicodeBuffer {
+    pub(crate) fn from_generic(generic: Owned<GenericBuffer>) -> Self {
+        generic.set_content_type(hb::HB_BUFFER_CONTENT_TYPE_UNICODE);
+        UnicodeBuffer(generic)
+    }
+
     /// Creates a new empty `Buffer`.
     ///
     /// # Examples
@@ -481,7 +490,7 @@ impl UnicodeBuffer {
     /// assert!(buffer.is_empty());
     /// ```
     pub fn new() -> UnicodeBuffer {
-        UnicodeBuffer(GenericBuffer::new())
+        UnicodeBuffer::from_generic(GenericBuffer::new())
     }
 
     /// Converts this buffer to a raw harfbuzz object pointer.
@@ -798,7 +807,7 @@ impl GlyphBuffer {
     /// `UnicodeBuffer` reusing the existing allocation.
     pub fn clear(mut self) -> UnicodeBuffer {
         self.0.clear_contents();
-        UnicodeBuffer(self.0)
+        UnicodeBuffer::from_generic(self.0)
     }
 
     /// Returns a serializer that allows the contents of the buffer to be
