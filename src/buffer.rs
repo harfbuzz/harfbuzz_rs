@@ -2,10 +2,12 @@ use crate::common::{Direction, HarfbuzzObject, Language, Owned, Script, Tag};
 use crate::font::Position;
 use crate::hb;
 
+use std::convert::TryFrom;
 use std::fmt;
 use std::io;
 use std::io::Read;
 use std::os;
+use std::os::raw::c_uint;
 use std::ptr::NonNull;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
@@ -174,6 +176,12 @@ impl GenericBuffer {
         self.len() == 0
     }
 
+    pub(crate) fn add(&mut self, codepoint: u32, cluster: u32) {
+        unsafe {
+            hb::hb_buffer_add(self.as_raw(), codepoint, cluster);
+        }
+    }
+
     pub(crate) fn add_str_item(&mut self, string: &str, item_start: usize, item_len: usize) {
         assert!(item_start + item_len <= string.len());
         let utf8_ptr = string.as_ptr() as *const _;
@@ -185,6 +193,20 @@ impl GenericBuffer {
                 item_start as os::raw::c_uint,
                 item_len as os::raw::c_int,
             );
+        }
+    }
+
+    pub(crate) fn append(
+        &mut self,
+        source: &GenericBuffer,
+        cluster: u32,
+        start: usize,
+        end: usize,
+    ) {
+        let start = c_uint::try_from(start).expect("Integer overflow");
+        let end = c_uint::try_from(end).expect("Integer overflow");
+        unsafe {
+            hb::hb_buffer_append(self.as_raw(), source.as_raw(), start, end);
         }
     }
 
@@ -493,6 +515,21 @@ impl UnicodeBuffer {
         self.0.is_empty()
     }
 
+    /// Add a single codepoint with the associated cluster value to the buffer.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use harfbuzz_rs::UnicodeBuffer;
+    ///
+    /// let buffer = UnicodeBuffer::new().add('A' as u32, 0);
+    /// assert_eq!(buffer.string_lossy(), "A");
+    /// ```
+    pub fn add(mut self, codepoint: u32, cluster: u32) -> UnicodeBuffer {
+        self.0.add(codepoint, cluster);
+        self
+    }
+
     /// Add the string slice `str_slice` to the `Buffer`'s array of codepoints.
     ///
     /// When shaping part of a larger text (e.g. a run of text from a paragraph)
@@ -551,6 +588,17 @@ impl UnicodeBuffer {
             usize::checked_sub(item.as_ptr() as _, context.as_ptr() as _).expect(PANIC_MSG);
         assert!(offset + item.len() <= context.len(), PANIC_MSG);
         self.0.add_str_item(context, offset, item.len());
+        self
+    }
+
+    pub fn append(
+        mut self,
+        other: &UnicodeBuffer,
+        cluster: u32,
+        start: usize,
+        end: usize,
+    ) -> UnicodeBuffer {
+        self.0.append(&other.0, cluster, start, end);
         self
     }
 
