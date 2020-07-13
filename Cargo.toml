@@ -20,9 +20,11 @@ travis-ci = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master" }
 appveyor = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master", service = "github" }
 
 [features]
-default = []
+default = ["build-native-harfbuzz", "build-native-freetype"]
+build-native-harfbuzz = ["harfbuzz-sys/build-native-harfbuzz"]
+build-native-freetype = ["harfbuzz-sys/build-native-freetype"]
 
 [dependencies]
-harfbuzz-sys = ">= 0.3"
+harfbuzz-sys = { version = ">= 0.3", default-features = false }
 rusttype = { version = ">= 0.7, <0.9", optional = true }
 bitflags = "^1"
