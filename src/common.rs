@@ -161,6 +161,7 @@ pub enum Direction {
 }
 
 impl Direction {
+    /// Convert into raw value of type `hb_direction_t`.
     pub fn to_raw(self) -> hb::hb_direction_t {
         match self {
             Direction::Invalid => hb::HB_DIRECTION_INVALID,
@@ -171,6 +172,7 @@ impl Direction {
         }
     }
 
+    /// Create from raw value of type `hb_direction_t`.
     pub fn from_raw(dir: hb::hb_direction_t) -> Self {
         match dir {
             hb::HB_DIRECTION_LTR => Direction::Ltr,
