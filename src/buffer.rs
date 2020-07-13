@@ -196,15 +196,7 @@ impl GenericBuffer {
         }
     }
 
-    pub(crate) fn append(
-        &mut self,
-        source: &GenericBuffer,
-        cluster: u32,
-        start: usize,
-        end: usize,
-    ) {
-        let start = c_uint::try_from(start).expect("Integer overflow");
-        let end = c_uint::try_from(end).expect("Integer overflow");
+    pub(crate) fn append(&mut self, source: &GenericBuffer, start: c_uint, end: c_uint) {
         unsafe {
             hb::hb_buffer_append(self.as_raw(), source.as_raw(), start, end);
         }
@@ -600,14 +592,47 @@ impl UnicodeBuffer {
         self
     }
 
-    pub fn append(
+    /// Append codepoints from another `UnicodeBuffer` to the end of `self`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use harfbuzz_rs::UnicodeBuffer;
+    ///
+    /// let buffer = UnicodeBuffer::new().add_str("Hello");
+    /// let other = UnicodeBuffer::new().add_str(" World!");
+    /// let buffer = buffer.append(&other);
+    /// assert_eq!(buffer.string_lossy(), "Hello World!");
+    /// ```
+    ///
+    pub fn append(mut self, other: &UnicodeBuffer) -> UnicodeBuffer {
+        self.0.append(&other.0, 0, c_uint::max_value());
+        self
+    }
+
+    /// Append a range of codepoints from another `UnicodeBuffer` to the end of
+    /// `self`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use harfbuzz_rs::UnicodeBuffer;
+    ///
+    /// let buffer = UnicodeBuffer::new().add_str("Hello");
+    /// let other = UnicodeBuffer::new().add_str(" World!");
+    /// let buffer = buffer.append_range(&other, 0..=3);
+    /// assert_eq!(buffer.string_lossy(), "Hello Wor");
+    /// let buffer = buffer.append_range(&other, 4..);
+    /// assert_eq!(buffer.string_lossy(), "Hello World!");
+    /// ```
+    ///
+    pub fn append_range(
         mut self,
         other: &UnicodeBuffer,
-        cluster: u32,
-        start: usize,
-        end: usize,
+        range: impl std::ops::RangeBounds<usize>,
     ) -> UnicodeBuffer {
-        self.0.append(&other.0, cluster, start, end);
+        let (start, end) = crate::start_end_range(range);
+        self.0.append(&other.0, start, end);
         self
     }
 
