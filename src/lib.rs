@@ -96,6 +96,23 @@ pub use crate::font::*;
 use std::ops::{Bound, RangeBounds};
 use std::os::raw::c_uint;
 
+pub(crate) fn start_end_range(range: impl RangeBounds<usize>) -> (c_uint, c_uint) {
+    // We have to do careful bounds checking since c_uint may be of
+    // different sizes on different platforms. We do assume that
+    // sizeof(usize) >= sizeof(c_uint).
+    const MAX_UINT: usize = c_uint::max_value() as usize;
+    let start = match range.start_bound() {
+        Bound::Included(&included) => included.min(MAX_UINT) as c_uint,
+        Bound::Excluded(&excluded) => excluded.min(MAX_UINT - 1) as c_uint + 1,
+        Bound::Unbounded => 0,
+    };
+    let end = match range.end_bound() {
+        Bound::Included(&included) => included.saturating_add(1).min(MAX_UINT) as c_uint,
+        Bound::Excluded(&excluded) => excluded.min(MAX_UINT) as c_uint,
+        Bound::Unbounded => c_uint::max_value(),
+    };
+    (start, end)
+}
 /// A feature tag with an accompanying range specifying on which subslice of
 /// `shape`s input it should be applied.
 ///
@@ -131,28 +148,17 @@ pub struct Feature(hb::hb_feature_t);
 impl Feature {
     /// Create a new `Feature` struct.
     ///
+    /// The feature will be applied with the given value to all glyphs which are
+    /// in clusters contained in `range`.
+    ///
     /// # Arguments
     ///
     /// - `tag`: The OpenType feature tag to use.
     /// - `value`: Some OpenType features accept different values to change
     ///   their behaviour.
-    /// - `range`: The character range that should be affected by this feature.
+    /// - `range`: The cluster range that should be affected by this feature.
     pub fn new(tag: impl Into<Tag>, value: u32, range: impl RangeBounds<usize>) -> Feature {
-        // We have to do careful bounds checking since c_uint may be of
-        // different sizes on different platforms. We do assume that
-        // sizeof(usize) >= sizeof(c_uint).
-        const MAX_UINT: usize = c_uint::max_value() as usize;
-        let start = match range.start_bound() {
-            Bound::Included(&included) => included.min(MAX_UINT) as c_uint,
-            Bound::Excluded(&excluded) => excluded.min(MAX_UINT - 1) as c_uint + 1,
-            Bound::Unbounded => 0,
-        };
-        let end = match range.end_bound() {
-            Bound::Included(&included) => included.min(MAX_UINT) as c_uint,
-            Bound::Excluded(&excluded) => excluded.saturating_sub(1).min(MAX_UINT) as c_uint,
-            Bound::Unbounded => c_uint::max_value(),
-        };
-
+        let (start, end) = start_end_range(range);
         Feature(hb::hb_feature_t {
             tag: tag.into().0,
             value,
@@ -235,19 +241,19 @@ mod tests {
         const UINT_MAX: usize = std::os::raw::c_uint::max_value() as usize;
 
         let feature = Feature::new(tag, 100, 2..100);
-        assert_feature(feature, tag, 100, 2, 99);
+        assert_feature(feature, tag, 100, 2, 100);
 
         let feature = Feature::new(tag, 100, 2..=100);
-        assert_feature(feature, tag, 100, 2, 100);
+        assert_feature(feature, tag, 100, 2, 101);
 
         let feature = Feature::new(tag, 100, 2..);
         assert_feature(feature, tag, 100, 2, UINT_MAX);
 
         let feature = Feature::new(tag, 100, ..100);
-        assert_feature(feature, tag, 100, 0, 99);
+        assert_feature(feature, tag, 100, 0, 100);
 
         let feature = Feature::new(tag, 100, ..=100);
-        assert_feature(feature, tag, 100, 0, 100);
+        assert_feature(feature, tag, 100, 0, 101);
 
         let feature = Feature::new(tag, 100, ..);
         assert_feature(feature, tag, 100, 0, UINT_MAX);
