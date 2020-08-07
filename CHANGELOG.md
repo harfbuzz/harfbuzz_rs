@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Off-by-one error in cluster ranges for featues
+- Off-by-one error in cluster ranges for features
 
 ## [1.1.1] 2020-04-29
 
@@ -88,7 +88,7 @@ stable.
 - `SetRustTypeFuncs` is now deprecated in favor of
   `create_harfbuzz_rusttype_font`
 - Internal representation of smart pointers (possibly more safe now)
-- Many improvementes to documentation
+- Many improvements to documentation
 
 ## [0.3.0] 2018-08-26
 
