@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] 2020-08-07
+
+### Fixed
+
+- Since harfbuzz-sys 0.5.0 made breaking changes (see issue [#27](https://github.com/manuel-rhdt/harfbuzz_rs/issues/27)) we do not support it for now. If you need the newest harfbuzz-sys please make a comment on the issue. The current plan is to push a new major release of harfbuzz_rs 2.0.0.
+
 ## [1.1.2] 2020-07-13
 
 ### Added
