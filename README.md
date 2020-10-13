@@ -29,6 +29,11 @@ let index = 0; //< face index in the font file
 let face = Face::from_file(path, index)?;
 let mut font = Font::new(face);
 
+// the desired font size
+let size = 11;
+// increase the font size for improved precision of advances
+font.set_scale(size * 64, size * 64);
+
 let buffer = UnicodeBuffer::new().add_str("Hello World!");
 let output = shape(&font, buffer, &[]);
 
@@ -41,9 +46,10 @@ let infos = output.get_glyph_infos();
 for (position, info) in positions.iter().zip(infos) {
     let gid = info.codepoint;
     let cluster = info.cluster;
-    let x_advance = position.x_advance;
-    let x_offset = position.x_offset;
-    let y_offset = position.y_offset;
+    // rescale to the right font size
+    let x_advance = position.x_advance / 64;
+    let x_offset = position.x_offset / 64;
+    let y_offset = position.y_offset / 64;
 
     // Here you would usually draw the glyphs.
     println!("gid{:?}={:?}@{:?},{:?}+{:?}", gid, cluster, x_advance, x_offset, y_offset);
