@@ -266,7 +266,7 @@ pub unsafe trait HarfbuzzObject: Sized {
     /// changed. Should not be called directly by a library user.
     ///
     /// Use the Owned and Shared abstractions instead.
-    #[doc(hide)]
+    #[doc(hidden)]
     unsafe fn from_raw(val: *const Self::Raw) -> Self;
 
     /// Returns the underlying harfbuzz object pointer.
