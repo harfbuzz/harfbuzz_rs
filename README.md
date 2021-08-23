@@ -67,9 +67,17 @@ gid69=10@528,0+0
 gid2=11@276,0+0
 ```
 
+The values of `x_advance`, `x_offset`, `y_advance` and `y_offset` are all given in so-called _font units_ by default.
+By calling `face.upem()` you get the number of font units per [EM](<https://en.wikipedia.org/wiki/Em_(typography)>) for
+a specific `face`. This `upem` value can be used to scale the advances and offsets to a given font-size.
+For example, if you want to display a font at 16 point (pt) size, that means that _1 EM = 16 pt_.
+In this example, to convert a value, say `x_advance`, from font-units to points, we compute `((x_advance * font_size) as f64) / (upem as f64)`, where `font_size = 16` is a variable specifying the font size in points.
+
+Note that harfbuzz internally supports scaling fonts itself as well (using `font.set_scale(...)`, etc.) but in my opinion it is easier to scale the results oneself as described in the paragraph above.
+
 # Supported HarfBuzz versions
 
-This crate is tested to work with harfbuzz versions 2.0 and higher. Older versions may work as well but not sure. I recommend statically linking the harfbuzz library provided by the `harfbuzz-sys` crate.
+This crate is tested to work with harfbuzz versions 2.0 and higher. Older versions may work as well. I recommend statically linking the harfbuzz library provided by the `harfbuzz-sys` crate which is always up-to-date.
 
 # Optional Features
 
