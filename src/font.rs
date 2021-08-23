@@ -117,8 +117,6 @@ impl<'a> Font<'a> {
         unsafe {
             let face = face.into();
             let raw_font = hb::hb_font_create(face.as_raw());
-            // set default font funcs for a completely new font
-            hb::hb_ot_font_set_funcs(raw_font);
             Owned::from_raw(raw_font)
         }
     }

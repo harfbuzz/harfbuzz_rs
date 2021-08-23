@@ -2,6 +2,7 @@ use crate::common::{Direction, HarfbuzzObject, Language, Owned, Script, Tag};
 use crate::font::Position;
 use crate::hb;
 
+use fmt::Formatter;
 use std::io::Read;
 use std::os;
 use std::os::raw::c_uint;
@@ -43,7 +44,7 @@ impl SegmentProperties {
 /// both horizontal and vertical directions. All positions in `GlyphPosition`
 /// are relative to the current point.
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct GlyphPosition {
     /// how much the line advances after drawing this glyph when setting text in
     /// horizontal direction.
@@ -58,6 +59,17 @@ pub struct GlyphPosition {
     /// not affect how much the line advances.
     pub y_offset: Position,
     var: hb::hb_var_int_t,
+}
+
+impl std::fmt::Debug for GlyphPosition {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GlyphPosition")
+            .field("x_advance", &self.x_advance)
+            .field("y_advance", &self.y_advance)
+            .field("x_offset", &self.x_offset)
+            .field("y_offset", &self.y_offset)
+            .finish()
+    }
 }
 
 impl GlyphPosition {
@@ -98,7 +110,7 @@ impl GlyphFlags {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 #[repr(C)]
 pub struct GlyphInfo {
     pub codepoint: u32,
@@ -106,6 +118,16 @@ pub struct GlyphInfo {
     pub cluster: u32,
     var1: hb::hb_var_int_t,
     var2: hb::hb_var_int_t,
+}
+
+impl std::fmt::Debug for GlyphInfo {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GlyphInfo")
+            .field("codepoint", &self.codepoint)
+            .field("cluster", &self.cluster)
+            .field("flags", &self.glyph_flags())
+            .finish()
+    }
 }
 
 impl GlyphInfo {
@@ -283,7 +305,7 @@ impl GenericBuffer {
 
     /// Reverse the `Buffer`'s contents in the range from `start` to `end`.
     pub(crate) fn reverse_range(&mut self, start: usize, end: usize) {
-        assert!(start <= self.len(), end <= self.len());
+        assert!(start <= self.len(), "{}", end <= self.len());
         unsafe { hb::hb_buffer_reverse_range(self.as_raw(), start as u32, end as u32) }
     }
 
@@ -585,7 +607,7 @@ impl UnicodeBuffer {
         const PANIC_MSG: &str = "`item` must be a substring of `context`";
         let offset =
             usize::checked_sub(item.as_ptr() as _, context.as_ptr() as _).expect(PANIC_MSG);
-        assert!(offset + item.len() <= context.len(), PANIC_MSG);
+        assert!(offset + item.len() <= context.len(), "{}", PANIC_MSG);
         self.0.add_str_item(context, offset, item.len());
         self
     }
@@ -869,7 +891,7 @@ impl GlyphBuffer {
     ///     ).read_to_string(&mut string)
     ///     .unwrap();
     ///
-    /// assert_eq!(string, "gid2=0+520|gid3=1+574|gid4=2+562")
+    /// assert_eq!(string, "[gid2=0+520|gid3=1+574|gid4=2+562]")
     /// ```
     pub fn serializer<'a>(
         &'a self,
@@ -966,6 +988,7 @@ mod tests {
         );
         let mut string = String::new();
         serializer.read_to_string(&mut string).unwrap();
+        let string = string.replace(|c: char| !c.is_ascii_digit(), "");
         assert_eq!(
             string.parse::<u32>().unwrap(),
             glyph_buffer.get_glyph_infos()[0].codepoint
@@ -992,7 +1015,8 @@ mod tests {
         let mut string = String::new();
         serializer.read_to_string(&mut string).unwrap();
         for (serialized_glyph, glyph_info) in string
-            .split_terminator('|')
+            .split_terminator::<&[char]>(&['|', '[', ']'])
+            .filter(|c| !c.is_empty())
             .zip(glyph_buffer.get_glyph_infos())
         {
             assert_eq!(

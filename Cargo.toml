@@ -25,6 +25,6 @@ build-native-harfbuzz = ["harfbuzz-sys/build-native-harfbuzz"]
 build-native-freetype = ["harfbuzz-sys/build-native-freetype"]
 
 [dependencies]
-harfbuzz-sys = { version = ">= 0.3, <0.5", default-features = false }
-rusttype = { version = ">= 0.7, <0.9", optional = true }
+harfbuzz-sys = { version = "0.5", default-features = false }
+rusttype = { version = "0.9", optional = true }
 bitflags = "^1"

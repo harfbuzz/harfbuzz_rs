@@ -73,7 +73,7 @@
 /// adequate wrapper is provided.
 // This will hopefully not cause backwards compability concerns since harfbuzz
 // tries to be backwards compatible.
-pub use harfbuzz_sys as hb;
+use harfbuzz_sys as hb;
 #[macro_use]
 extern crate bitflags;
 
