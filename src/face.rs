@@ -137,7 +137,28 @@ impl<'a> Face<'a> {
     pub fn glyph_count(&self) -> u32 {
         unsafe { hb::hb_face_get_glyph_count(self.as_raw()) }
     }
+
+    #[cfg(variation_support)]
+    pub fn get_variation_axis_infos(&self) -> Vec<VariationAxisInfo> {
+        let mut count = unsafe { hb::hb_ot_var_get_axis_count(self.as_raw()) };
+        let mut vector: Vec<VariationAxisInfo> = Vec::with_capacity(count as usize);
+        unsafe {
+            hb::hb_ot_var_get_axis_infos(
+                self.as_raw(),
+                0,
+                &mut count,
+                vector.as_mut_ptr() as *mut _,
+            )
+        };
+        unsafe { vector.set_len(count as usize) };
+        vector
+    }
 }
+
+#[cfg(variation_support)]
+#[derive(Debug, Clone, Copy)]
+#[repr(transparent)]
+pub struct VariationAxisInfo(pub hb::hb_ot_var_axis_info_t);
 
 unsafe impl<'a> HarfbuzzObject for Face<'a> {
     type Raw = hb::hb_face_t;
