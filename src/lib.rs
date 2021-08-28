@@ -141,6 +141,54 @@ pub(crate) fn start_end_range(range: impl RangeBounds<usize>) -> (c_uint, c_uint
 ///
 /// let output = shape(&font, buffer, &[feature]);
 /// ```
+/// 
+/// 
+    /// Create a new `variation` struct.
+    ///
+    ///
+    /// # Arguments
+    ///
+    /// - `tag`: The OpenType variation tag to use.
+    /// - `value`: Some OpenType variant accept different values to change
+    ///   their behaviour.
+#[derive(Debug, Copy, Clone)]
+#[repr(transparent)]
+pub struct Variation(hb::hb_variation_t);
+
+impl Variation{
+    pub fn new(tag: impl Into<Tag>, value: f32) -> Variation {
+        Variation(hb::hb_variation_t {
+            tag: tag.into().0,
+            value,
+
+        })
+    }
+
+    pub fn tag(&self) -> Tag {
+        Tag(self.0.tag)
+    }
+
+    pub fn value(&self) -> f32 {
+        self.0.value
+    }
+}
+
+////
+/// Set font variation
+/// eg.
+/// let variation_vec : Vec<Variation> = vec![Variation::new(b"wght", 800.0), Variation::new(b"wdth", 30.0)];
+/// set_variations(&font, &variation_vec);
+/// 
+pub fn set_variations(font: &Font<'_>,  features: &[Variation]) {
+    unsafe {
+        hb::hb_font_set_variations(
+            font.as_raw(),
+            features.as_ptr() as *mut _,
+            features.len() as u32,
+        )
+    };
+}
+
 #[derive(Debug, Copy, Clone)]
 #[repr(transparent)]
 pub struct Feature(hb::hb_feature_t);
@@ -252,7 +300,7 @@ mod tests {
         let feature = Feature::new(tag, 100, ..100);
         assert_feature(feature, tag, 100, 0, 100);
 
-        let feature = Feature::new(tag, 100, ..=100);
+        let feature = Feature::new(tag, 100, ..=100); 
         assert_feature(feature, tag, 100, 0, 101);
 
         let feature = Feature::new(tag, 100, ..);
