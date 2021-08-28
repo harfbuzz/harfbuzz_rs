@@ -146,14 +146,14 @@ pub(crate) fn start_end_range(range: impl RangeBounds<usize>) -> (c_uint, c_uint
 
 
 
-    /// Create a new `variation` struct.
-    ///
-    ///
-    /// # Arguments
-    ///
-    /// - `tag`: The OpenType variation tag to use.
-    /// - `value`: Some OpenType variant accept different values to change
-    ///   their behaviour.
+/// Create a new `variation` struct.
+///
+///
+/// # Arguments
+///
+/// - `tag`: The OpenType variation tag to use.
+/// - `value`: Some OpenType variant accept different values to change
+///   their behaviour.
 #[derive(Debug, Copy, Clone)]
 #[repr(transparent)]
 pub struct Variation(hb::hb_variation_t);
