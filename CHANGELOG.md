@@ -5,16 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0] 2021-08-32
+## [2.0.1] 2021-08-28
 
-## Changed
+### Added
+
+- Add basic support for font variations (see PR [#32](https://github.com/manuel-rhdt/harfbuzz_rs/pull/32))
+
+## [2.0.0] 2021-08-22
+
+### Changed
 
 - **Breaking** Remove reexport of harfbuzz-sys (this was a bad idea, since we inherit any breaking changes made in harfuzz-sys automatically)
 - Update harfbuzz-sys to 0.5
 - Update rusttype to 0.9
 - Improve README
 
-## Fixed
+### Fixed
 
 - Cargo test no longer may fail spuriously because of harfbuzz-internal serialization format not being consistent
 
