@@ -8,6 +8,7 @@ use crate::common::{HarfbuzzObject, Owned, Shared};
 use crate::face::Face;
 pub use crate::font_funcs::FontFuncs;
 use crate::font_funcs::FontFuncsImpl;
+use crate::Variation;
 
 use std::ffi::CStr;
 use std::marker::PhantomData;
@@ -432,6 +433,24 @@ impl<'a> Font<'a> {
                 None
             }
         }
+    }
+
+    /// Set font variation settings.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let variation_vec : Vec<Variation> = vec![Variation::new(b"wght", 800.0), Variation::new(b"wdth", 30.0)];
+    /// set_variations(&font, &variation_vec);
+    /// ```
+    pub fn set_variations(&self,  variations: &[Variation]) {
+        unsafe {
+        hb::hb_font_set_variations(
+            self.as_raw(),
+            variations.as_ptr() as *mut _,
+            variations.len() as u32,
+        )
+        };
     }
 }
 
