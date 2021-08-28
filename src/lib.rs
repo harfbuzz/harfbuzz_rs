@@ -173,21 +173,6 @@ impl Variation{
     }
 }
 
-////
-/// Set font variation
-/// eg.
-/// let variation_vec : Vec<Variation> = vec![Variation::new(b"wght", 800.0), Variation::new(b"wdth", 30.0)];
-/// set_variations(&font, &variation_vec);
-/// 
-pub fn set_variations(font: &Font<'_>,  features: &[Variation]) {
-    unsafe {
-        hb::hb_font_set_variations(
-            font.as_raw(),
-            features.as_ptr() as *mut _,
-            features.len() as u32,
-        )
-    };
-}
 
 #[derive(Debug, Copy, Clone)]
 #[repr(transparent)]
@@ -300,7 +285,7 @@ mod tests {
         let feature = Feature::new(tag, 100, ..100);
         assert_feature(feature, tag, 100, 0, 100);
 
-        let feature = Feature::new(tag, 100, ..=100); 
+        let feature = Feature::new(tag, 100, ..=100);
         assert_feature(feature, tag, 100, 0, 101);
 
         let feature = Feature::new(tag, 100, ..);
