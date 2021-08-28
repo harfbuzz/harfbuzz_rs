@@ -440,8 +440,14 @@ impl<'a> Font<'a> {
     /// # Examples
     ///
     /// ```
+    /// use harfbuzz_rs::*;
+    /// 
+    /// let path = "testfiles/SourceSansVariable-Roman.ttf";
+    /// let face = Face::from_file(path, 0).expect("could not load face");
+    /// let font = Font::new(face);
+    ///
     /// let variation_vec : Vec<Variation> = vec![Variation::new(b"wght", 800.0), Variation::new(b"wdth", 30.0)];
-    /// set_variations(&font, &variation_vec);
+    /// font.set_variations(&variation_vec);
     /// ```
     pub fn set_variations(&self,  variations: &[Variation]) {
         unsafe {
