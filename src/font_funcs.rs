@@ -22,13 +22,25 @@ use std::panic;
 use std::ptr::NonNull;
 
 /// This Trait specifies the font callbacks that harfbuzz uses for its shaping.
-/// You shouldn't call these functions yourself. They are exposed through the
-/// `Font` wrapper.
 ///
-/// No function in this trait needs to be implemented, the default
-/// implementations simply return the parent font's data. If a `Font` is created
-/// directly from a face, its parent is the empty `Font` which returns null
-/// values for every font func.
+/// Custom font data providers can implement this trait to supply the HarfBuzz
+/// font shaping engine with the necessary information it needs during the
+/// shaping process.
+///
+/// Users wishing to use a font data provider that implements `FontFuncs` can
+/// tell HarfBuzz to use the data provider by calling [`Font::set_font_funcs()`]
+/// on a [`Font`].
+///
+/// Usually this is not necessary, since HarfBuzz comes by default with an
+/// integrated implementation of `FontFuncs` that reads the required data from
+/// an OpenType font file.
+///
+/// When implementing this trait, you may only want to override some of the
+/// functions, while the rest of the functions should fall back to the HarfBuzz
+/// provided font-funcs. This is possible through the use of *subfonts*.
+///
+/// Note that if a `Font` is created directly from a face, its parent is the
+/// empty `Font` which returns null values for every font func.
 #[allow(unused_variables)]
 pub trait FontFuncs {
     fn get_font_h_extents(&self, font: &Font<'_>) -> Option<FontExtents> {

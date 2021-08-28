@@ -50,10 +50,10 @@ pub(crate) extern "C" fn destroy_box<U>(ptr: *mut c_void) {
     unsafe { Box::from_raw(ptr as *mut U) };
 }
 
-/// A type representing a single font (i.e. a specific combination of typeface
-/// and typesize).
+/// A type representing a single font (i.e. a specific combination of typeface,
+/// font-size and font-variation settings)
 ///
-/// It safely wraps `hb_font_t`.
+/// It safely wraps the raw HarfBuzz type `hb_font_t *`.
 ///
 /// # Font Funcs
 ///
@@ -61,10 +61,11 @@ pub(crate) extern "C" fn destroy_box<U>(ptr: *mut c_void) {
 /// how glyph information is accessed during shaping. This is done through
 /// so-called font funcs.
 ///
-/// You can manually define new font funcs according to your needs, in most
+/// You can manually define new font funcs according to your needs
+/// (see [`FontFuncs`]), in most
 /// cases though the default font funcs provided by HarfBuzz will suffice. In
-/// that case the creation of a usable font amounts to calling the `Font::new`
-/// constructor with the desired `Face`.
+/// that case the creation of a usable font amounts to calling the [`Font::new()`]
+/// constructor with the desired [`Face`].
 ///
 /// # Parents and Children
 ///
@@ -74,9 +75,17 @@ pub(crate) extern "C" fn destroy_box<U>(ptr: *mut c_void) {
 /// objects to use different font function implementations for some font funcs
 /// while reusing the parent's implementation for the remaining funcs.
 ///
+/// A child font is created through [`Self::create_sub_font()`].
+///
 /// Since every font created by `Font::new` by default uses HarfBuzz's internal
 /// font funcs they can be used as a fallback mechanism by only customizing the
 /// font funcs of a sub-font.
+///
+/// # Font Variations
+///
+/// Using OpenType font variations is supported (but variation axis enumeration
+/// is not supported yet unfortunately). See an example for how to use font
+/// variations in [`Self::set_variations()`].
 ///
 /// # Examples
 ///
@@ -128,6 +137,15 @@ impl<'a> Font<'a> {
     /// function you call on the empty font will return some reasonable default
     /// value. An empty font is the only font whose `.parent()` method returns
     /// `None`.
+    ///
+    /// # Examples
+    ///
+    /// An empty font does not have a parent.
+    /// ```
+    /// use harfbuzz_rs::Font;
+    /// let empty_font = Font::empty();
+    /// assert!(empty_font.parent().is_none());
+    /// ```
     pub fn empty() -> Owned<Self> {
         unsafe {
             let raw_font = hb::hb_font_get_empty();
@@ -204,7 +222,7 @@ impl<'a> Font<'a> {
 
     /// Sets the EM scale of the font.
     pub fn set_scale(&mut self, x: i32, y: i32) {
-        unsafe { hb::hb_font_set_scale(self.as_raw(), x, y) };
+        unsafe { hb::hb_font_set_scale(self.as_raw_mut(), x, y) };
     }
 
     pub fn ppem(&self) -> (u32, u32) {
@@ -214,11 +232,11 @@ impl<'a> Font<'a> {
     }
 
     pub fn set_ppem(&mut self, x: u32, y: u32) {
-        unsafe { hb::hb_font_set_ppem(self.as_raw(), x, y) };
+        unsafe { hb::hb_font_set_ppem(self.as_raw_mut(), x, y) };
     }
 
     /// Sets the font functions that this font will have from a value that
-    /// implements [`FontFuncs`](./font_funcs/trait.FontFuncs.html).
+    /// implements [`FontFuncs`].
     pub fn set_font_funcs<FuncsType>(&mut self, funcs: FuncsType)
     where
         FuncsType: 'a + Send + Sync + FontFuncs,
@@ -439,23 +457,26 @@ impl<'a> Font<'a> {
     ///
     /// # Examples
     ///
+    /// Setup a font with two variations enabled:
     /// ```
-    /// use harfbuzz_rs::*;
-    /// 
-    /// let path = "testfiles/SourceSansVariable-Roman.ttf";
-    /// let face = Face::from_file(path, 0).expect("could not load face");
-    /// let font = Font::new(face);
+    /// # use harfbuzz_rs::*;
+    /// use harfbuzz_rs::{Face, Font, Variation};
+    /// # use std::path::PathBuf;
+    /// # let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    /// # path.push("testfiles/SourceSansVariable-Roman.ttf");
+    /// let face = Face::from_file(path, 0).expect("Error reading font file.");
+    /// let mut font = Font::new(face);
     ///
     /// let variation_vec : Vec<Variation> = vec![Variation::new(b"wght", 800.0), Variation::new(b"wdth", 30.0)];
     /// font.set_variations(&variation_vec);
     /// ```
-    pub fn set_variations(&self,  variations: &[Variation]) {
+    pub fn set_variations(&mut self, variations: &[Variation]) {
         unsafe {
-        hb::hb_font_set_variations(
-            self.as_raw(),
-            variations.as_ptr() as *mut _,
-            variations.len() as u32,
-        )
+            hb::hb_font_set_variations(
+                self.as_raw_mut(),
+                variations.as_ptr() as *mut _,
+                variations.len() as u32,
+            )
         };
     }
 }

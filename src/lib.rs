@@ -113,6 +113,47 @@ pub(crate) fn start_end_range(range: impl RangeBounds<usize>) -> (c_uint, c_uint
     };
     (start, end)
 }
+
+/// A variation selector which can be applied to a specific font.
+///
+/// To use OpenType variations when shaping see the documentation of [`Font`].
+///
+/// # Fields
+///
+/// - `tag`: The OpenType tag of the variation.
+/// - `value`: Some OpenType variant accept different values to change
+///   their behaviour.
+#[derive(Debug, Copy, Clone)]
+#[repr(transparent)]
+pub struct Variation(hb::hb_variation_t);
+
+impl Variation {
+    /// Create a new Variation with provided `tag` and `value`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use harfbuzz_rs::Variation;
+    /// Variation::new(b"wght", 800.0);
+    /// ```
+    pub fn new(tag: impl Into<Tag>, value: f32) -> Variation {
+        Variation(hb::hb_variation_t {
+            tag: tag.into().0,
+            value,
+        })
+    }
+
+    /// Returns the `tag` of the variation.
+    pub fn tag(&self) -> Tag {
+        Tag(self.0.tag)
+    }
+
+    /// Returns the value of the variation.
+    pub fn value(&self) -> f32 {
+        self.0.value
+    }
+}
+
 /// A feature tag with an accompanying range specifying on which subslice of
 /// `shape`s input it should be applied.
 ///
@@ -141,42 +182,6 @@ pub(crate) fn start_end_range(range: impl RangeBounds<usize>) -> (c_uint, c_uint
 ///
 /// let output = shape(&font, buffer, &[feature]);
 /// ```
-/// 
-/// 
-
-
-
-/// Create a new `variation` struct.
-///
-///
-/// # Arguments
-///
-/// - `tag`: The OpenType variation tag to use.
-/// - `value`: Some OpenType variant accept different values to change
-///   their behaviour.
-#[derive(Debug, Copy, Clone)]
-#[repr(transparent)]
-pub struct Variation(hb::hb_variation_t);
-
-impl Variation{
-    pub fn new(tag: impl Into<Tag>, value: f32) -> Variation {
-        Variation(hb::hb_variation_t {
-            tag: tag.into().0,
-            value,
-
-        })
-    }
-
-    pub fn tag(&self) -> Tag {
-        Tag(self.0.tag)
-    }
-
-    pub fn value(&self) -> f32 {
-        self.0.value
-    }
-}
-
-
 #[derive(Debug, Copy, Clone)]
 #[repr(transparent)]
 pub struct Feature(hb::hb_feature_t);

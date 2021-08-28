@@ -275,6 +275,15 @@ pub unsafe trait HarfbuzzObject: Sized {
     /// destruction.
     fn as_raw(&self) -> *mut Self::Raw;
 
+    /// Returns the underlying harfbuzz object pointer with the intention of
+    /// mutating the object.
+    ///
+    /// The caller must ensure, that this pointer is not used after `self`'s
+    /// destruction.
+    fn as_raw_mut(&mut self) -> *mut Self::Raw {
+        self.as_raw()
+    }
+
     /// Increases the reference count of the HarfBuzz object.
     ///
     /// Wraps a `hb_TYPE_reference()` call.

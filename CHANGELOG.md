@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add basic support for font variations (see PR [#32](https://github.com/manuel-rhdt/harfbuzz_rs/pull/32))
+- Improve documentation around font variations and font funcs.
 
 ## [2.0.0] 2021-08-22
 
