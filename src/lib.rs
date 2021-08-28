@@ -141,6 +141,42 @@ pub(crate) fn start_end_range(range: impl RangeBounds<usize>) -> (c_uint, c_uint
 ///
 /// let output = shape(&font, buffer, &[feature]);
 /// ```
+/// 
+/// 
+
+
+
+/// Create a new `variation` struct.
+///
+///
+/// # Arguments
+///
+/// - `tag`: The OpenType variation tag to use.
+/// - `value`: Some OpenType variant accept different values to change
+///   their behaviour.
+#[derive(Debug, Copy, Clone)]
+#[repr(transparent)]
+pub struct Variation(hb::hb_variation_t);
+
+impl Variation{
+    pub fn new(tag: impl Into<Tag>, value: f32) -> Variation {
+        Variation(hb::hb_variation_t {
+            tag: tag.into().0,
+            value,
+
+        })
+    }
+
+    pub fn tag(&self) -> Tag {
+        Tag(self.0.tag)
+    }
+
+    pub fn value(&self) -> f32 {
+        self.0.value
+    }
+}
+
+
 #[derive(Debug, Copy, Clone)]
 #[repr(transparent)]
 pub struct Feature(hb::hb_feature_t);
