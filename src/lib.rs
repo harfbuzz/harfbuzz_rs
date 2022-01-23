@@ -73,10 +73,14 @@
 /// adequate wrapper is provided.
 // This will hopefully not cause backwards compability concerns since harfbuzz
 // tries to be backwards compatible.
-use harfbuzz_sys as hb;
 #[macro_use]
 extern crate bitflags;
 
+#[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
+#[allow(deref_nullptr)]
+#[allow(dead_code)]
+mod bindings;
 mod blob;
 mod buffer;
 mod common;
@@ -86,6 +90,10 @@ pub mod font_funcs;
 
 #[cfg(feature = "rusttype")]
 pub mod rusttype;
+
+use bindings::hb_feature_t;
+use bindings::hb_shape;
+use bindings::hb_variation_t;
 
 pub use crate::blob::*;
 pub use crate::buffer::*;
@@ -125,7 +133,7 @@ pub(crate) fn start_end_range(range: impl RangeBounds<usize>) -> (c_uint, c_uint
 ///   their behaviour.
 #[derive(Debug, Copy, Clone)]
 #[repr(transparent)]
-pub struct Variation(hb::hb_variation_t);
+pub struct Variation(hb_variation_t);
 
 impl Variation {
     /// Create a new Variation with provided `tag` and `value`.
@@ -137,7 +145,7 @@ impl Variation {
     /// Variation::new(b"wght", 800.0);
     /// ```
     pub fn new(tag: impl Into<Tag>, value: f32) -> Variation {
-        Variation(hb::hb_variation_t {
+        Variation(hb_variation_t {
             tag: tag.into().0,
             value,
         })
@@ -184,7 +192,7 @@ impl Variation {
 /// ```
 #[derive(Debug, Copy, Clone)]
 #[repr(transparent)]
-pub struct Feature(hb::hb_feature_t);
+pub struct Feature(hb_feature_t);
 
 impl Feature {
     /// Create a new `Feature` struct.
@@ -200,7 +208,7 @@ impl Feature {
     /// - `range`: The cluster range that should be affected by this feature.
     pub fn new(tag: impl Into<Tag>, value: u32, range: impl RangeBounds<usize>) -> Feature {
         let (start, end) = start_end_range(range);
-        Feature(hb::hb_feature_t {
+        Feature(hb_feature_t {
             tag: tag.into().0,
             value,
             start,
@@ -246,7 +254,7 @@ impl Feature {
 pub fn shape(font: &Font<'_>, buffer: UnicodeBuffer, features: &[Feature]) -> GlyphBuffer {
     let buffer = buffer.guess_segment_properties();
     unsafe {
-        hb::hb_shape(
+        hb_shape(
             font.as_raw(),
             buffer.0.as_raw(),
             features.as_ptr() as *mut _,

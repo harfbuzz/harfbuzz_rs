@@ -1,4 +1,3 @@
-use crate::hb;
 use std;
 use std::os::raw::c_void;
 use std::ptr::NonNull;
@@ -6,6 +5,12 @@ use std::ptr::NonNull;
 use std::marker::PhantomData;
 use std::path::Path;
 
+use crate::bindings::{
+    hb_blob_t, hb_face_create, hb_face_create_for_tables, hb_face_destroy, hb_face_get_empty,
+    hb_face_get_glyph_count, hb_face_get_index, hb_face_get_upem, hb_face_reference,
+    hb_face_reference_blob, hb_face_reference_table, hb_face_set_glyph_count, hb_face_set_upem,
+    hb_face_t, hb_tag_t,
+};
 use crate::blob::Blob;
 use crate::common::{HarfbuzzObject, Owned, Shared, Tag};
 
@@ -18,7 +23,7 @@ use crate::common::{HarfbuzzObject, Owned, Shared, Tag};
 /// > are used to create fonts.
 #[derive(Debug)]
 pub struct Face<'a> {
-    raw: NonNull<hb::hb_face_t>,
+    raw: NonNull<hb_face_t>,
     marker: PhantomData<&'a [u8]>,
 }
 
@@ -28,13 +33,13 @@ impl<'a> Face<'a> {
     /// If `data` is not a valid font then this function returns the empty face.
     pub fn new<T: Into<Shared<Blob<'a>>>>(data: T, index: u32) -> Owned<Face<'a>> {
         let blob = data.into();
-        let hb_face = unsafe { hb::hb_face_create(blob.as_raw(), index) };
+        let hb_face = unsafe { hb_face_create(blob.as_raw(), index) };
         unsafe { Owned::from_raw(hb_face) }
     }
 
     /// Returns a "null" face.
     pub fn empty() -> Owned<Face<'static>> {
-        let hb_face = unsafe { hb::hb_face_get_empty() };
+        let hb_face = unsafe { hb_face_get_empty() };
         unsafe { Owned::from_raw(hb_face) }
     }
 
@@ -66,10 +71,10 @@ impl<'a> Face<'a> {
             unsafe { Box::from_raw(ptr as *mut U) };
         }
         extern "C" fn table_func<'b, F>(
-            _: *mut hb::hb_face_t,
-            tag: hb::hb_tag_t,
+            _: *mut hb_face_t,
+            tag: hb_tag_t,
             user_data: *mut c_void,
-        ) -> *mut hb::hb_blob_t
+        ) -> *mut hb_blob_t
         where
             F: FnMut(Tag) -> Option<Shared<Blob<'b>>>,
         {
@@ -83,7 +88,7 @@ impl<'a> Face<'a> {
         }
         let boxed_closure = Box::new(func);
         unsafe {
-            let face = hb::hb_face_create_for_tables(
+            let face = hb_face_create_for_tables(
                 Some(table_func::<'b, F>),
                 Box::into_raw(boxed_closure) as *mut _,
                 Some(destroy_box::<F>),
@@ -94,7 +99,7 @@ impl<'a> Face<'a> {
 
     pub fn face_data(&self) -> Shared<Blob<'a>> {
         unsafe {
-            let raw_blob = hb::hb_face_reference_blob(self.as_raw());
+            let raw_blob = hb_face_reference_blob(self.as_raw());
             Shared::from_raw_owned(raw_blob)
         }
     }
@@ -103,7 +108,7 @@ impl<'a> Face<'a> {
     /// no table with `tag`.
     pub fn table_with_tag(&self, tag: impl Into<Tag>) -> Option<Shared<Blob<'a>>> {
         unsafe {
-            let raw_blob = hb::hb_face_reference_table(self.as_raw(), tag.into().0);
+            let raw_blob = hb_face_reference_table(self.as_raw(), tag.into().0);
             if raw_blob.is_null() {
                 None
             } else {
@@ -118,37 +123,32 @@ impl<'a> Face<'a> {
     }
 
     pub fn index(&self) -> u32 {
-        unsafe { hb::hb_face_get_index(self.as_raw()) }
+        unsafe { hb_face_get_index(self.as_raw()) }
     }
 
     pub fn set_upem(&mut self, upem: u32) {
-        unsafe { hb::hb_face_set_upem(self.as_raw(), upem) };
+        unsafe { hb_face_set_upem(self.as_raw(), upem) };
     }
 
     pub fn upem(&self) -> u32 {
-        unsafe { hb::hb_face_get_upem(self.as_raw()) }
+        unsafe { hb_face_get_upem(self.as_raw()) }
     }
 
     pub fn set_glyph_count(&mut self, count: u32) {
-        unsafe { hb::hb_face_set_glyph_count(self.as_raw(), count) };
+        unsafe { hb_face_set_glyph_count(self.as_raw(), count) };
     }
 
     /// Returns the number of glyphs contained in the face.
     pub fn glyph_count(&self) -> u32 {
-        unsafe { hb::hb_face_get_glyph_count(self.as_raw()) }
+        unsafe { hb_face_get_glyph_count(self.as_raw()) }
     }
 
     #[cfg(variation_support)]
     pub fn get_variation_axis_infos(&self) -> Vec<VariationAxisInfo> {
-        let mut count = unsafe { hb::hb_ot_var_get_axis_count(self.as_raw()) };
+        let mut count = unsafe { hb_ot_var_get_axis_count(self.as_raw()) };
         let mut vector: Vec<VariationAxisInfo> = Vec::with_capacity(count as usize);
         unsafe {
-            hb::hb_ot_var_get_axis_infos(
-                self.as_raw(),
-                0,
-                &mut count,
-                vector.as_mut_ptr() as *mut _,
-            )
+            hb_ot_var_get_axis_infos(self.as_raw(), 0, &mut count, vector.as_mut_ptr() as *mut _)
         };
         unsafe { vector.set_len(count as usize) };
         vector
@@ -158,12 +158,12 @@ impl<'a> Face<'a> {
 #[cfg(variation_support)]
 #[derive(Debug, Clone, Copy)]
 #[repr(transparent)]
-pub struct VariationAxisInfo(pub hb::hb_ot_var_axis_info_t);
+pub struct VariationAxisInfo(pub hb_ot_var_axis_info_t);
 
 unsafe impl<'a> HarfbuzzObject for Face<'a> {
-    type Raw = hb::hb_face_t;
+    type Raw = hb_face_t;
 
-    unsafe fn from_raw(raw: *const hb::hb_face_t) -> Self {
+    unsafe fn from_raw(raw: *const hb_face_t) -> Self {
         Face {
             raw: NonNull::new(raw as *mut _).unwrap(),
             marker: PhantomData,
@@ -175,11 +175,11 @@ unsafe impl<'a> HarfbuzzObject for Face<'a> {
     }
 
     unsafe fn reference(&self) {
-        hb::hb_face_reference(self.as_raw());
+        hb_face_reference(self.as_raw());
     }
 
     unsafe fn dereference(&self) {
-        hb::hb_face_destroy(self.as_raw());
+        hb_face_destroy(self.as_raw());
     }
 }
 

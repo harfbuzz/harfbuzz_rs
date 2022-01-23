@@ -1,9 +1,18 @@
-use crate::hb;
 use std;
 use std::ptr::NonNull;
 
 use std::os::raw::c_void;
 
+use crate::bindings::{
+    hb_font_create, hb_font_create_sub_font, hb_font_destroy, hb_font_extents_t, hb_font_get_empty,
+    hb_font_get_face, hb_font_get_glyph_contour_point, hb_font_get_glyph_extents,
+    hb_font_get_glyph_from_name, hb_font_get_glyph_h_advance, hb_font_get_glyph_h_origin,
+    hb_font_get_glyph_name, hb_font_get_glyph_v_advance, hb_font_get_glyph_v_origin,
+    hb_font_get_h_extents, hb_font_get_nominal_glyph, hb_font_get_parent, hb_font_get_ppem,
+    hb_font_get_scale, hb_font_get_v_extents, hb_font_get_variation_glyph, hb_font_reference,
+    hb_font_set_funcs, hb_font_set_ppem, hb_font_set_scale, hb_font_set_variations, hb_font_t,
+    hb_glyph_extents_t, hb_position_t,
+};
 use crate::common::{HarfbuzzObject, Owned, Shared};
 use crate::face::Face;
 pub use crate::font_funcs::FontFuncs;
@@ -14,7 +23,7 @@ use std::ffi::CStr;
 use std::marker::PhantomData;
 
 pub type Glyph = u32;
-pub type Position = hb::hb_position_t;
+pub type Position = hb_position_t;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
@@ -35,16 +44,16 @@ impl FontExtents {
         }
     }
 
-    pub fn into_raw(self) -> hb::hb_font_extents_t {
+    pub fn into_raw(self) -> hb_font_extents_t {
         unsafe { std::mem::transmute(self) }
     }
 
-    pub fn from_raw(raw: hb::hb_font_extents_t) -> FontExtents {
+    pub fn from_raw(raw: hb_font_extents_t) -> FontExtents {
         unsafe { std::mem::transmute(raw) }
     }
 }
 
-pub type GlyphExtents = hb::hb_glyph_extents_t;
+pub type GlyphExtents = hb_glyph_extents_t;
 
 pub(crate) extern "C" fn destroy_box<U>(ptr: *mut c_void) {
     unsafe { Box::from_raw(ptr as *mut U) };
@@ -101,8 +110,8 @@ pub(crate) extern "C" fn destroy_box<U>(ptr: *mut c_void) {
 /// ```
 #[derive(Debug, PartialEq, Eq)]
 pub struct Font<'a> {
-    raw: NonNull<hb::hb_font_t>,
-    marker: PhantomData<&'a hb::hb_font_t>,
+    raw: NonNull<hb_font_t>,
+    marker: PhantomData<&'a hb_font_t>,
 }
 
 impl<'a> Font<'a> {
@@ -126,7 +135,7 @@ impl<'a> Font<'a> {
     pub fn new<T: Into<Shared<Face<'a>>>>(face: T) -> Owned<Self> {
         unsafe {
             let face = face.into();
-            let raw_font = hb::hb_font_create(face.as_raw());
+            let raw_font = hb_font_create(face.as_raw());
             Owned::from_raw(raw_font)
         }
     }
@@ -148,7 +157,7 @@ impl<'a> Font<'a> {
     /// ```
     pub fn empty() -> Owned<Self> {
         unsafe {
-            let raw_font = hb::hb_font_get_empty();
+            let raw_font = hb_font_get_empty();
             Owned::from_raw(raw_font)
         }
     }
@@ -175,7 +184,7 @@ impl<'a> Font<'a> {
     /// assert_eq!(sub_font.parent().unwrap(), font);
     /// ```
     pub fn create_sub_font<T: Into<Shared<Self>>>(font: T) -> Owned<Self> {
-        unsafe { Owned::from_raw(hb::hb_font_create_sub_font(font.into().as_raw())) }
+        unsafe { Owned::from_raw(hb_font_create_sub_font(font.into().as_raw())) }
     }
 
     /// Returns a shared pointer to the parent font.
@@ -198,7 +207,7 @@ impl<'a> Font<'a> {
     /// ```
     pub fn parent(&self) -> Option<Shared<Self>> {
         unsafe {
-            let parent = hb::hb_font_get_parent(self.as_raw());
+            let parent = hb_font_get_parent(self.as_raw());
             if parent.is_null() {
                 // hb_font_get_parent returns null-ptr if called on the empty font.
                 None
@@ -210,29 +219,29 @@ impl<'a> Font<'a> {
 
     /// Returns a shared pointer to the face from which this font was created.
     pub fn face(&self) -> Shared<Face<'a>> {
-        unsafe { Shared::from_raw_ref(hb::hb_font_get_face(self.as_raw())) }
+        unsafe { Shared::from_raw_ref(hb_font_get_face(self.as_raw())) }
     }
 
     /// Returns the EM scale of the font.
     pub fn scale(&self) -> (i32, i32) {
         let mut result = (0i32, 0i32);
-        unsafe { hb::hb_font_get_scale(self.as_raw(), &mut result.0, &mut result.1) };
+        unsafe { hb_font_get_scale(self.as_raw(), &mut result.0, &mut result.1) };
         result
     }
 
     /// Sets the EM scale of the font.
     pub fn set_scale(&mut self, x: i32, y: i32) {
-        unsafe { hb::hb_font_set_scale(self.as_raw_mut(), x, y) };
+        unsafe { hb_font_set_scale(self.as_raw_mut(), x, y) };
     }
 
     pub fn ppem(&self) -> (u32, u32) {
         let mut result = (0u32, 0u32);
-        unsafe { hb::hb_font_get_ppem(self.as_raw(), &mut result.0, &mut result.1) };
+        unsafe { hb_font_get_ppem(self.as_raw(), &mut result.0, &mut result.1) };
         result
     }
 
     pub fn set_ppem(&mut self, x: u32, y: u32) {
-        unsafe { hb::hb_font_set_ppem(self.as_raw_mut(), x, y) };
+        unsafe { hb_font_set_ppem(self.as_raw_mut(), x, y) };
     }
 
     /// Sets the font functions that this font will have from a value that
@@ -244,7 +253,7 @@ impl<'a> Font<'a> {
         let funcs_impl: Owned<FontFuncsImpl<FuncsType>> = FontFuncsImpl::from_trait_impl();
         let font_data = Box::new(funcs);
         unsafe {
-            hb::hb_font_set_funcs(
+            hb_font_set_funcs(
                 self.as_raw(),
                 funcs_impl.as_raw(),
                 Box::into_raw(font_data) as *mut _,
@@ -296,10 +305,8 @@ impl<'a> Font<'a> {
     pub fn get_font_h_extents(&self) -> Option<FontExtents> {
         unsafe {
             let mut extents = FontExtents::default();
-            let result = hb::hb_font_get_h_extents(
-                self.as_raw(),
-                &mut extents as *mut FontExtents as *mut _,
-            );
+            let result =
+                hb_font_get_h_extents(self.as_raw(), &mut extents as *mut FontExtents as *mut _);
             if result == 1 {
                 Some(extents)
             } else {
@@ -311,10 +318,8 @@ impl<'a> Font<'a> {
     pub fn get_font_v_extents(&self) -> Option<FontExtents> {
         unsafe {
             let mut extents = std::mem::zeroed::<FontExtents>();
-            let result = hb::hb_font_get_v_extents(
-                self.as_raw(),
-                &mut extents as *mut FontExtents as *mut _,
-            );
+            let result =
+                hb_font_get_v_extents(self.as_raw(), &mut extents as *mut FontExtents as *mut _);
             if result == 1 {
                 Some(extents)
             } else {
@@ -326,7 +331,7 @@ impl<'a> Font<'a> {
     pub fn get_nominal_glyph(&self, c: char) -> Option<Glyph> {
         unsafe {
             let mut glyph = 0;
-            let result = hb::hb_font_get_nominal_glyph(self.as_raw(), c as u32, &mut glyph);
+            let result = hb_font_get_nominal_glyph(self.as_raw(), c as u32, &mut glyph);
             if result == 1 {
                 Some(glyph)
             } else {
@@ -338,8 +343,7 @@ impl<'a> Font<'a> {
     pub fn get_variation_glyph(&self, c: char, v: char) -> Option<Glyph> {
         unsafe {
             let mut glyph = 0;
-            let result =
-                hb::hb_font_get_variation_glyph(self.as_raw(), c as u32, v as u32, &mut glyph);
+            let result = hb_font_get_variation_glyph(self.as_raw(), c as u32, v as u32, &mut glyph);
             if result == 1 {
                 Some(glyph)
             } else {
@@ -350,19 +354,18 @@ impl<'a> Font<'a> {
 
     /// Get the horizontal advance width of a glyph.
     pub fn get_glyph_h_advance(&self, glyph: Glyph) -> Position {
-        unsafe { hb::hb_font_get_glyph_h_advance(self.as_raw(), glyph) }
+        unsafe { hb_font_get_glyph_h_advance(self.as_raw(), glyph) }
     }
 
     /// Get the vertical advance width of a glyph.
     pub fn get_glyph_v_advance(&self, glyph: Glyph) -> Position {
-        unsafe { hb::hb_font_get_glyph_v_advance(self.as_raw(), glyph) }
+        unsafe { hb_font_get_glyph_v_advance(self.as_raw(), glyph) }
     }
 
     pub fn get_glyph_h_origin(&self, glyph: Glyph) -> Option<(Position, Position)> {
         unsafe {
             let mut pos = (0, 0);
-            let result =
-                hb::hb_font_get_glyph_h_origin(self.as_raw(), glyph, &mut pos.0, &mut pos.1);
+            let result = hb_font_get_glyph_h_origin(self.as_raw(), glyph, &mut pos.0, &mut pos.1);
             if result == 1 {
                 Some(pos)
             } else {
@@ -374,8 +377,7 @@ impl<'a> Font<'a> {
     pub fn get_glyph_v_origin(&self, glyph: Glyph) -> Option<(Position, Position)> {
         unsafe {
             let mut pos = (0, 0);
-            let result =
-                hb::hb_font_get_glyph_v_origin(self.as_raw(), glyph, &mut pos.0, &mut pos.1);
+            let result = hb_font_get_glyph_v_origin(self.as_raw(), glyph, &mut pos.0, &mut pos.1);
             if result == 1 {
                 Some(pos)
             } else {
@@ -387,7 +389,7 @@ impl<'a> Font<'a> {
     pub fn get_glyph_extents(&self, glyph: Glyph) -> Option<GlyphExtents> {
         unsafe {
             let mut extents = std::mem::zeroed::<GlyphExtents>();
-            let result = hb::hb_font_get_glyph_extents(self.as_raw(), glyph, &mut extents);
+            let result = hb_font_get_glyph_extents(self.as_raw(), glyph, &mut extents);
             if result == 1 {
                 Some(extents)
             } else {
@@ -403,7 +405,7 @@ impl<'a> Font<'a> {
     ) -> Option<(Position, Position)> {
         unsafe {
             let mut pos = (0, 0);
-            let result = hb::hb_font_get_glyph_contour_point(
+            let result = hb_font_get_glyph_contour_point(
                 self.as_raw(),
                 glyph,
                 point_index,
@@ -421,7 +423,7 @@ impl<'a> Font<'a> {
     pub fn get_glyph_name(&self, glyph: Glyph) -> Option<String> {
         let mut buffer = [0; 256];
         let result = unsafe {
-            hb::hb_font_get_glyph_name(
+            hb_font_get_glyph_name(
                 self.as_raw(),
                 glyph,
                 buffer.as_mut_ptr() as *mut _,
@@ -439,7 +441,7 @@ impl<'a> Font<'a> {
     pub fn get_glyph_from_name(&self, name: &str) -> Option<Glyph> {
         unsafe {
             let mut glyph = 0;
-            let result = hb::hb_font_get_glyph_from_name(
+            let result = hb_font_get_glyph_from_name(
                 self.as_raw(),
                 name.as_ptr() as *mut _,
                 name.len() as i32,
@@ -472,7 +474,7 @@ impl<'a> Font<'a> {
     /// ```
     pub fn set_variations(&mut self, variations: &[Variation]) {
         unsafe {
-            hb::hb_font_set_variations(
+            hb_font_set_variations(
                 self.as_raw_mut(),
                 variations.as_ptr() as *mut _,
                 variations.len() as u32,
@@ -485,7 +487,7 @@ unsafe impl<'a> Send for Font<'a> {}
 unsafe impl<'a> Sync for Font<'a> {}
 
 unsafe impl<'a> HarfbuzzObject for Font<'a> {
-    type Raw = hb::hb_font_t;
+    type Raw = hb_font_t;
 
     unsafe fn from_raw(raw: *const Self::Raw) -> Self {
         Font {
@@ -499,11 +501,11 @@ unsafe impl<'a> HarfbuzzObject for Font<'a> {
     }
 
     unsafe fn reference(&self) {
-        hb::hb_font_reference(self.as_raw());
+        hb_font_reference(self.as_raw());
     }
 
     unsafe fn dereference(&self) {
-        hb::hb_font_destroy(self.as_raw());
+        hb_font_destroy(self.as_raw());
     }
 }
 
@@ -526,6 +528,6 @@ mod test {
 
     #[test]
     fn test_font_extents_layout() {
-        assert_memory_layout_equal::<FontExtents, hb::hb_font_extents_t>()
+        assert_memory_layout_equal::<FontExtents, hb_font_extents_t>()
     }
 }

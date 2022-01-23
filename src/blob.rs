@@ -1,4 +1,3 @@
-use crate::hb;
 use std::os::raw::c_void;
 
 use std;
@@ -9,6 +8,18 @@ use std::fs;
 use std::path::Path;
 use std::ptr::NonNull;
 
+use crate::bindings::hb_blob_create;
+use crate::bindings::hb_blob_create_sub_blob;
+use crate::bindings::hb_blob_destroy;
+use crate::bindings::hb_blob_get_data;
+use crate::bindings::hb_blob_get_data_writable;
+use crate::bindings::hb_blob_get_length;
+use crate::bindings::hb_blob_is_immutable;
+use crate::bindings::hb_blob_make_immutable;
+use crate::bindings::hb_blob_reference;
+use crate::bindings::hb_blob_t;
+use crate::bindings::HB_MEMORY_MODE_READONLY;
+use crate::bindings::HB_MEMORY_MODE_WRITABLE;
 use crate::common::{HarfbuzzObject, Owned, Shared};
 
 /// A `Blob` manages raw data like e.g. file contents. It refers to a slice of
@@ -30,7 +41,7 @@ use crate::common::{HarfbuzzObject, Owned, Shared};
 /// respectively.
 #[repr(C)]
 pub struct Blob<'a> {
-    raw: NonNull<hb::hb_blob_t>,
+    raw: NonNull<hb_blob_t>,
     marker: PhantomData<&'a [u8]>,
 }
 impl<'a> Blob<'a> {
@@ -38,10 +49,10 @@ impl<'a> Blob<'a> {
     /// slice's data.
     pub fn with_bytes(bytes: &'a [u8]) -> Owned<Blob<'a>> {
         let hb_blob = unsafe {
-            hb::hb_blob_create(
+            hb_blob_create(
                 bytes.as_ptr() as *const _,
                 bytes.len() as u32,
-                hb::HB_MEMORY_MODE_READONLY,
+                HB_MEMORY_MODE_READONLY,
                 std::ptr::null_mut(),
                 None,
             )
@@ -53,10 +64,10 @@ impl<'a> Blob<'a> {
     /// slice's data.
     pub fn with_bytes_mut(bytes: &'a mut [u8]) -> Owned<Blob<'a>> {
         let hb_blob = unsafe {
-            hb::hb_blob_create(
+            hb_blob_create(
                 bytes.as_ptr() as *const _,
                 bytes.len() as u32,
-                hb::HB_MEMORY_MODE_WRITABLE,
+                HB_MEMORY_MODE_WRITABLE,
                 std::ptr::null_mut(),
                 None,
             )
@@ -82,10 +93,10 @@ impl<'a> Blob<'a> {
         }
 
         let hb_blob = unsafe {
-            hb::hb_blob_create(
+            hb_blob_create(
                 ptr as *const _,
                 len as u32,
-                hb::HB_MEMORY_MODE_READONLY,
+                HB_MEMORY_MODE_READONLY,
                 data as *mut _,
                 Some(destroy::<T>),
             )
@@ -110,8 +121,8 @@ impl<'a> Blob<'a> {
     /// Get a slice of the `Blob`'s bytes.
     pub fn get_data(&self) -> &[u8] {
         unsafe {
-            let mut length = hb::hb_blob_get_length(self.as_raw());
-            let data_ptr = hb::hb_blob_get_data(self.as_raw(), &mut length as *mut _);
+            let mut length = hb_blob_get_length(self.as_raw());
+            let data_ptr = hb_blob_get_data(self.as_raw(), &mut length as *mut _);
             std::slice::from_raw_parts(data_ptr as *const u8, length as usize)
         }
     }
@@ -124,8 +135,7 @@ impl<'a> Blob<'a> {
     /// * `offset`: Byte-offset of sub-blob within parent.
     /// * `length`: Length of the sub-blob.
     pub fn create_sub_blob(&self, offset: usize, length: usize) -> Shared<Blob<'a>> {
-        let blob =
-            unsafe { hb::hb_blob_create_sub_blob(self.as_raw(), offset as u32, length as u32) };
+        let blob = unsafe { hb_blob_create_sub_blob(self.as_raw(), offset as u32, length as u32) };
         unsafe { Shared::from_raw_owned(blob) }
     }
 
@@ -135,13 +145,13 @@ impl<'a> Blob<'a> {
     /// after being shared. In Rust this is not really necessary due to the borrow
     /// checker. This method is provided regardless for completeness.
     pub fn is_immutable(&self) -> bool {
-        unsafe { hb::hb_blob_is_immutable(self.as_raw()) == 1 }
+        unsafe { hb_blob_is_immutable(self.as_raw()) == 1 }
     }
 
     /// Makes this blob immutable so the bytes it refers to will never change
     /// during its lifetime.
     pub fn make_immutable(&mut self) {
-        unsafe { hb::hb_blob_make_immutable(self.as_raw()) }
+        unsafe { hb_blob_make_immutable(self.as_raw()) }
     }
 
     /// Try to get a mutable slice of the `Blob`'s bytes, possibly copying them.
@@ -150,8 +160,8 @@ impl<'a> Blob<'a> {
     /// failed.
     pub fn try_get_mut_data(&mut self) -> Option<&'a mut [u8]> {
         unsafe {
-            let mut length = hb::hb_blob_get_length(self.as_raw());
-            let data_ptr = hb::hb_blob_get_data_writable(self.as_raw(), &mut length as *mut _);
+            let mut length = hb_blob_get_length(self.as_raw());
+            let data_ptr = hb_blob_get_data_writable(self.as_raw(), &mut length as *mut _);
             if data_ptr.is_null() {
                 None
             } else {
@@ -177,25 +187,25 @@ impl<'a> fmt::Debug for Blob<'a> {
 }
 
 unsafe impl<'a> HarfbuzzObject for Blob<'a> {
-    type Raw = hb::hb_blob_t;
+    type Raw = hb_blob_t;
 
-    unsafe fn from_raw(raw: *const hb::hb_blob_t) -> Self {
+    unsafe fn from_raw(raw: *const hb_blob_t) -> Self {
         Blob {
             raw: NonNull::new(raw as *mut _).unwrap(),
             marker: PhantomData,
         }
     }
 
-    fn as_raw(&self) -> *mut hb::hb_blob_t {
+    fn as_raw(&self) -> *mut hb_blob_t {
         self.raw.as_ptr()
     }
 
     unsafe fn reference(&self) {
-        hb::hb_blob_reference(self.as_raw());
+        hb_blob_reference(self.as_raw());
     }
 
     unsafe fn dereference(&self) {
-        hb::hb_blob_destroy(self.as_raw());
+        hb_blob_destroy(self.as_raw());
     }
 }
 

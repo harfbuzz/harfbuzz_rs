@@ -14,17 +14,20 @@ categories = [
 ]
 license = "MIT"
 edition = "2018"
+links = "harfbuzz"
 
 [badges]
 travis-ci = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master" }
 appveyor = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master", service = "github" }
 
 [features]
-default = ["build-native-harfbuzz", "build-native-freetype"]
-build-native-harfbuzz = ["harfbuzz-sys/build-native-harfbuzz"]
-build-native-freetype = ["harfbuzz-sys/build-native-freetype"]
+default = ["build-native-harfbuzz"]
+build-native-harfbuzz = []
 
 [dependencies]
-harfbuzz-sys = { version = "0.5", default-features = false }
 rusttype = { version = "0.9", optional = true }
 bitflags = "^1"
+
+[build-dependencies]
+cc = "1.0"
+pkg-config = "0.3.24"

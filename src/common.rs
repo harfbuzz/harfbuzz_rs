@@ -1,4 +1,3 @@
-use crate::hb;
 use std::borrow::Borrow;
 use std::ops::{Deref, DerefMut};
 
@@ -19,7 +18,7 @@ use std::ops::{Deref, DerefMut};
 /// a `Tag`.
 #[derive(Copy, Clone, Hash, PartialEq, Eq)]
 #[repr(transparent)]
-pub struct Tag(pub hb::hb_tag_t);
+pub struct Tag(pub hb_tag_t);
 
 impl Tag {
     /// Create a `Tag` from its four-char textual representation.
@@ -40,7 +39,7 @@ impl Tag {
 
     fn tag_to_string(self) -> String {
         let mut buf: [u8; 4] = [0; 4];
-        unsafe { hb::hb_tag_to_string(self.0, buf.as_mut_ptr() as *mut _) };
+        unsafe { hb_tag_to_string(self.0, buf.as_mut_ptr() as *mut _) };
         String::from_utf8_lossy(&buf).into()
     }
 
@@ -141,7 +140,7 @@ impl FromStr for Tag {
             return Err(TagFromStrErr::ZeroLengthString);
         }
         let len = std::cmp::max(s.len(), 4) as i32;
-        unsafe { Ok(Tag(hb::hb_tag_from_string(s.as_ptr() as *mut _, len))) }
+        unsafe { Ok(Tag(hb_tag_from_string(s.as_ptr() as *mut _, len))) }
     }
 }
 
@@ -162,34 +161,34 @@ pub enum Direction {
 
 impl Direction {
     /// Convert into raw value of type `hb_direction_t`.
-    pub fn to_raw(self) -> hb::hb_direction_t {
+    pub fn to_raw(self) -> hb_direction_t {
         match self {
-            Direction::Invalid => hb::HB_DIRECTION_INVALID,
-            Direction::Ltr => hb::HB_DIRECTION_LTR,
-            Direction::Rtl => hb::HB_DIRECTION_RTL,
-            Direction::Ttb => hb::HB_DIRECTION_TTB,
-            Direction::Btt => hb::HB_DIRECTION_BTT,
+            Direction::Invalid => HB_DIRECTION_INVALID,
+            Direction::Ltr => HB_DIRECTION_LTR,
+            Direction::Rtl => HB_DIRECTION_RTL,
+            Direction::Ttb => HB_DIRECTION_TTB,
+            Direction::Btt => HB_DIRECTION_BTT,
         }
     }
 
     /// Create from raw value of type `hb_direction_t`.
-    pub fn from_raw(dir: hb::hb_direction_t) -> Self {
+    pub fn from_raw(dir: hb_direction_t) -> Self {
         match dir {
-            hb::HB_DIRECTION_LTR => Direction::Ltr,
-            hb::HB_DIRECTION_RTL => Direction::Rtl,
-            hb::HB_DIRECTION_TTB => Direction::Ttb,
-            hb::HB_DIRECTION_BTT => Direction::Btt,
+            HB_DIRECTION_LTR => Direction::Ltr,
+            HB_DIRECTION_RTL => Direction::Rtl,
+            HB_DIRECTION_TTB => Direction::Ttb,
+            HB_DIRECTION_BTT => Direction::Btt,
             _ => Direction::Invalid,
         }
     }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-pub struct Language(pub hb::hb_language_t);
+pub struct Language(pub hb_language_t);
 
 impl Default for Language {
     fn default() -> Language {
-        Language(unsafe { hb::hb_language_get_default() })
+        Language(unsafe { hb_language_get_default() })
     }
 }
 
@@ -200,10 +199,17 @@ impl Debug for Language {
 }
 
 use std::ffi::CStr;
+
+use crate::bindings::{
+    hb_direction_t, hb_language_from_string, hb_language_get_default, hb_language_t,
+    hb_language_to_string, hb_script_from_iso15924_tag, hb_script_get_horizontal_direction,
+    hb_script_t, hb_script_to_iso15924_tag, hb_tag_from_string, hb_tag_t, hb_tag_to_string,
+    HB_DIRECTION_BTT, HB_DIRECTION_INVALID, HB_DIRECTION_LTR, HB_DIRECTION_RTL, HB_DIRECTION_TTB,
+};
 impl Display for Language {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let string = unsafe {
-            let char_ptr = hb::hb_language_to_string(self.0);
+            let char_ptr = hb_language_to_string(self.0);
             if char_ptr.is_null() {
                 return Err(fmt::Error);
             }
@@ -222,7 +228,7 @@ impl FromStr for Language {
     type Err = InvalidLanguage;
     fn from_str(s: &str) -> Result<Language, InvalidLanguage> {
         let len = std::cmp::min(s.len(), std::i32::MAX as _) as i32;
-        let lang = unsafe { hb::hb_language_from_string(s.as_ptr() as *mut _, len) };
+        let lang = unsafe { hb_language_from_string(s.as_ptr() as *mut _, len) };
         if lang.is_null() {
             Err(InvalidLanguage {})
         } else {
@@ -232,19 +238,19 @@ impl FromStr for Language {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-pub struct Script(pub hb::hb_script_t);
+pub struct Script(pub hb_script_t);
 
 impl Script {
     pub fn from_iso15924_tag(tag: Tag) -> Self {
-        Script(unsafe { hb::hb_script_from_iso15924_tag(tag.0) })
+        Script(unsafe { hb_script_from_iso15924_tag(tag.0) })
     }
 
     pub fn to_iso15924_tag(self) -> Tag {
-        Tag(unsafe { hb::hb_script_to_iso15924_tag(self.0) })
+        Tag(unsafe { hb_script_to_iso15924_tag(self.0) })
     }
 
     pub fn horizontal_direction(self) -> Direction {
-        Direction::from_raw(unsafe { hb::hb_script_get_horizontal_direction(self.0) })
+        Direction::from_raw(unsafe { hb_script_get_horizontal_direction(self.0) })
     }
 }
 

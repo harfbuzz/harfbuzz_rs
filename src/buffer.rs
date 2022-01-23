@@ -1,6 +1,25 @@
+use crate::bindings::{
+    hb_buffer_add, hb_buffer_add_utf8, hb_buffer_append, hb_buffer_clear_contents,
+    hb_buffer_cluster_level_t, hb_buffer_content_type_t, hb_buffer_create, hb_buffer_destroy,
+    hb_buffer_get_cluster_level, hb_buffer_get_content_type, hb_buffer_get_direction,
+    hb_buffer_get_empty, hb_buffer_get_glyph_infos, hb_buffer_get_glyph_positions,
+    hb_buffer_get_language, hb_buffer_get_length, hb_buffer_get_script,
+    hb_buffer_get_segment_properties, hb_buffer_guess_segment_properties, hb_buffer_pre_allocate,
+    hb_buffer_reference, hb_buffer_reverse, hb_buffer_reverse_range, hb_buffer_serialize_format_t,
+    hb_buffer_serialize_glyphs, hb_buffer_set_cluster_level, hb_buffer_set_content_type,
+    hb_buffer_set_direction, hb_buffer_set_language, hb_buffer_set_script, hb_buffer_t,
+    hb_glyph_flags_t, hb_glyph_info_get_glyph_flags, hb_glyph_info_t, hb_mask_t,
+    hb_script_from_iso15924_tag, hb_script_t, hb_script_to_iso15924_tag, hb_segment_properties_t,
+    hb_var_int_t, HB_BUFFER_CLUSTER_LEVEL_CHARACTERS, HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS,
+    HB_BUFFER_CLUSTER_LEVEL_MONOTONE_GRAPHEMES, HB_BUFFER_CONTENT_TYPE_GLYPHS,
+    HB_BUFFER_CONTENT_TYPE_UNICODE, HB_BUFFER_SERIALIZE_FLAG_GLYPH_EXTENTS,
+    HB_BUFFER_SERIALIZE_FLAG_GLYPH_FLAGS, HB_BUFFER_SERIALIZE_FLAG_NO_ADVANCES,
+    HB_BUFFER_SERIALIZE_FLAG_NO_CLUSTERS, HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES,
+    HB_BUFFER_SERIALIZE_FLAG_NO_POSITIONS, HB_BUFFER_SERIALIZE_FORMAT_JSON,
+    HB_BUFFER_SERIALIZE_FORMAT_TEXT, HB_GLYPH_FLAG_UNSAFE_TO_BREAK,
+};
 use crate::common::{Direction, HarfbuzzObject, Language, Owned, Script, Tag};
 use crate::font::Position;
-use crate::hb;
 
 use fmt::Formatter;
 use std::io::Read;
@@ -18,7 +37,7 @@ pub struct SegmentProperties {
 }
 
 impl SegmentProperties {
-    pub fn from_raw(raw: hb::hb_segment_properties_t) -> Self {
+    pub fn from_raw(raw: hb_segment_properties_t) -> Self {
         let direction = Direction::from_raw(raw.direction);
         let script = Script(raw.script);
         let language = Language(raw.language);
@@ -29,8 +48,8 @@ impl SegmentProperties {
         }
     }
 
-    pub fn into_raw(self) -> hb::hb_segment_properties_t {
-        hb::hb_segment_properties_t {
+    pub fn into_raw(self) -> hb_segment_properties_t {
+        hb_segment_properties_t {
             direction: self.direction.to_raw(),
             script: self.script.0,
             language: self.language.0,
@@ -58,7 +77,7 @@ pub struct GlyphPosition {
     /// how much the glyph moves on the Y-axis before drawing it, this should
     /// not affect how much the line advances.
     pub y_offset: Position,
-    var: hb::hb_var_int_t,
+    var: hb_var_int_t,
 }
 
 impl std::fmt::Debug for GlyphPosition {
@@ -84,14 +103,14 @@ impl GlyphPosition {
             y_advance,
             x_offset,
             y_offset,
-            var: hb::hb_var_int_t { u32: 0 },
+            var: hb_var_int_t { u32: 0 },
         }
     }
 }
 
 /// A set of flags that may be set during shaping on each glyph.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct GlyphFlags(pub hb::hb_glyph_flags_t);
+pub struct GlyphFlags(pub hb_glyph_flags_t);
 
 #[allow(clippy::trivially_copy_pass_by_ref)]
 impl GlyphFlags {
@@ -106,7 +125,7 @@ impl GlyphFlags {
     /// line-breaking, or limiting the reshaping to a small piece around the
     /// breaking point only.
     pub fn unsafe_to_break(&self) -> bool {
-        self.0 & hb::HB_GLYPH_FLAG_UNSAFE_TO_BREAK == hb::HB_GLYPH_FLAG_UNSAFE_TO_BREAK
+        self.0 & HB_GLYPH_FLAG_UNSAFE_TO_BREAK == HB_GLYPH_FLAG_UNSAFE_TO_BREAK
     }
 }
 
@@ -114,10 +133,10 @@ impl GlyphFlags {
 #[repr(C)]
 pub struct GlyphInfo {
     pub codepoint: u32,
-    mask: hb::hb_mask_t,
+    mask: hb_mask_t,
     pub cluster: u32,
-    var1: hb::hb_var_int_t,
-    var2: hb::hb_var_int_t,
+    var1: hb_var_int_t,
+    var2: hb_var_int_t,
 }
 
 impl std::fmt::Debug for GlyphInfo {
@@ -132,10 +151,10 @@ impl std::fmt::Debug for GlyphInfo {
 
 impl GlyphInfo {
     pub fn glyph_flags(&self) -> GlyphFlags {
-        GlyphFlags(unsafe { hb::hb_glyph_info_get_glyph_flags(self.as_raw()) })
+        GlyphFlags(unsafe { hb_glyph_info_get_glyph_flags(self.as_raw()) })
     }
 
-    fn as_raw(&self) -> *const hb::hb_glyph_info_t {
+    fn as_raw(&self) -> *const hb_glyph_info_t {
         (self as *const GlyphInfo) as *const _
     }
 }
@@ -148,20 +167,20 @@ pub enum ClusterLevel {
 }
 
 impl ClusterLevel {
-    pub fn from_raw(raw: hb::hb_buffer_cluster_level_t) -> Self {
+    pub fn from_raw(raw: hb_buffer_cluster_level_t) -> Self {
         match raw {
-            hb::HB_BUFFER_CLUSTER_LEVEL_MONOTONE_GRAPHEMES => ClusterLevel::MonotoneGraphemes,
-            hb::HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS => ClusterLevel::MonotoneCharacters,
-            hb::HB_BUFFER_CLUSTER_LEVEL_CHARACTERS => ClusterLevel::Characters,
+            HB_BUFFER_CLUSTER_LEVEL_MONOTONE_GRAPHEMES => ClusterLevel::MonotoneGraphemes,
+            HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS => ClusterLevel::MonotoneCharacters,
+            HB_BUFFER_CLUSTER_LEVEL_CHARACTERS => ClusterLevel::Characters,
             _ => panic!("received unrecognized HB_BUFFER_CLUSTER_LEVEL"),
         }
     }
 
-    pub fn into_raw(self) -> hb::hb_buffer_cluster_level_t {
+    pub fn into_raw(self) -> hb_buffer_cluster_level_t {
         match self {
-            ClusterLevel::MonotoneGraphemes => hb::HB_BUFFER_CLUSTER_LEVEL_MONOTONE_GRAPHEMES,
-            ClusterLevel::MonotoneCharacters => hb::HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS,
-            ClusterLevel::Characters => hb::HB_BUFFER_CLUSTER_LEVEL_CHARACTERS,
+            ClusterLevel::MonotoneGraphemes => HB_BUFFER_CLUSTER_LEVEL_MONOTONE_GRAPHEMES,
+            ClusterLevel::MonotoneCharacters => HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS,
+            ClusterLevel::Characters => HB_BUFFER_CLUSTER_LEVEL_CHARACTERS,
         }
     }
 }
@@ -174,22 +193,22 @@ impl Default for ClusterLevel {
 
 #[derive(Debug)]
 pub(crate) struct GenericBuffer {
-    raw: NonNull<hb::hb_buffer_t>,
+    raw: NonNull<hb_buffer_t>,
 }
 impl GenericBuffer {
     pub(crate) fn new() -> Owned<GenericBuffer> {
-        let buffer = unsafe { hb::hb_buffer_create() };
+        let buffer = unsafe { hb_buffer_create() };
         unsafe { Owned::from_raw(buffer) }
     }
 
     #[allow(unused)]
     pub(crate) fn empty() -> Owned<GenericBuffer> {
-        let buffer = unsafe { hb::hb_buffer_get_empty() };
+        let buffer = unsafe { hb_buffer_get_empty() };
         unsafe { Owned::from_raw(buffer) }
     }
 
     pub(crate) fn len(&self) -> usize {
-        unsafe { hb::hb_buffer_get_length(self.as_raw()) as usize }
+        unsafe { hb_buffer_get_length(self.as_raw()) as usize }
     }
 
     pub(crate) fn is_empty(&self) -> bool {
@@ -198,7 +217,7 @@ impl GenericBuffer {
 
     pub(crate) fn add(&mut self, codepoint: u32, cluster: u32) {
         unsafe {
-            hb::hb_buffer_add(self.as_raw(), codepoint, cluster);
+            hb_buffer_add(self.as_raw(), codepoint, cluster);
         }
     }
 
@@ -206,7 +225,7 @@ impl GenericBuffer {
         assert!(item_start + item_len <= string.len());
         let utf8_ptr = string.as_ptr() as *const _;
         unsafe {
-            hb::hb_buffer_add_utf8(
+            hb_buffer_add_utf8(
                 self.as_raw(),
                 utf8_ptr,
                 string.len() as os::raw::c_int,
@@ -218,25 +237,25 @@ impl GenericBuffer {
 
     pub(crate) fn append(&mut self, source: &GenericBuffer, start: c_uint, end: c_uint) {
         unsafe {
-            hb::hb_buffer_append(self.as_raw(), source.as_raw(), start, end);
+            hb_buffer_append(self.as_raw(), source.as_raw(), start, end);
         }
     }
 
     pub(crate) fn set_direction(&mut self, direction: Direction) {
-        unsafe { hb::hb_buffer_set_direction(self.as_raw(), direction.to_raw()) };
+        unsafe { hb_buffer_set_direction(self.as_raw(), direction.to_raw()) };
     }
 
     /// Returns the `Buffer`'s text direction.
     pub(crate) fn get_direction(&self) -> Direction {
-        Direction::from_raw(unsafe { hb::hb_buffer_get_direction(self.as_raw()) })
+        Direction::from_raw(unsafe { hb_buffer_get_direction(self.as_raw()) })
     }
 
     pub(crate) fn set_language(&mut self, lang: Language) {
-        unsafe { hb::hb_buffer_set_language(self.as_raw(), lang.0) }
+        unsafe { hb_buffer_set_language(self.as_raw(), lang.0) }
     }
 
     pub(crate) fn get_language(&self) -> Option<Language> {
-        let raw_lang = unsafe { hb::hb_buffer_get_language(self.as_raw()) };
+        let raw_lang = unsafe { hb_buffer_get_language(self.as_raw()) };
         if raw_lang.is_null() {
             None
         } else {
@@ -244,48 +263,47 @@ impl GenericBuffer {
         }
     }
 
-    pub(crate) fn set_script(&mut self, script: hb::hb_script_t) {
-        unsafe { hb::hb_buffer_set_script(self.as_raw(), script) }
+    pub(crate) fn set_script(&mut self, script: hb_script_t) {
+        unsafe { hb_buffer_set_script(self.as_raw(), script) }
     }
 
-    pub(crate) fn get_script(&self) -> hb::hb_script_t {
-        unsafe { hb::hb_buffer_get_script(self.as_raw()) }
+    pub(crate) fn get_script(&self) -> hb_script_t {
+        unsafe { hb_buffer_get_script(self.as_raw()) }
     }
 
     pub(crate) fn guess_segment_properties(&mut self) {
-        unsafe { hb::hb_buffer_guess_segment_properties(self.as_raw()) };
+        unsafe { hb_buffer_guess_segment_properties(self.as_raw()) };
     }
 
     pub(crate) fn get_segment_properties(&self) -> SegmentProperties {
         unsafe {
-            let mut segment_props: hb::hb_segment_properties_t = std::mem::zeroed();
-            hb::hb_buffer_get_segment_properties(self.as_raw(), &mut segment_props as *mut _);
+            let mut segment_props: hb_segment_properties_t = std::mem::zeroed();
+            hb_buffer_get_segment_properties(self.as_raw(), &mut segment_props as *mut _);
             SegmentProperties::from_raw(segment_props)
         }
     }
 
     pub(crate) fn set_cluster_level(&mut self, cluster_level: ClusterLevel) {
-        unsafe { hb::hb_buffer_set_cluster_level(self.as_raw(), cluster_level.into_raw()) }
+        unsafe { hb_buffer_set_cluster_level(self.as_raw(), cluster_level.into_raw()) }
     }
 
     pub(crate) fn get_cluster_level(&self) -> ClusterLevel {
-        ClusterLevel::from_raw(unsafe { hb::hb_buffer_get_cluster_level(self.as_raw()) })
+        ClusterLevel::from_raw(unsafe { hb_buffer_get_cluster_level(self.as_raw()) })
     }
 
     pub(crate) fn pre_allocate(&mut self, size: usize) {
         let size = size.min(std::os::raw::c_uint::max_value() as usize);
-        unsafe { hb::hb_buffer_pre_allocate(self.as_raw(), size as _) };
+        unsafe { hb_buffer_pre_allocate(self.as_raw(), size as _) };
     }
 
     pub(crate) fn clear_contents(&mut self) {
-        unsafe { hb::hb_buffer_clear_contents(self.as_raw()) };
+        unsafe { hb_buffer_clear_contents(self.as_raw()) };
     }
 
     pub(crate) fn get_glyph_positions(&self) -> &[GlyphPosition] {
         unsafe {
             let mut length: u32 = 0;
-            let glyph_pos =
-                hb::hb_buffer_get_glyph_positions(self.as_raw(), &mut length as *mut u32);
+            let glyph_pos = hb_buffer_get_glyph_positions(self.as_raw(), &mut length as *mut u32);
             std::slice::from_raw_parts(glyph_pos as *const _, length as usize)
         }
     }
@@ -293,33 +311,33 @@ impl GenericBuffer {
     pub(crate) fn get_glyph_infos(&self) -> &[GlyphInfo] {
         unsafe {
             let mut length: u32 = 0;
-            let glyph_infos = hb::hb_buffer_get_glyph_infos(self.as_raw(), &mut length as *mut u32);
+            let glyph_infos = hb_buffer_get_glyph_infos(self.as_raw(), &mut length as *mut u32);
             std::slice::from_raw_parts(glyph_infos as *const _, length as usize)
         }
     }
 
     /// Reverse the `Buffer`'s contents.
     pub(crate) fn reverse(&mut self) {
-        unsafe { hb::hb_buffer_reverse(self.as_raw()) };
+        unsafe { hb_buffer_reverse(self.as_raw()) };
     }
 
     /// Reverse the `Buffer`'s contents in the range from `start` to `end`.
     pub(crate) fn reverse_range(&mut self, start: usize, end: usize) {
         assert!(start <= self.len(), "{}", end <= self.len());
-        unsafe { hb::hb_buffer_reverse_range(self.as_raw(), start as u32, end as u32) }
+        unsafe { hb_buffer_reverse_range(self.as_raw(), start as u32, end as u32) }
     }
 
-    pub(crate) fn set_content_type(&self, content_type: hb::hb_buffer_content_type_t) {
-        unsafe { hb::hb_buffer_set_content_type(self.as_raw(), content_type) }
+    pub(crate) fn set_content_type(&self, content_type: hb_buffer_content_type_t) {
+        unsafe { hb_buffer_set_content_type(self.as_raw(), content_type) }
     }
 
-    pub(crate) fn content_type(&self) -> hb::hb_buffer_content_type_t {
-        unsafe { hb::hb_buffer_get_content_type(self.as_raw()) }
+    pub(crate) fn content_type(&self) -> hb_buffer_content_type_t {
+        unsafe { hb_buffer_get_content_type(self.as_raw()) }
     }
 }
 
 unsafe impl HarfbuzzObject for GenericBuffer {
-    type Raw = hb::hb_buffer_t;
+    type Raw = hb_buffer_t;
 
     unsafe fn from_raw(raw: *const Self::Raw) -> Self {
         GenericBuffer {
@@ -332,11 +350,11 @@ unsafe impl HarfbuzzObject for GenericBuffer {
     }
 
     unsafe fn reference(&self) {
-        hb::hb_buffer_reference(self.as_raw());
+        hb_buffer_reference(self.as_raw());
     }
 
     unsafe fn dereference(&self) {
-        hb::hb_buffer_destroy(self.as_raw());
+        hb_buffer_destroy(self.as_raw());
     }
 }
 
@@ -349,11 +367,11 @@ pub enum SerializeFormat {
     Json,
 }
 
-impl From<SerializeFormat> for hb::hb_buffer_serialize_format_t {
+impl From<SerializeFormat> for hb_buffer_serialize_format_t {
     fn from(fmt: SerializeFormat) -> Self {
         match fmt {
-            SerializeFormat::Text => hb::HB_BUFFER_SERIALIZE_FORMAT_TEXT,
-            SerializeFormat::Json => hb::HB_BUFFER_SERIALIZE_FORMAT_JSON,
+            SerializeFormat::Text => HB_BUFFER_SERIALIZE_FORMAT_TEXT,
+            SerializeFormat::Json => HB_BUFFER_SERIALIZE_FORMAT_JSON,
         }
     }
 }
@@ -363,18 +381,18 @@ bitflags! {
     #[derive(Default)]
     pub struct SerializeFlags: u32 {
         /// Do not serialize glyph cluster.
-        const NO_CLUSTERS = hb::HB_BUFFER_SERIALIZE_FLAG_NO_CLUSTERS;
+        const NO_CLUSTERS = HB_BUFFER_SERIALIZE_FLAG_NO_CLUSTERS;
         /// Do not serialize glyph position information.
-        const NO_POSITIONS = hb::HB_BUFFER_SERIALIZE_FLAG_NO_POSITIONS;
+        const NO_POSITIONS = HB_BUFFER_SERIALIZE_FLAG_NO_POSITIONS;
         /// Do no serialize glyph name.
-        const NO_GLYPH_NAMES = hb::HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES;
+        const NO_GLYPH_NAMES = HB_BUFFER_SERIALIZE_FLAG_NO_GLYPH_NAMES;
         /// Serialize glyph extents.
-        const GLYPH_EXTENTS = hb::HB_BUFFER_SERIALIZE_FLAG_GLYPH_EXTENTS;
+        const GLYPH_EXTENTS = HB_BUFFER_SERIALIZE_FLAG_GLYPH_EXTENTS;
         /// Serialize glyph flags.
-        const GLYPH_FLAGS = hb::HB_BUFFER_SERIALIZE_FLAG_GLYPH_FLAGS;
+        const GLYPH_FLAGS = HB_BUFFER_SERIALIZE_FLAG_GLYPH_FLAGS;
         /// Do not serialize glyph advances, glyph offsets will reflect absolute
         /// glyph positions.
-        const NO_ADVANCES = hb::HB_BUFFER_SERIALIZE_FLAG_NO_ADVANCES;
+        const NO_ADVANCES = HB_BUFFER_SERIALIZE_FLAG_NO_ADVANCES;
     }
 }
 
@@ -405,7 +423,7 @@ impl<'a> Read for BufferSerializer<'a> {
                 }
                 let mut bytes_written = 0;
                 let num_serialized_items = unsafe {
-                    hb::hb_buffer_serialize_glyphs(
+                    hb_buffer_serialize_glyphs(
                         self.buffer.as_raw(),
                         self.start as u32,
                         self.end as u32,
@@ -449,16 +467,14 @@ impl TypedBuffer {
     ///
     /// Marked as unsafe because it acceses a raw pointer. Internally calls
     /// `Owned::from_raw` and therefore the same ownership considerations apply.
-    pub unsafe fn take_from_raw(raw: *mut hb::hb_buffer_t) -> Option<TypedBuffer> {
+    pub unsafe fn take_from_raw(raw: *mut hb_buffer_t) -> Option<TypedBuffer> {
         let generic_buf: Owned<GenericBuffer> = Owned::from_raw(raw);
         let content_type = generic_buf.content_type();
         match content_type {
-            hb::HB_BUFFER_CONTENT_TYPE_UNICODE => {
+            HB_BUFFER_CONTENT_TYPE_UNICODE => {
                 Some(TypedBuffer::Unicode(UnicodeBuffer(generic_buf)))
             }
-            hb::HB_BUFFER_CONTENT_TYPE_GLYPHS => {
-                Some(TypedBuffer::Glyphs(GlyphBuffer(generic_buf)))
-            }
+            HB_BUFFER_CONTENT_TYPE_GLYPHS => Some(TypedBuffer::Glyphs(GlyphBuffer(generic_buf))),
             _ => None,
         }
     }
@@ -488,7 +504,7 @@ impl TypedBuffer {
 pub struct UnicodeBuffer(pub(crate) Owned<GenericBuffer>);
 impl UnicodeBuffer {
     pub(crate) fn from_generic(generic: Owned<GenericBuffer>) -> Self {
-        generic.set_content_type(hb::HB_BUFFER_CONTENT_TYPE_UNICODE);
+        generic.set_content_type(HB_BUFFER_CONTENT_TYPE_UNICODE);
         UnicodeBuffer(generic)
     }
 
@@ -506,7 +522,7 @@ impl UnicodeBuffer {
     }
 
     /// Converts this buffer to a raw harfbuzz object pointer.
-    pub fn into_raw(self) -> *mut hb::hb_buffer_t {
+    pub fn into_raw(self) -> *mut hb_buffer_t {
         Owned::into_raw(self.0)
     }
 
@@ -698,13 +714,13 @@ impl UnicodeBuffer {
     /// Set the script from an ISO15924 tag.
     pub fn set_script(mut self, script: Tag) -> UnicodeBuffer {
         self.0
-            .set_script(unsafe { hb::hb_script_from_iso15924_tag(script.0) });
+            .set_script(unsafe { hb_script_from_iso15924_tag(script.0) });
         self
     }
 
     /// Get the ISO15924 script tag.
     pub fn get_script(&self) -> Tag {
-        Tag(unsafe { hb::hb_script_to_iso15924_tag(self.0.get_script()) })
+        Tag(unsafe { hb_script_to_iso15924_tag(self.0.get_script()) })
     }
 
     /// Set the buffer language.
@@ -819,7 +835,7 @@ impl GlyphBuffer {
     }
 
     /// Converts this buffer to a raw harfbuzz object pointer.
-    pub fn into_raw(self) -> *mut hb::hb_buffer_t {
+    pub fn into_raw(self) -> *mut hb_buffer_t {
         Owned::into_raw(self.0)
     }
 
@@ -934,13 +950,14 @@ impl fmt::Display for GlyphBuffer {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::bindings::hb_glyph_position_t;
     use crate::tests::assert_memory_layout_equal;
     use crate::{shape, Face, Font};
 
     #[test]
     fn test_memory_layouts() {
-        assert_memory_layout_equal::<hb::hb_glyph_position_t, GlyphPosition>();
-        assert_memory_layout_equal::<hb::hb_glyph_info_t, GlyphInfo>();
+        assert_memory_layout_equal::<hb_glyph_position_t, GlyphPosition>();
+        assert_memory_layout_equal::<hb_glyph_info_t, GlyphInfo>();
     }
 
     #[test]
