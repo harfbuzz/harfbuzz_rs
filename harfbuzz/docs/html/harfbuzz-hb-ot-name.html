@@ -83,6 +83,10 @@
 <td class="function_name"><a class="link" href="harfbuzz-hb-ot-name.html#hb-ot-name-id-t" title="hb_ot_name_id_t">hb_ot_name_id_t</a></td>
 </tr>
 <tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="harfbuzz-hb-ot-name.html#hb-ot-name-id-predefined-t" title="enum hb_ot_name_id_predefined_t">hb_ot_name_id_predefined_t</a></td>
+</tr>
+<tr>
 <td class="datatype_keyword"> </td>
 <td class="function_name"><a class="link" href="harfbuzz-hb-ot-name.html#hb-ot-name-entry-t" title="hb_ot_name_entry_t">hb_ot_name_entry_t</a></td>
 </tr>
@@ -135,7 +139,7 @@ used as long as <em class="parameter"><code>face</code></em>
 <div class="refsect3">
 <a name="hb-ot-name-list-names.returns"></a><h4>Returns</h4>
 <p>Array of available name entries. </p>
-<p><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=num_entries]</span></p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=num_entries]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-2-1-0.html#api-index-2.1.0">2.1.0</a></p>
 </div>
@@ -329,9 +333,211 @@ text written to buffer. </p></td>
 <p>An integral type representing an OpenType 'name' table name identifier.
 There are predefined name IDs, as well as name IDs return from other
 API.  These can be used to fetch name strings from a font face.</p>
+<p class="since">Since: <a class="link" href="api-index-2-0-0.html#api-index-2.0.0">2.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-ot-name-id-predefined-t"></a><h3>enum hb_ot_name_id_predefined_t</h3>
+<p>An enum type representing the pre-defined name IDs.</p>
 <p>For more information on these fields, see the
 <a class="ulink" href="https://docs.microsoft.com/en-us/typography/opentype/spec/name#name-ids" target="_top">OpenType spec</a>.</p>
-<p class="since">Since: <a class="link" href="api-index-2-0-0.html#api-index-2.0.0">2.0.0</a></p>
+<div class="refsect3">
+<a name="hb-ot-name-id-predefined-t.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-COPYRIGHT:CAPS"></a>HB_OT_NAME_ID_COPYRIGHT</p></td>
+<td class="enum_member_description">
+<p>Copyright notice</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-FONT-FAMILY:CAPS"></a>HB_OT_NAME_ID_FONT_FAMILY</p></td>
+<td class="enum_member_description">
+<p>Font Family name</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-FONT-SUBFAMILY:CAPS"></a>HB_OT_NAME_ID_FONT_SUBFAMILY</p></td>
+<td class="enum_member_description">
+<p>Font Subfamily name</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-UNIQUE-ID:CAPS"></a>HB_OT_NAME_ID_UNIQUE_ID</p></td>
+<td class="enum_member_description">
+<p>Unique font identifier</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-FULL-NAME:CAPS"></a>HB_OT_NAME_ID_FULL_NAME</p></td>
+<td class="enum_member_description">
+<p>Full font name that reflects
+all family and relevant subfamily descriptors</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-VERSION-STRING:CAPS"></a>HB_OT_NAME_ID_VERSION_STRING</p></td>
+<td class="enum_member_description">
+<p>Version string</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-POSTSCRIPT-NAME:CAPS"></a>HB_OT_NAME_ID_POSTSCRIPT_NAME</p></td>
+<td class="enum_member_description">
+<p>PostScript name for the font</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-TRADEMARK:CAPS"></a>HB_OT_NAME_ID_TRADEMARK</p></td>
+<td class="enum_member_description">
+<p>Trademark</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-MANUFACTURER:CAPS"></a>HB_OT_NAME_ID_MANUFACTURER</p></td>
+<td class="enum_member_description">
+<p>Manufacturer Name</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-DESIGNER:CAPS"></a>HB_OT_NAME_ID_DESIGNER</p></td>
+<td class="enum_member_description">
+<p>Designer</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-DESCRIPTION:CAPS"></a>HB_OT_NAME_ID_DESCRIPTION</p></td>
+<td class="enum_member_description">
+<p>Description</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-VENDOR-URL:CAPS"></a>HB_OT_NAME_ID_VENDOR_URL</p></td>
+<td class="enum_member_description">
+<p>URL of font vendor</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-DESIGNER-URL:CAPS"></a>HB_OT_NAME_ID_DESIGNER_URL</p></td>
+<td class="enum_member_description">
+<p>URL of typeface designer</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-LICENSE:CAPS"></a>HB_OT_NAME_ID_LICENSE</p></td>
+<td class="enum_member_description">
+<p>License Description</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-LICENSE-URL:CAPS"></a>HB_OT_NAME_ID_LICENSE_URL</p></td>
+<td class="enum_member_description">
+<p>URL where additional licensing
+information can be found</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-TYPOGRAPHIC-FAMILY:CAPS"></a>HB_OT_NAME_ID_TYPOGRAPHIC_FAMILY</p></td>
+<td class="enum_member_description">
+<p>Typographic Family name</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-TYPOGRAPHIC-SUBFAMILY:CAPS"></a>HB_OT_NAME_ID_TYPOGRAPHIC_SUBFAMILY</p></td>
+<td class="enum_member_description">
+<p>Typographic Subfamily name</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-MAC-FULL-NAME:CAPS"></a>HB_OT_NAME_ID_MAC_FULL_NAME</p></td>
+<td class="enum_member_description">
+<p>Compatible Full Name for MacOS</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-SAMPLE-TEXT:CAPS"></a>HB_OT_NAME_ID_SAMPLE_TEXT</p></td>
+<td class="enum_member_description">
+<p>Sample text</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-CID-FINDFONT-NAME:CAPS"></a>HB_OT_NAME_ID_CID_FINDFONT_NAME</p></td>
+<td class="enum_member_description">
+<p>PostScript CID findfont name</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-WWS-FAMILY:CAPS"></a>HB_OT_NAME_ID_WWS_FAMILY</p></td>
+<td class="enum_member_description">
+<p>WWS Family Name</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-WWS-SUBFAMILY:CAPS"></a>HB_OT_NAME_ID_WWS_SUBFAMILY</p></td>
+<td class="enum_member_description">
+<p>WWS Subfamily Name</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-LIGHT-BACKGROUND:CAPS"></a>HB_OT_NAME_ID_LIGHT_BACKGROUND</p></td>
+<td class="enum_member_description">
+<p>Light Background Palette</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-DARK-BACKGROUND:CAPS"></a>HB_OT_NAME_ID_DARK_BACKGROUND</p></td>
+<td class="enum_member_description">
+<p>Dark Background Palette</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-VARIATIONS-PS-PREFIX:CAPS"></a>HB_OT_NAME_ID_VARIATIONS_PS_PREFIX</p></td>
+<td class="enum_member_description">
+<p>Variations PostScript Name Prefix</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-NAME-ID-INVALID:CAPS"></a>HB_OT_NAME_ID_INVALID</p></td>
+<td class="enum_member_description">
+<p>Value to represent a nonexistent name ID.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-7-0-0.html#api-index-7.0.0">7.0.0</a></p>
 </div>
 <hr>
 <div class="refsect2">

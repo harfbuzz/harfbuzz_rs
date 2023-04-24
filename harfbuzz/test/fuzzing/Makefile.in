@@ -215,7 +215,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/depcomp README
+am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/depcomp
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -251,8 +251,6 @@ CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DIRECTWRITE_CXXFLAGS = @DIRECTWRITE_CXXFLAGS@
-DIRECTWRITE_LIBS = @DIRECTWRITE_LIBS@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -409,9 +407,13 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 NULL = 
-EXTRA_DIST = README run-shape-fuzzer-tests.py \
+
+# seems autotools builds do not support builds with experimental APIs, so
+# EXTRA_DIST hb-repacker-fuzzer.cc
+EXTRA_DIST = README.md hb-repacker-fuzzer.cc run-shape-fuzzer-tests.py \
 	run-subset-fuzzer-tests.py run-draw-fuzzer-tests.py \
-	meson.build fonts $(NULL)
+	run-repacker-fuzzer-tests.py meson.build fonts graphs sets \
+	$(NULL)
 CLEANFILES = 
 DISTCLEANFILES = 
 MAINTAINERCLEANFILES = 

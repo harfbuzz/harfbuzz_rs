@@ -523,6 +523,8 @@ hb_ot_var_normalize_coords (<em class="parameter"><code><a class="link" href="ha
 <p>Normalizes the given design-space coordinates. The minimum and maximum
 values for the axis are mapped to the interval [-1,1], with the default
 axis value mapped to 0.</p>
+<p>The normalized values have 14 bits of fixed-point sub-integer precision as per
+OpenType specification.</p>
 <p>Any additional scaling defined in the face's <code class="literal">avar</code> table is also
 applied, as described at https://docs.microsoft.com/en-us/typography/opentype/spec/avar</p>
 <div class="refsect3">
@@ -668,7 +670,7 @@ applied, as described at https://docs.microsoft.com/en-us/typography/opentype/sp
 </tr>
 <tr>
 <td class="struct_member_name"><p><span class="type">float</span> <em class="structfield"><code><a name="hb-ot-var-axis-info-t.min-value"></a>min_value</code></em>;</p></td>
-<td class="struct_member_description"><p>The mininum value on the variation axis that the font covers</p></td>
+<td class="struct_member_description"><p>The minimum value on the variation axis that the font covers</p></td>
 <td class="struct_member_annotations"> </td>
 </tr>
 <tr>

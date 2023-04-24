@@ -36,7 +36,7 @@
       <code class="literal">1</code>. Client programs can increase the reference
       count on an object by calling its
       <code class="function">reference()</code> method. Whenever a client
-      program is finished with an object, it should call its 
+      program is finished with an object, it should call its
       corresponding <code class="function">destroy()</code> method. The destroy
       method will decrease the reference count on the object and,
       whenever the reference count reaches zero, it will also destroy
@@ -46,8 +46,8 @@
       All of HarfBuzz's object-lifecycle-management APIs are
       thread-safe (unless you compiled HarfBuzz from source with the
       <code class="literal">HB_NO_MT</code> configuration flag), even when the
-      object as a whole is not thread-safe. 
-      It is also permissible to <code class="function">reference()</code> or to 
+      object as a whole is not thread-safe.
+      It is also permissible to <code class="function">reference()</code> or to
       <code class="function">destroy()</code> the <code class="literal">NULL</code>
       value.
     </p>
@@ -65,7 +65,7 @@
       as immutable and <code class="function">is_immutable()</code> methods to
       test whether or not an object is immutable. Attempts to use
       setter functions on immutable objects will fail silently; see the API
-      Reference manual for specifics. 
+      Reference manual for specifics.
     </p>
 <p>
       Note also that there are no "make mutable" methods. If client

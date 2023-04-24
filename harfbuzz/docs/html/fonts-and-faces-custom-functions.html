@@ -116,6 +116,14 @@
       <code class="function">hb_font_get_glyph_from_name_func_t</code>: returns
       the glyph index that corresponds to a given glyph name.
     </p></li>
+<li class="listitem"><p>
+      <code class="function">hb_font_draw_glyph_func_t</code>: gets the outlines
+      of a glyph (by calling #hb_draw_funcs_t callbacks).
+    </p></li>
+<li class="listitem"><p>
+      <code class="function">hb_font_paint_glyph_func_t</code>: paints a glyph
+      (by calling #hb_paint_funcs_t callbacks).
+    </p></li>
 </ul></div>
 <p>
       You can create new font-functions by calling

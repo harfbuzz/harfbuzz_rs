@@ -7,7 +7,7 @@
 <link rel="home" href="index.html" title="HarfBuzz Manual">
 <link rel="up" href="fonts-and-faces.html" title="Fonts, faces, and output">
 <link rel="prev" href="fonts-and-faces-native-opentype.html" title="Font objects and HarfBuzz's native OpenType implementation">
-<link rel="next" href="shaping-and-shape-plans.html" title="Shaping and shape plans">
+<link rel="next" href="glyphs-and-rendering.html" title="Glyphs and rendering">
 <meta name="generator" content="GTK-Doc V1.32 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
@@ -17,7 +17,7 @@
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
 <td><a accesskey="u" href="fonts-and-faces.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
 <td><a accesskey="p" href="fonts-and-faces-native-opentype.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
-<td><a accesskey="n" href="shaping-and-shape-plans.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+<td><a accesskey="n" href="glyphs-and-rendering.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
 </tr></table>
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
@@ -86,12 +86,23 @@
       range actually implemented in the font's variation axis. After
       all, a font might only provide lighter-than-regular weights, and
       setting a heavier value on the <code class="literal">wght</code> axis will
-      not change that. 
+      not change that.
     </p>
 <p>
       Once your variation settings are specified on your font object,
       however, shaping with a variable font is just like shaping a
       static font.
+    </p>
+<p>
+      In addition to providing the variation axes themselves, fonts may also
+      pre-define certain variation coordinates as named instances. HarfBuzz
+      makes these coordinates (and their associated names) available via
+      <code class="function">hb_ot_var_named_instance_get_design_coords()</code> and
+      <code class="function">hb_ot_var_named_instance_get_subfamily_name_id()</code>.
+    </p>
+<p>
+      Applications should treat named instances like multiple independent,
+      static fonts.
     </p>
 </div>
 <div class="footer">

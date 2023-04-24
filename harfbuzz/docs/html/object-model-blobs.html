@@ -34,9 +34,9 @@
       you do so in a <code class="literal">hb_blob_t</code> wrapper.
     </p>
 <p>
-      This allows you to take advantage of HarffBuzz's
+      This allows you to take advantage of HarfBuzz's
       reference-counting and <code class="function">destroy</code>
-      callbacks. If you allocated the memory for the data using 
+      callbacks. If you allocated the memory for the data using
       <code class="function">malloc()</code>, you would create the blob using
     </p>
 <pre class="programlisting">
@@ -47,7 +47,11 @@
       allocated memory whenever the blob drops its last reference and
       is deconstructed.  Consequently, the user code can stop worrying
       about freeing memory and let the reference-counting machinery
-      take care of that. 
+      take care of that.
+    </p>
+<p>
+      Most of the time, blobs are read-only, facilitating their use in
+      immutable objects.
     </p>
 </div>
 <div class="footer">

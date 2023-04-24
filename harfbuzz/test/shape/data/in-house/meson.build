@@ -1,31 +1,37 @@
-in_house_tests_base = [
+in_house_tests = [
   'aat-morx.tests',
   'aat-trak.tests',
   'arabic-fallback-shaping.tests',
   'arabic-feature-order.tests',
   'arabic-like-joining.tests',
-  'arabic-mark-attach.tests',
   'arabic-mark-order.tests',
   'arabic-normalization.tests',
+  'arabic-phags-pa.tests',
   'arabic-stch.tests',
   'automatic-fractions.tests',
   'cluster.tests',
   'collections.tests',
   'color-fonts.tests',
   'context-matching.tests',
+  'coretext.tests',
   'cursive-positioning.tests',
   'default-ignorables.tests',
   'digits.tests',
+  'directwrite.tests',
   'emoji.tests',
   'emoji-clusters.tests',
   'fallback-positioning.tests',
+  'glyph-props-no-gdef.tests',
   'hangul-jamo.tests',
+  'hebrew-diacritics.tests',
   'hyphens.tests',
   'indic-consonant-with-stacker.tests',
   'indic-decompose.tests',
+  'indic-feature-order.tests',
   'indic-init.tests',
   'indic-joiner-candrabindu.tests',
   'indic-joiners.tests',
+  'indic-malayalam-dot-reph.tests',
   'indic-old-spec.tests',
   'indic-pref-blocking.tests',
   'indic-script-extensions.tests',
@@ -45,11 +51,13 @@ in_house_tests_base = [
   'myanmar-misc.tests',
   'myanmar-syllable.tests',
   'myanmar-zawgyi.tests',
+  'nested-mark-filtering-sets.tests',
   'none-directional.tests',
   'positioning-features.tests',
   'rand.tests',
   'reverse-sub.tests',
   'rotation.tests',
+  'sara-am.tests',
   'simple.tests',
   'sinhala.tests',
   'spaces.tests',
@@ -57,7 +65,10 @@ in_house_tests_base = [
   'tibetan-contractions-2.tests',
   'tibetan-vowels.tests',
   'tt-kern-gpos.tests',
+  'uniscribe.tests',
+  'unsafe-to-concat.tests',
   'use-indic3.tests',
+  'use-javanese.tests',
   'use-marchen.tests',
   'use-syllable.tests',
   'use-vowel-letter-spoofing.tests',
@@ -66,16 +77,4 @@ in_house_tests_base = [
   'variations-rvrn.tests',
   'vertical.tests',
   'zero-width-marks.tests',
-]
-
-in_house_tests_coretext = [
-  'coretext.tests',
-]
-
-in_house_tests_uniscribe = [
-  'uniscribe.tests',
-]
-
-in_house_tests_directwrite = [
-  'directwrite.tests',
 ]

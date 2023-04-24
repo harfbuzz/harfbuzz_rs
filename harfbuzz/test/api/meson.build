@@ -6,6 +6,8 @@ endif
 tests = [
   'test-aat-layout.c',
   'test-baseline.c',
+  'test-be-glyph-advance.c',
+  'test-be-num-glyphs.c',
   'test-blob.c',
   'test-buffer.c',
   'test-c.c',
@@ -13,8 +15,11 @@ tests = [
   'test-cplusplus.cc',
   'test-common.c',
   'test-draw.c',
+  'test-extents.c',
   'test-font.c',
   'test-font-scale.c',
+  'test-glyph-names.c',
+  'test-instance-cff2.c',
   'test-map.c',
   'test-object.c',
   'test-ot-alternates.c',
@@ -30,6 +35,8 @@ tests = [
   'test-ot-tag.c',
   'test-ot-extents-cff.c',
   'test-ot-metrics-tt-var.c',
+  'test-paint.c',
+  'test-subset-repacker.c',
   'test-set.c',
   'test-shape.c',
   'test-style.c',
@@ -58,7 +65,16 @@ tests = [
 ]
 
 if conf.get('HAVE_FREETYPE', 0) == 1
-  tests += 'test-ot-math.c'
+  tests += [
+    'test-ot-math.c',
+    'test-ft.c',
+  ]
+endif
+
+if conf.get('HAVE_CORETEXT', 0) == 1
+  tests += [
+    'test-coretext.c',
+  ]
 endif
 
 if conf.get('HAVE_FREETYPE', 0) == 1 and conf.get('HAVE_PTHREAD', 0) == 1
@@ -74,16 +90,22 @@ env.set('G_TEST_SRCDIR', meson.current_source_dir())
 env.set('G_TEST_BUILDDIR', meson.current_build_dir())
 
 foreach source : tests
+  cpp_args = []
   test_name = source.split('.')[0]
 
   deps = [glib_dep, freetype_dep, thread_dep, libharfbuzz_dep, libharfbuzz_icu_dep]
   suite = ['api']
-  if test_name.contains('-subset')
+  if test_name.contains('-subset') or test_name.contains('-instance')
     deps += libharfbuzz_subset_dep
     suite += 'subset'
   endif
 
+  if test_name.contains('-instance')
+    cpp_args += '-DHB_EXPERIMENTAL_API'
+  endif
+
   test(test_name, executable(test_name, source,
+    cpp_args:  cpp_args,
     include_directories: [incconfig],
     dependencies: deps,
     install: false,

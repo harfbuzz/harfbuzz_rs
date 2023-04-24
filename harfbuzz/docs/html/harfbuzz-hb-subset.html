@@ -81,10 +81,10 @@
 </tr>
 <tr>
 <td class="function_type">
-<a class="link" href="harfbuzz-hb-subset.html#hb-subset-flags-t" title="enum hb_subset_flags_t"><span class="returnvalue">hb_subset_flags_t</span></a>
+<span class="returnvalue">void</span>
 </td>
 <td class="function_name">
-<a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-get-flags" title="hb_subset_input_get_flags ()">hb_subset_input_get_flags</a> <span class="c_punctuation">()</span>
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-keep-everything" title="hb_subset_input_keep_everything ()">hb_subset_input_keep_everything</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -93,6 +93,14 @@
 </td>
 <td class="function_name">
 <a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-set-flags" title="hb_subset_input_set_flags ()">hb_subset_input_set_flags</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-flags-t" title="enum hb_subset_flags_t"><span class="returnvalue">hb_subset_flags_t</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-get-flags" title="hb_subset_input_get_flags ()">hb_subset_input_get_flags</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -121,10 +129,106 @@
 </tr>
 <tr>
 <td class="function_type">
+<a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-pin-axis-location" title="hb_subset_input_pin_axis_location ()">hb_subset_input_pin_axis_location</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-pin-axis-to-default" title="hb_subset_input_pin_axis_to_default ()">hb_subset_input_pin_axis_to_default</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="returnvalue">hb_face_t</span></a> *
 </td>
 <td class="function_name">
 <a class="link" href="harfbuzz-hb-subset.html#hb-subset-or-fail" title="hb_subset_or_fail ()">hb_subset_or_fail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="returnvalue">hb_subset_plan_t</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-create-or-fail" title="hb_subset_plan_create_or_fail ()">hb_subset_plan_create_or_fail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="returnvalue">hb_subset_plan_t</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-reference" title="hb_subset_plan_reference ()">hb_subset_plan_reference</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-destroy" title="hb_subset_plan_destroy ()">hb_subset_plan_destroy</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-set-user-data" title="hb_subset_plan_set_user_data ()">hb_subset_plan_set_user_data</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span> *
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-get-user-data" title="hb_subset_plan_get_user_data ()">hb_subset_plan_get_user_data</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="returnvalue">hb_face_t</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-execute-or-fail" title="hb_subset_plan_execute_or_fail ()">hb_subset_plan_execute_or_fail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-map.html#hb-map-t" title="hb_map_t"><span class="returnvalue">hb_map_t</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-unicode-to-old-glyph-mapping" title="hb_subset_plan_unicode_to_old_glyph_mapping ()">hb_subset_plan_unicode_to_old_glyph_mapping</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-map.html#hb-map-t" title="hb_map_t"><span class="returnvalue">hb_map_t</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-new-to-old-glyph-mapping" title="hb_subset_plan_new_to_old_glyph_mapping ()">hb_subset_plan_new_to_old_glyph_mapping</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-map.html#hb-map-t" title="hb_map_t"><span class="returnvalue">hb_map_t</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-old-to-new-glyph-mapping" title="hb_subset_plan_old_to_new_glyph_mapping ()">hb_subset_plan_old_to_new_glyph_mapping</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="returnvalue">hb_face_t</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-preprocess" title="hb_subset_preprocess ()">hb_subset_preprocess</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 </tbody>
@@ -149,6 +253,10 @@
 <tr>
 <td class="datatype_keyword">enum</td>
 <td class="function_name"><a class="link" href="harfbuzz-hb-subset.html#hb-subset-sets-t" title="enum hb_subset_sets_t">hb_subset_sets_t</a></td>
+</tr>
+<tr>
+<td class="typedef_keyword">typedef</td>
+<td class="function_name"><a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t">hb_subset_plan_t</a></td>
 </tr>
 </tbody>
 </table></div>
@@ -338,12 +446,15 @@ attached to the specified subset input object.</p>
 </div>
 <hr>
 <div class="refsect2">
-<a name="hb-subset-input-get-flags"></a><h3>hb_subset_input_get_flags ()</h3>
-<pre class="programlisting"><a class="link" href="harfbuzz-hb-subset.html#hb-subset-flags-t" title="enum hb_subset_flags_t"><span class="returnvalue">hb_subset_flags_t</span></a>
-hb_subset_input_get_flags (<em class="parameter"><code><a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-t" title="hb_subset_input_t"><span class="type">hb_subset_input_t</span></a> *input</code></em>);</pre>
-<p>Gets all of the subsetting flags in the input object.</p>
+<a name="hb-subset-input-keep-everything"></a><h3>hb_subset_input_keep_everything ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+hb_subset_input_keep_everything (<em class="parameter"><code><a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-t" title="hb_subset_input_t"><span class="type">hb_subset_input_t</span></a> *input</code></em>);</pre>
+<p>Configure input object to keep everything in the font face.
+That is, all Unicodes, glyphs, names, layout items,
+glyph names, etc.</p>
+<p>The input can be tailored afterwards by the caller.</p>
 <div class="refsect3">
-<a name="hb-subset-input-get-flags.parameters"></a><h4>Parameters</h4>
+<a name="hb-subset-input-keep-everything.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -352,16 +463,12 @@ hb_subset_input_get_flags (<em class="parameter"><code><a class="link" href="har
 </colgroup>
 <tbody><tr>
 <td class="parameter_name"><p>input</p></td>
-<td class="parameter_description"><p>a <a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-t" title="hb_subset_input_t"><span class="type">hb_subset_input_t</span></a> object.</p></td>
+<td class="parameter_description"><p>a <a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-t" title="hb_subset_input_t"><span class="type">hb_subset_input_t</span></a> object</p></td>
 <td class="parameter_annotations"> </td>
 </tr></tbody>
 </table></div>
 </div>
-<div class="refsect3">
-<a name="hb-subset-input-get-flags.returns"></a><h4>Returns</h4>
-<p> the subsetting flags bit field.</p>
-</div>
-<p class="since">Since: <a class="link" href="api-index-2-9-0.html#api-index-2.9.0">2.9.0</a></p>
+<p class="since">Since: <a class="link" href="api-index-7-0-0.html#api-index-7.0.0">7.0.0</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -392,6 +499,33 @@ field.</p>
 </tr>
 </tbody>
 </table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-2-9-0.html#api-index-2.9.0">2.9.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-subset-input-get-flags"></a><h3>hb_subset_input_get_flags ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-subset.html#hb-subset-flags-t" title="enum hb_subset_flags_t"><span class="returnvalue">hb_subset_flags_t</span></a>
+hb_subset_input_get_flags (<em class="parameter"><code><a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-t" title="hb_subset_input_t"><span class="type">hb_subset_input_t</span></a> *input</code></em>);</pre>
+<p>Gets all of the subsetting flags in the input object.</p>
+<div class="refsect3">
+<a name="hb-subset-input-get-flags.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>input</p></td>
+<td class="parameter_description"><p>a <a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-t" title="hb_subset_input_t"><span class="type">hb_subset_input_t</span></a> object.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-subset-input-get-flags.returns"></a><h4>Returns</h4>
+<p> the subsetting flags bit field.</p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-2-9-0.html#api-index-2.9.0">2.9.0</a></p>
 </div>
@@ -492,6 +626,100 @@ hb_subset_input_set (<em class="parameter"><code><a class="link" href="harfbuzz-
 </div>
 <hr>
 <div class="refsect2">
+<a name="hb-subset-input-pin-axis-location"></a><h3>hb_subset_input_pin_axis_location ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+hb_subset_input_pin_axis_location (<em class="parameter"><code><a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-t" title="hb_subset_input_t"><span class="type">hb_subset_input_t</span></a> *input</code></em>,
+                                   <em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
+                                   <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> axis_tag</code></em>,
+                                   <em class="parameter"><code><span class="type">float</span> axis_value</code></em>);</pre>
+<p>Pin an axis to a fixed location in the given subset input object.</p>
+<p>All axes in a font must be pinned. Additionally, <code class="literal">CFF2</code> table, if present,
+will be de-subroutinized.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="hb-subset-input-pin-axis-location.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>input</p></td>
+<td class="parameter_description"><p>a <a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-t" title="hb_subset_input_t"><span class="type">hb_subset_input_t</span></a> object.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>face</p></td>
+<td class="parameter_description"><p>a <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> object.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>axis_tag</p></td>
+<td class="parameter_description"><p>Tag of the axis to be pinned</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>axis_value</p></td>
+<td class="parameter_description"><p>Location on the axis to be pinned at</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-subset-input-pin-axis-location.returns"></a><h4>Returns</h4>
+<p> <code class="literal">true</code> if success, <code class="literal">false</code> otherwise</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-6-0-0.html#api-index-6.0.0">6.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-subset-input-pin-axis-to-default"></a><h3>hb_subset_input_pin_axis_to_default ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+hb_subset_input_pin_axis_to_default (<em class="parameter"><code><a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-t" title="hb_subset_input_t"><span class="type">hb_subset_input_t</span></a> *input</code></em>,
+                                     <em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
+                                     <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> axis_tag</code></em>);</pre>
+<p>Pin an axis to its default location in the given subset input object.</p>
+<p>All axes in a font must be pinned. Additionally, <code class="literal">CFF2</code> table, if present,
+will be de-subroutinized.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="hb-subset-input-pin-axis-to-default.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>input</p></td>
+<td class="parameter_description"><p>a <a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-t" title="hb_subset_input_t"><span class="type">hb_subset_input_t</span></a> object.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>face</p></td>
+<td class="parameter_description"><p>a <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> object.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>axis_tag</p></td>
+<td class="parameter_description"><p>Tag of the axis to be pinned</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-subset-input-pin-axis-to-default.returns"></a><h4>Returns</h4>
+<p> <code class="literal">true</code> if success, <code class="literal">false</code> otherwise</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-6-0-0.html#api-index-6.0.0">6.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="hb-subset-or-fail"></a><h3>hb_subset_or_fail ()</h3>
 <pre class="programlisting"><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="returnvalue">hb_face_t</span></a> *
 hb_subset_or_fail (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *source</code></em>,
@@ -521,6 +749,351 @@ if the subset operation fails.</p>
 </table></div>
 </div>
 <p class="since">Since: <a class="link" href="api-index-2-9-0.html#api-index-2.9.0">2.9.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-subset-plan-create-or-fail"></a><h3>hb_subset_plan_create_or_fail ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="returnvalue">hb_subset_plan_t</span></a> *
+hb_subset_plan_create_or_fail (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
+                               <em class="parameter"><code>const <a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-t" title="hb_subset_input_t"><span class="type">hb_subset_input_t</span></a> *input</code></em>);</pre>
+<p>Computes a plan for subsetting the supplied face according
+to a provided input. The plan describes
+which tables and glyphs should be retained.</p>
+<div class="refsect3">
+<a name="hb-subset-plan-create-or-fail.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>face</p></td>
+<td class="parameter_description"><p>font face to create the plan for.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>input</p></td>
+<td class="parameter_description"><p>a <a class="link" href="harfbuzz-hb-subset.html#hb-subset-input-t" title="hb_subset_input_t"><span class="type">hb_subset_input_t</span></a> input.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-subset-plan-create-or-fail.returns"></a><h4>Returns</h4>
+<p>New subset plan. Destroy with
+<a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-destroy" title="hb_subset_plan_destroy ()"><code class="function">hb_subset_plan_destroy()</code></a>. If there is a failure creating the plan
+nullptr will be returned. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-4-0-0.html#api-index-4.0.0">4.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-subset-plan-reference"></a><h3>hb_subset_plan_reference ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="returnvalue">hb_subset_plan_t</span></a> *
+hb_subset_plan_reference (<em class="parameter"><code><a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="type">hb_subset_plan_t</span></a> *plan</code></em>);</pre>
+<p>Increases the reference count on <em class="parameter"><code>plan</code></em>
+.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="hb-subset-plan-reference.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>plan</p></td>
+<td class="parameter_description"><p>a <a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="type">hb_subset_plan_t</span></a> object.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-subset-plan-reference.returns"></a><h4>Returns</h4>
+<p> <em class="parameter"><code>plan</code></em>
+.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-4-0-0.html#api-index-4.0.0">4.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-subset-plan-destroy"></a><h3>hb_subset_plan_destroy ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+hb_subset_plan_destroy (<em class="parameter"><code><a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="type">hb_subset_plan_t</span></a> *plan</code></em>);</pre>
+<p>Decreases the reference count on <em class="parameter"><code>plan</code></em>
+, and if it reaches zero, destroys
+<em class="parameter"><code>plan</code></em>
+, freeing all memory.</p>
+<div class="refsect3">
+<a name="hb-subset-plan-destroy.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>plan</p></td>
+<td class="parameter_description"><p>a <a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="type">hb_subset_plan_t</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-4-0-0.html#api-index-4.0.0">4.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-subset-plan-set-user-data"></a><h3>hb_subset_plan_set_user_data ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+hb_subset_plan_set_user_data (<em class="parameter"><code><a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="type">hb_subset_plan_t</span></a> *plan</code></em>,
+                              <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-user-data-key-t" title="hb_user_data_key_t"><span class="type">hb_user_data_key_t</span></a> *key</code></em>,
+                              <em class="parameter"><code><span class="type">void</span> *data</code></em>,
+                              <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-destroy-func-t" title="hb_destroy_func_t ()"><span class="type">hb_destroy_func_t</span></a> destroy</code></em>,
+                              <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="type">hb_bool_t</span></a> replace</code></em>);</pre>
+<p>Attaches a user-data key/data pair to the given subset plan object.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="hb-subset-plan-set-user-data.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>plan</p></td>
+<td class="parameter_description"><p>a <a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="type">hb_subset_plan_t</span></a> object.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>key</p></td>
+<td class="parameter_description"><p>The user-data key to set</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>data</p></td>
+<td class="parameter_description"><p>A pointer to the user data</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>destroy</p></td>
+<td class="parameter_description"><p>A callback to call when <em class="parameter"><code>data</code></em>
+is not needed anymore. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>replace</p></td>
+<td class="parameter_description"><p>Whether to replace an existing data with the same key</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-subset-plan-set-user-data.returns"></a><h4>Returns</h4>
+<p> <code class="literal">true</code> if success, <code class="literal">false</code> otherwise</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-4-0-0.html#api-index-4.0.0">4.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-subset-plan-get-user-data"></a><h3>hb_subset_plan_get_user_data ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span> *
+hb_subset_plan_get_user_data (<em class="parameter"><code>const <a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="type">hb_subset_plan_t</span></a> *plan</code></em>,
+                              <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-user-data-key-t" title="hb_user_data_key_t"><span class="type">hb_user_data_key_t</span></a> *key</code></em>);</pre>
+<p>Fetches the user data associated with the specified key,
+attached to the specified subset plan object.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="hb-subset-plan-get-user-data.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>plan</p></td>
+<td class="parameter_description"><p>a <a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="type">hb_subset_plan_t</span></a> object.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>key</p></td>
+<td class="parameter_description"><p>The user-data key to query</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-subset-plan-get-user-data.returns"></a><h4>Returns</h4>
+<p>A pointer to the user data. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-4-0-0.html#api-index-4.0.0">4.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-subset-plan-execute-or-fail"></a><h3>hb_subset_plan_execute_or_fail ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="returnvalue">hb_face_t</span></a> *
+hb_subset_plan_execute_or_fail (<em class="parameter"><code><a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="type">hb_subset_plan_t</span></a> *plan</code></em>);</pre>
+<p>Executes the provided subsetting <em class="parameter"><code>plan</code></em>
+.</p>
+<div class="refsect3">
+<a name="hb-subset-plan-execute-or-fail.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>plan</p></td>
+<td class="parameter_description"><p>a subsetting plan.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-subset-plan-execute-or-fail.returns"></a><h4>Returns</h4>
+<p>on success returns a reference to generated font subset. If the subsetting operation fails
+returns nullptr.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-4-0-0.html#api-index-4.0.0">4.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-subset-plan-unicode-to-old-glyph-mapping"></a><h3>hb_subset_plan_unicode_to_old_glyph_mapping ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-map.html#hb-map-t" title="hb_map_t"><span class="returnvalue">hb_map_t</span></a> *
+hb_subset_plan_unicode_to_old_glyph_mapping
+                               (<em class="parameter"><code>const <a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="type">hb_subset_plan_t</span></a> *plan</code></em>);</pre>
+<p>Returns the mapping between codepoints in the original font and the
+associated glyph id in the original font.</p>
+<div class="refsect3">
+<a name="hb-subset-plan-unicode-to-old-glyph-mapping.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>plan</p></td>
+<td class="parameter_description"><p>a subsetting plan.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-subset-plan-unicode-to-old-glyph-mapping.returns"></a><h4>Returns</h4>
+<p>A pointer to the <a class="link" href="harfbuzz-hb-map.html#hb-map-t" title="hb_map_t"><span class="type">hb_map_t</span></a> of the mapping. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-4-0-0.html#api-index-4.0.0">4.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-subset-plan-new-to-old-glyph-mapping"></a><h3>hb_subset_plan_new_to_old_glyph_mapping ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-map.html#hb-map-t" title="hb_map_t"><span class="returnvalue">hb_map_t</span></a> *
+hb_subset_plan_new_to_old_glyph_mapping
+                               (<em class="parameter"><code>const <a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="type">hb_subset_plan_t</span></a> *plan</code></em>);</pre>
+<p>Returns the mapping between glyphs in the subset that will be produced by
+<em class="parameter"><code>plan</code></em>
+ and the glyph in the original font.</p>
+<div class="refsect3">
+<a name="hb-subset-plan-new-to-old-glyph-mapping.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>plan</p></td>
+<td class="parameter_description"><p>a subsetting plan.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-subset-plan-new-to-old-glyph-mapping.returns"></a><h4>Returns</h4>
+<p>A pointer to the <a class="link" href="harfbuzz-hb-map.html#hb-map-t" title="hb_map_t"><span class="type">hb_map_t</span></a> of the mapping. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-4-0-0.html#api-index-4.0.0">4.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-subset-plan-old-to-new-glyph-mapping"></a><h3>hb_subset_plan_old_to_new_glyph_mapping ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-map.html#hb-map-t" title="hb_map_t"><span class="returnvalue">hb_map_t</span></a> *
+hb_subset_plan_old_to_new_glyph_mapping
+                               (<em class="parameter"><code>const <a class="link" href="harfbuzz-hb-subset.html#hb-subset-plan-t" title="hb_subset_plan_t"><span class="type">hb_subset_plan_t</span></a> *plan</code></em>);</pre>
+<p>Returns the mapping between glyphs in the original font to glyphs in the
+subset that will be produced by <em class="parameter"><code>plan</code></em>
+</p>
+<div class="refsect3">
+<a name="hb-subset-plan-old-to-new-glyph-mapping.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>plan</p></td>
+<td class="parameter_description"><p>a subsetting plan.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-subset-plan-old-to-new-glyph-mapping.returns"></a><h4>Returns</h4>
+<p>A pointer to the <a class="link" href="harfbuzz-hb-map.html#hb-map-t" title="hb_map_t"><span class="type">hb_map_t</span></a> of the mapping. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-4-0-0.html#api-index-4.0.0">4.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-subset-preprocess"></a><h3>hb_subset_preprocess ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="returnvalue">hb_face_t</span></a> *
+hb_subset_preprocess (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *source</code></em>);</pre>
+<p>Preprocesses the face and attaches data that will be needed by the
+subsetter. Future subsetting operations can then use the precomputed data
+to speed up the subsetting operation.</p>
+<p>See <a class="ulink" href="https://github.com/harfbuzz/harfbuzz/blob/main/docs/subset-preprocessing.md" target="_top">subset-preprocessing</a>
+for more information.</p>
+<p>Note: the preprocessed face may contain sub-blobs that reference the memory
+backing the source <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a>. Therefore in the case that this memory is not
+owned by the source face you will need to ensure that memory lives
+as long as the returned <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a>.</p>
+<div class="refsect3">
+<a name="hb-subset-preprocess.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>source</p></td>
+<td class="parameter_description"><p>a <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> object.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-subset-preprocess.returns"></a><h4>Returns</h4>
+<p> a new <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a>.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-6-0-0.html#api-index-6.0.0">6.0.0</a></p>
 </div>
 </div>
 <div class="refsect1">
@@ -694,10 +1267,26 @@ in the subset.</p>
 </td>
 <td class="enum_member_annotations"> </td>
 </tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-SUBSET-SETS-LAYOUT-SCRIPT-TAG:CAPS"></a>HB_SUBSET_SETS_LAYOUT_SCRIPT_TAG</p></td>
+<td class="enum_member_description">
+<p>the set of layout script tags that will be retained
+in the subset. Defaults to all tags. Since: 5.0.0</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
 </tbody>
 </table></div>
 </div>
 <p class="since">Since: <a class="link" href="api-index-2-9-1.html#api-index-2.9.1">2.9.1</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-subset-plan-t"></a><h3>hb_subset_plan_t</h3>
+<pre class="programlisting">typedef struct hb_subset_plan_t hb_subset_plan_t;
+</pre>
+<p>Contains information about how the subset operation will be executed.
+Such as mappings from the old glyph ids to the new ones in the subset.</p>
 </div>
 </div>
 </div>

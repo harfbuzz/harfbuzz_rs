@@ -221,8 +221,6 @@ CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DIRECTWRITE_CXXFLAGS = @DIRECTWRITE_CXXFLAGS@
-DIRECTWRITE_LIBS = @DIRECTWRITE_LIBS@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -384,7 +382,7 @@ NULL =
 EXTRA_DIST = README.md meson.build hb-diff hb-diff-colorize \
 	hb-diff-filter-failures hb-diff-stat hb-unicode-decode \
 	hb-unicode-encode hb-unicode-prettyname record-test.sh \
-	run-tests.py texts/in-house $(NULL) hb_test_tools.py $(NULL)
+	run-tests.py $(NULL) hb_test_tools.py $(NULL)
 CLEANFILES = hb_test_tools.py[co] $(NULL)
 DISTCLEANFILES = 
 MAINTAINERCLEANFILES = 

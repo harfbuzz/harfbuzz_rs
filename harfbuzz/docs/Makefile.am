@@ -29,7 +29,7 @@ SCANGOBJ_OPTIONS=
 # Extra options to supply to gtkdoc-scan.
 # e.g. SCAN_OPTIONS=--deprecated-guards="GTK_DISABLE_DEPRECATED"
 SCAN_OPTIONS=--rebuild-types --deprecated-guards="HB_DISABLE_DEPRECATED" \
-	--ignore-decorators='HB_EXTERN|HB_DEPRECATED'
+	--ignore-decorators='HB_EXTERN|HB_DEPRECATED|HB_DEPRECATED_FOR()'
 
 # Header files or dirs to ignore when scanning. Use base file/dir names
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h private_code
@@ -83,7 +83,7 @@ content_files=	\
 	usermanual-integration.xml \
 	version.xml
 
-# SGML files where gtk-doc abbrevations (#GtkWidget) are expanded
+# SGML files where gtk-doc abbreviations (#GtkWidget) are expanded
 # These files must be listed here *and* in content_files
 # e.g. expand_content_files=running.sgml
 expand_content_files=

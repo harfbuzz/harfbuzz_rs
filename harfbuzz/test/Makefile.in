@@ -160,7 +160,7 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 DIST_SUBDIRS = $(SUBDIRS)
-am__DIST_COMMON = $(srcdir)/Makefile.in
+am__DIST_COMMON = $(srcdir)/Makefile.in COPYING
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -221,8 +221,6 @@ CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DIRECTWRITE_CXXFLAGS = @DIRECTWRITE_CXXFLAGS@
-DIRECTWRITE_LIBS = @DIRECTWRITE_LIBS@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -379,8 +377,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 NULL = 
-EXTRA_DIST = meson.build $(NULL)
-SUBDIRS = api shape subset fuzzing
+EXTRA_DIST = COPYING meson.build $(NULL)
+SUBDIRS = api shape subset fuzzing threads
 all: all-recursive
 
 .SUFFIXES:

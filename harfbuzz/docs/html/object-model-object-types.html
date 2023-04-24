@@ -40,12 +40,16 @@
       the <code class="literal">hb_buffer_t</code> object has
       <code class="function">hb_buffer_create()</code> as its constructor,
       <code class="function">hb_buffer_reference()</code> to reference, and
-      <code class="function">hb_buffer_destroy()</code> to dereference. 
+      <code class="function">hb_buffer_destroy()</code> to dereference.
     </p>
 <p>
       After construction, each object's properties are accessible only
       through the setter and getter functions described in the API
       Reference manual.
+    </p>
+<p>
+      Note that many object types can be marked as read-only or immutable,
+      facilitating their use in multi-threaded environments.
     </p>
 <p>
       Key object types provided by HarfBuzz include:

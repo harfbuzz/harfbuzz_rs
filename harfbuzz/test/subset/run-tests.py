@@ -11,7 +11,6 @@ import sys
 import tempfile
 import shutil
 import io
-import hashlib
 
 from subset_test_suite import SubsetTestSuite
 
@@ -48,14 +47,19 @@ def fail_test (test, cli_args, message):
 	print ('  expected_file	    %s' % os.path.abspath (expected_file))
 	return 1
 
-def run_test (test, should_check_ots):
+def run_test (test, should_check_ots, preprocess):
 	out_file = os.path.join (tempfile.mkdtemp (), test.get_font_name () + '-subset' + test.get_font_extension ())
 	cli_args = ["--font-file=" + test.font_path,
 		    "--output-file=" + out_file,
 		    "--unicodes=%s" % test.unicodes (),
 		    "--drop-tables+=DSIG",
 		    "--drop-tables-=sbix"]
+	if preprocess:
+		cli_args.extend(["--preprocess-face",])
+
 	cli_args.extend (test.get_profile_flags ())
+	if test.get_instance_flags ():
+		cli_args.extend (["--instance=%s" % ','.join(test.get_instance_flags ())])
 	ret = subset_cmd (cli_args)
 
 	if ret != "success":
@@ -63,11 +67,11 @@ def run_test (test, should_check_ots):
 
 	expected_file = os.path.join (test_suite.get_output_directory (), test.get_font_name ())
 	with open (expected_file, "rb") as fp:
-		expected_hash = hashlib.sha224(fp.read()).hexdigest()
+		expected_contents = fp.read()
 	with open (out_file, "rb") as fp:
-		actual_hash = hashlib.sha224(fp.read()).hexdigest()
+		actual_contents = fp.read()
 
-	if expected_hash == actual_hash:
+	if expected_contents == actual_contents:
 		if should_check_ots:
 			print ("Checking output with ots-sanitize.")
 			if not check_ots (out_file):
@@ -140,7 +144,10 @@ for path in args:
 		print ("Running tests in " + path)
 		test_suite = SubsetTestSuite (path, f.read ())
 		for test in test_suite.tests ():
-			fails += run_test (test, has_ots)
+			# Tests are run with and without preprocessing, results should be the
+			# same between them.
+			fails += run_test (test, has_ots, False)
+			fails += run_test (test, has_ots, True)
 
 if fails != 0:
 	sys.exit ("%d test(s) failed." % fails)

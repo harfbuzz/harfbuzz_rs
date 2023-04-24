@@ -102,8 +102,7 @@
     </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
-<p><span class="emphasis"><em>Level 0</em></span> is the default and
-	reproduces the behavior of the old HarfBuzz library.
+<p><span class="emphasis"><em>Level 0</em></span> is the default.
 	</p>
 <p>
 	  The distinguishing feature of level 0 behavior is that, at
@@ -114,7 +113,7 @@
 	  as well as the <span class="emphasis"><em>Zero Width Joiner</em></span> and
 	  <span class="emphasis"><em>Zero Width Non-Joiner</em></span> code points, are
 	  assigned the cluster value of the closest preceding code
-	  point from <span class="emphasis"><em>different</em></span> category. 
+	  point from <span class="emphasis"><em>different</em></span> category.
 	</p>
 <p>
 	  In essence, whenever a base character is followed by a mark
@@ -124,6 +123,11 @@
 	  "merging" the affected clusters. This behavior is based on
 	  the Grapheme Cluster Boundary specification in <a class="ulink" href="https://www.unicode.org/reports/tr29/#Regex_Definitions" target="_top">Unicode
 	  Technical Report 29</a>.
+	</p>
+<p>
+	  This cluster level is suitable for code that likes to use
+	  HarfBuzz cluster values as an approximation of the Unicode
+	  Grapheme Cluster Boundaries as well.
 	</p>
 <p>
 	  Client programs can specify level 0 behavior for a buffer by
@@ -139,13 +143,13 @@
 	  implement backward compatibility with the old HarfBuzz.
 	</p>
 <p>
-	  Level 1 differs from level 0 by not merging the 
+	  <span class="emphasis"><em>Level 1</em></span> differs from level 0 by not merging the
 	  clusters of marks and other modifier code points with the
 	  preceding "base" code point's cluster. By preserving the
 	  separate cluster values of these marks and modifier code
 	  points, script shapers can perform additional operations
-	  that might lead to improved results (for example, reordering
-	  a sequence of marks).
+	  that might lead to improved results (for example, coloring
+	  mark glyphs differently than their base).
 	</p>
 <p>
 	  Client programs can specify level 1 behavior for a buffer by
@@ -161,7 +165,7 @@
 	</p>
 <p>
 	  This difference can be seen most clearly when HarfBuzz processes
-	  ligature substitutions and glyph decompositions. In level 0 
+	  ligature substitutions and glyph decompositions. In level 0
 	  and level 1, ligatures and glyph decomposition both involve
 	  merging clusters; in level 2, neither of these operations
 	  triggers a merge.
@@ -178,7 +182,7 @@
       assign initial cluster values in a buffer by reusing the indices
       of the code points in the input text. This gives a sequence of
       cluster values that is monotonically increasing (for example,
-      0,1,2,3,4). 
+      0,1,2,3,4).
     </p>
 <p>
       It is not <span class="emphasis"><em>required</em></span> that the cluster values

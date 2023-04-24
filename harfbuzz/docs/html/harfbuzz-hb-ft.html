@@ -135,6 +135,14 @@
 <a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-set-funcs" title="hb_ft_font_set_funcs ()">hb_ft_font_set_funcs</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-ft.html#hb-ft-hb-font-changed" title="hb_ft_hb_font_changed ()">hb_ft_hb_font_changed</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -159,6 +167,9 @@ functions are not thread-safe either.</div>
 hb_ft_face_create (<em class="parameter"><code><span class="type">FT_Face</span> ft_face</code></em>,
                    <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-destroy-func-t" title="hb_destroy_func_t ()"><span class="type">hb_destroy_func_t</span></a> destroy</code></em>);</pre>
 <p>Creates an <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> face object from the specified FT_Face.</p>
+<p>Note that this is using the FT_Face object just to get at the underlying
+font data, and fonts created from the returned <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> will use the native
+HarfBuzz font implementation, unless you call <a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-set-funcs" title="hb_ft_font_set_funcs ()"><code class="function">hb_ft_font_set_funcs()</code></a> on them.</p>
 <p>This variant of the function does not provide any life-cycle management.</p>
 <p>Most client programs should use <a class="link" href="harfbuzz-hb-ft.html#hb-ft-face-create-referenced" title="hb_ft_face_create_referenced ()"><code class="function">hb_ft_face_create_referenced()</code></a>
 (or, perhaps, <a class="link" href="harfbuzz-hb-ft.html#hb-ft-face-create-cached" title="hb_ft_face_create_cached ()"><code class="function">hb_ft_face_create_cached()</code></a>) instead. </p>
@@ -201,6 +212,9 @@ after the <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_
 <pre class="programlisting"><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="returnvalue">hb_face_t</span></a> *
 hb_ft_face_create_cached (<em class="parameter"><code><span class="type">FT_Face</span> ft_face</code></em>);</pre>
 <p>Creates an <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> face object from the specified FT_Face.</p>
+<p>Note that this is using the FT_Face object just to get at the underlying
+font data, and fonts created from the returned <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> will use the native
+HarfBuzz font implementation, unless you call <a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-set-funcs" title="hb_ft_font_set_funcs ()"><code class="function">hb_ft_font_set_funcs()</code></a> on them.</p>
 <p>This variant of the function caches the newly created <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a>
 face object, using the <em class="parameter"><code>generic</code></em>
  pointer of <em class="parameter"><code>ft_face</code></em>
@@ -240,6 +254,9 @@ reference counted.</p>
 <pre class="programlisting"><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="returnvalue">hb_face_t</span></a> *
 hb_ft_face_create_referenced (<em class="parameter"><code><span class="type">FT_Face</span> ft_face</code></em>);</pre>
 <p>Creates an <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> face object from the specified FT_Face.</p>
+<p>Note that this is using the FT_Face object just to get at the underlying
+font data, and fonts created from the returned <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> will use the native
+HarfBuzz font implementation, unless you call <a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-set-funcs" title="hb_ft_font_set_funcs ()"><code class="function">hb_ft_font_set_funcs()</code></a> on them.</p>
 <p>This is the preferred variant of the hb_ft_face_create*
 function family, because it calls <code class="function">FT_Reference_Face()</code> on <em class="parameter"><code>ft_face</code></em>
 ,
@@ -396,6 +413,9 @@ variation-axis settings on the FT_Face.</p>
 hb_ft_font_get_face (<em class="parameter"><code><a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> *font</code></em>);</pre>
 <p>Fetches the FT_Face associated with the specified <a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a>
 font object.</p>
+<p>This function works with <a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> objects created by
+<a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-create" title="hb_ft_font_create ()"><code class="function">hb_ft_font_create()</code></a> or <a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-create-referenced" title="hb_ft_font_create_referenced ()"><code class="function">hb_ft_font_create_referenced()</code></a>.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 <div class="refsect3">
 <a name="hb-ft-font-get-face.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -424,8 +444,12 @@ font object.</p>
 <pre class="programlisting"><span class="returnvalue">FT_Face</span>
 hb_ft_font_lock_face (<em class="parameter"><code><a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> *font</code></em>);</pre>
 <p>Gets the FT_Face associated with <em class="parameter"><code>font</code></em>
-, This face will be kept around until
-you call <a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-unlock-face" title="hb_ft_font_unlock_face ()"><code class="function">hb_ft_font_unlock_face()</code></a>.</p>
+.</p>
+<p>This face will be kept around and access to the FT_Face object
+from other HarfBuzz API wil be blocked until you call <a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-unlock-face" title="hb_ft_font_unlock_face ()"><code class="function">hb_ft_font_unlock_face()</code></a>.</p>
+<p>This function works with <a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> objects created by
+<a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-create" title="hb_ft_font_create ()"><code class="function">hb_ft_font_create()</code></a> or <a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-create-referenced" title="hb_ft_font_create_referenced ()"><code class="function">hb_ft_font_create_referenced()</code></a>.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 <div class="refsect3">
 <a name="hb-ft-font-lock-face.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -445,7 +469,7 @@ you call <a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-unlock-face" title
 <a name="hb-ft-font-lock-face.returns"></a><h4>Returns</h4>
 <p>the FT_Face associated with <em class="parameter"><code>font</code></em>
 or <code class="literal">NULL</code>. </p>
-<p><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-2-6-5.html#api-index-2.6.5">2.6.5</a></p>
 </div>
@@ -455,6 +479,7 @@ or <code class="literal">NULL</code>. </p>
 <pre class="programlisting"><span class="returnvalue">void</span>
 hb_ft_font_unlock_face (<em class="parameter"><code><a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> *font</code></em>);</pre>
 <p>Releases an FT_Face previously obtained with <a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-lock-face" title="hb_ft_font_lock_face ()"><code class="function">hb_ft_font_lock_face()</code></a>.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 <div class="refsect3">
 <a name="hb-ft-font-unlock-face.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -481,6 +506,8 @@ hb_ft_font_set_load_flags (<em class="parameter"><code><a class="link" href="har
 <p>Sets the FT_Load_Glyph load flags for the specified <a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a>.</p>
 <p>For more information, see 
 https://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html<span class="type">ft_load_xxx</span></p>
+<p>This function works with <a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> objects created by
+<a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-create" title="hb_ft_font_create ()"><code class="function">hb_ft_font_create()</code></a> or <a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-create-referenced" title="hb_ft_font_create_referenced ()"><code class="function">hb_ft_font_create_referenced()</code></a>.</p>
 <div class="refsect3">
 <a name="hb-ft-font-set-load-flags.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -513,6 +540,8 @@ hb_ft_font_get_load_flags (<em class="parameter"><code><a class="link" href="har
 <p>Fetches the FT_Load_Glyph load flags of the specified <a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a>.</p>
 <p>For more information, see 
 https://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html<span class="type">ft_load_xxx</span></p>
+<p>This function works with <a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> objects created by
+<a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-create" title="hb_ft_font_create ()"><code class="function">hb_ft_font_create()</code></a> or <a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-create-referenced" title="hb_ft_font_create_referenced ()"><code class="function">hb_ft_font_create_referenced()</code></a>.</p>
 <div class="refsect3">
 <a name="hb-ft-font-get-load-flags.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -530,7 +559,7 @@ https://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html<span c
 </div>
 <div class="refsect3">
 <a name="hb-ft-font-get-load-flags.returns"></a><h4>Returns</h4>
-<p> FT_Load_Glyph flags found</p>
+<p> FT_Load_Glyph flags found, or 0</p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-1-0-5.html#api-index-1.0.5">1.0.5</a></p>
 </div>
@@ -546,9 +575,12 @@ existing <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t
 functions even if that <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> face object was initially
 created with <a class="link" href="harfbuzz-hb-face.html#hb-face-create" title="hb_face_create ()"><code class="function">hb_face_create()</code></a>, and therefore was not
 initially configured to use FreeType font functions.</p>
-<p>An <a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> face object created with <a class="link" href="harfbuzz-hb-ft.html#hb-ft-face-create" title="hb_ft_face_create ()"><code class="function">hb_ft_face_create()</code></a>
+<p>An <a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> object created with <a class="link" href="harfbuzz-hb-ft.html#hb-ft-font-create" title="hb_ft_font_create ()"><code class="function">hb_ft_font_create()</code></a>
 is preconfigured for FreeType font functions and does not
 require this function to be used.</p>
+<p>Note that if you modify the underlying <a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> after
+calling this function, you need to call <a class="link" href="harfbuzz-hb-ft.html#hb-ft-hb-font-changed" title="hb_ft_hb_font_changed ()"><code class="function">hb_ft_hb_font_changed()</code></a>
+to update the underlying FT_Face.</p>
 <div class="note">Note: Internally, this function creates an FT_Face.
 </div>
 <div class="refsect3">
@@ -567,6 +599,41 @@ require this function to be used.</p>
 </table></div>
 </div>
 <p class="since">Since: <a class="link" href="api-index-1-0-5.html#api-index-1.0.5">1.0.5</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-ft-hb-font-changed"></a><h3>hb_ft_hb_font_changed ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+hb_ft_hb_font_changed (<em class="parameter"><code><a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> *font</code></em>);</pre>
+<p>Refreshes the state of the underlying FT_Face of <em class="parameter"><code>font</code></em>
+ when the hb_font_t
+<em class="parameter"><code>font</code></em>
+ has changed.
+This function should be called after changing the size or
+variation-axis settings on the <em class="parameter"><code>font</code></em>
+.
+This call is fast if nothing has changed on <em class="parameter"><code>font</code></em>
+.</p>
+<div class="refsect3">
+<a name="hb-ft-hb-font-changed.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>font</p></td>
+<td class="parameter_description"><p><a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> to work upon</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-ft-hb-font-changed.returns"></a><h4>Returns</h4>
+<p> true if changed, false otherwise</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-4-4-0.html#api-index-4.4.0">4.4.0</a></p>
 </div>
 </div>
 </div>

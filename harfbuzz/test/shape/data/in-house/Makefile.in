@@ -89,21 +89,28 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@HAVE_FREETYPE_TRUE@am__append_1 = HAVE_FREETYPE=1
+@HAVE_CORETEXT_TRUE@am__append_2 = HAVE_CORETEXT=1
+@HAVE_DIRECTWRITE_TRUE@am__append_3 = HAVE_DIRECTWRITE=1
+@HAVE_UNISCRIBE_TRUE@am__append_4 = HAVE_UNISCRIBE=1
 TESTS = tests/aat-morx.tests tests/aat-trak.tests \
 	tests/arabic-fallback-shaping.tests \
 	tests/arabic-feature-order.tests \
-	tests/arabic-like-joining.tests tests/arabic-mark-attach.tests \
-	tests/arabic-mark-order.tests tests/arabic-normalization.tests \
+	tests/arabic-like-joining.tests tests/arabic-mark-order.tests \
+	tests/arabic-normalization.tests tests/arabic-phags-pa.tests \
 	tests/arabic-stch.tests tests/automatic-fractions.tests \
 	tests/cluster.tests tests/collections.tests \
 	tests/color-fonts.tests tests/context-matching.tests \
-	tests/cursive-positioning.tests tests/default-ignorables.tests \
-	tests/digits.tests tests/emoji.tests \
+	tests/coretext.tests tests/cursive-positioning.tests \
+	tests/default-ignorables.tests tests/digits.tests \
+	tests/directwrite.tests tests/emoji.tests \
 	tests/emoji-clusters.tests tests/fallback-positioning.tests \
-	tests/hangul-jamo.tests tests/hyphens.tests \
+	tests/glyph-props-no-gdef.tests tests/hangul-jamo.tests \
+	tests/hebrew-diacritics.tests tests/hyphens.tests \
 	tests/indic-consonant-with-stacker.tests \
-	tests/indic-decompose.tests tests/indic-init.tests \
-	tests/indic-joiner-candrabindu.tests tests/indic-joiners.tests \
+	tests/indic-decompose.tests tests/indic-feature-order.tests \
+	tests/indic-init.tests tests/indic-joiner-candrabindu.tests \
+	tests/indic-joiners.tests tests/indic-malayalam-dot-reph.tests \
 	tests/indic-old-spec.tests tests/indic-pref-blocking.tests \
 	tests/indic-script-extensions.tests \
 	tests/indic-special-cases.tests tests/indic-syllable.tests \
@@ -115,18 +122,20 @@ TESTS = tests/aat-morx.tests tests/aat-trak.tests \
 	tests/mark-filtering-sets.tests \
 	tests/mongolian-variation-selector.tests \
 	tests/myanmar-misc.tests tests/myanmar-syllable.tests \
-	tests/myanmar-zawgyi.tests tests/none-directional.tests \
-	tests/positioning-features.tests tests/rand.tests \
-	tests/reverse-sub.tests tests/rotation.tests \
-	tests/simple.tests tests/sinhala.tests tests/spaces.tests \
-	tests/tibetan-contractions-1.tests \
+	tests/myanmar-zawgyi.tests \
+	tests/nested-mark-filtering-sets.tests \
+	tests/none-directional.tests tests/positioning-features.tests \
+	tests/rand.tests tests/reverse-sub.tests tests/rotation.tests \
+	tests/sara-am.tests tests/simple.tests tests/sinhala.tests \
+	tests/spaces.tests tests/tibetan-contractions-1.tests \
 	tests/tibetan-contractions-2.tests tests/tibetan-vowels.tests \
-	tests/tt-kern-gpos.tests tests/use-indic3.tests \
-	tests/use-marchen.tests tests/use-syllable.tests \
-	tests/use-vowel-letter-spoofing.tests tests/use.tests \
-	tests/variations.tests tests/variations-rvrn.tests \
-	tests/vertical.tests tests/zero-width-marks.tests \
-	$(am__EXEEXT_1)
+	tests/tt-kern-gpos.tests tests/uniscribe.tests \
+	tests/unsafe-to-concat.tests tests/use-indic3.tests \
+	tests/use-javanese.tests tests/use-marchen.tests \
+	tests/use-syllable.tests tests/use-vowel-letter-spoofing.tests \
+	tests/use.tests tests/variations.tests \
+	tests/variations-rvrn.tests tests/vertical.tests \
+	tests/zero-width-marks.tests $(am__EXEEXT_1)
 subdir = test/shape/data/in-house
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_link_flag.m4 \
@@ -366,7 +375,7 @@ am__set_b = \
       b='$*';; \
   esac
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.sources \
-	$(top_srcdir)/test-driver COPYING
+	$(top_srcdir)/test-driver
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -402,8 +411,6 @@ CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DIRECTWRITE_CXXFLAGS = @DIRECTWRITE_CXXFLAGS@
-DIRECTWRITE_LIBS = @DIRECTWRITE_LIBS@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -561,15 +568,14 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 NULL = 
 EXTRA_DIST = \
-	COPYING \
 	fonts \
 	meson.build \
 	$(TESTS) \
 	$(NULL)
 
 TEST_EXTENSIONS = .tests
-@HAVE_FREETYPE_FALSE@TESTS_ENVIRONMENT = HAVE_FREETYPE=0
-@HAVE_FREETYPE_TRUE@TESTS_ENVIRONMENT = HAVE_FREETYPE=1
+TESTS_ENVIRONMENT = $(am__append_1) $(am__append_2) $(am__append_3) \
+	$(am__append_4)
 TESTS_LOG_COMPILER = $(srcdir)/../../run-tests.py $(top_builddir)/util/hb-shape$(EXEEXT)
 DISABLED_TESTS = \
 	$(NULL)

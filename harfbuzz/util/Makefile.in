@@ -91,8 +91,15 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2)
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@am__append_1 = hb-view
-@HAVE_GLIB_TRUE@am__append_2 = hb-shape hb-subset hb-ot-shape-closure
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@am__append_1 = hb-view
+@HAVE_GLIB_TRUE@am__append_2 = hb-shape hb-info hb-subset \
+@HAVE_GLIB_TRUE@	hb-ot-shape-closure
+@HAVE_GLIB_TRUE@@HAVE_GOBJECT_TRUE@am__append_3 = \
+@HAVE_GLIB_TRUE@@HAVE_GOBJECT_TRUE@	$(top_builddir)/src/libharfbuzz-gobject.la \
+@HAVE_GLIB_TRUE@@HAVE_GOBJECT_TRUE@	$(GOBJECT_LIBS) \
+@HAVE_GLIB_TRUE@@HAVE_GOBJECT_TRUE@	$(NULL)
+
+@HAVE_CHAFA_TRUE@@HAVE_GLIB_TRUE@am__append_4 = $(CHAFA_LIBS)
 subdir = util
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_link_flag.m4 \
@@ -109,33 +116,50 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@am__EXEEXT_1 = hb-view$(EXEEXT)
-@HAVE_GLIB_TRUE@am__EXEEXT_2 = hb-shape$(EXEEXT) hb-subset$(EXEEXT) \
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@am__EXEEXT_1 = hb-view$(EXEEXT)
+@HAVE_GLIB_TRUE@am__EXEEXT_2 = hb-shape$(EXEEXT) hb-info$(EXEEXT) \
+@HAVE_GLIB_TRUE@	hb-subset$(EXEEXT) \
 @HAVE_GLIB_TRUE@	hb-ot-shape-closure$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am__hb_ot_shape_closure_SOURCES_DIST = face-options.hh font-options.hh \
-	hb-ot-shape-closure.cc main-font-text.hh options.hh \
-	text-options.hh
+am__hb_info_SOURCES_DIST = batch.hh face-options.hh font-options.hh \
+	hb-info.cc options.hh
 am__objects_1 =
-am__objects_2 = hb-ot-shape-closure.$(OBJEXT) $(am__objects_1)
-@HAVE_GLIB_TRUE@am_hb_ot_shape_closure_OBJECTS = $(am__objects_2)
-hb_ot_shape_closure_OBJECTS = $(am_hb_ot_shape_closure_OBJECTS)
-hb_ot_shape_closure_LDADD = $(LDADD)
+am__objects_2 = hb-info.$(OBJEXT) $(am__objects_1)
+@HAVE_GLIB_TRUE@am_hb_info_OBJECTS = $(am__objects_2)
+hb_info_OBJECTS = $(am_hb_info_OBJECTS)
 am__DEPENDENCIES_1 =
-hb_ot_shape_closure_DEPENDENCIES = $(top_builddir)/src/libharfbuzz.la \
+am__DEPENDENCIES_2 = $(top_builddir)/src/libharfbuzz.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
+@HAVE_GLIB_TRUE@@HAVE_GOBJECT_TRUE@am__DEPENDENCIES_3 = $(top_builddir)/src/libharfbuzz-gobject.la \
+@HAVE_GLIB_TRUE@@HAVE_GOBJECT_TRUE@	$(am__DEPENDENCIES_1) \
+@HAVE_GLIB_TRUE@@HAVE_GOBJECT_TRUE@	$(am__DEPENDENCIES_1)
+@HAVE_CHAFA_TRUE@@HAVE_GLIB_TRUE@am__DEPENDENCIES_4 =  \
+@HAVE_CHAFA_TRUE@@HAVE_GLIB_TRUE@	$(am__DEPENDENCIES_1)
+@HAVE_GLIB_TRUE@hb_info_DEPENDENCIES = $(am__DEPENDENCIES_2) \
+@HAVE_GLIB_TRUE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_3) \
+@HAVE_GLIB_TRUE@	$(am__DEPENDENCIES_4)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+am__hb_ot_shape_closure_SOURCES_DIST = face-options.hh font-options.hh \
+	hb-ot-shape-closure.cc main-font-text.hh options.hh \
+	text-options.hh
+am__objects_3 = hb-ot-shape-closure.$(OBJEXT) $(am__objects_1)
+@HAVE_GLIB_TRUE@am_hb_ot_shape_closure_OBJECTS = $(am__objects_3)
+hb_ot_shape_closure_OBJECTS = $(am_hb_ot_shape_closure_OBJECTS)
+hb_ot_shape_closure_LDADD = $(LDADD)
+hb_ot_shape_closure_DEPENDENCIES = $(top_builddir)/src/libharfbuzz.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am__hb_shape_SOURCES_DIST = batch.hh face-options.hh font-options.hh \
 	hb-shape.cc main-font-text.hh options.hh output-options.hh \
 	shape-consumer.hh shape-format.hh shape-options.hh \
-	text-options.hh
-am__objects_3 = hb-shape.$(OBJEXT) $(am__objects_1)
-@HAVE_GLIB_TRUE@am_hb_shape_OBJECTS = $(am__objects_3)
+	shape-output.hh text-options.hh
+am__objects_4 = hb-shape.$(OBJEXT) $(am__objects_1)
+@HAVE_GLIB_TRUE@am_hb_shape_OBJECTS = $(am__objects_4)
 hb_shape_OBJECTS = $(am_hb_shape_OBJECTS)
 hb_shape_LDADD = $(LDADD)
 hb_shape_DEPENDENCIES = $(top_builddir)/src/libharfbuzz.la \
@@ -143,28 +167,27 @@ hb_shape_DEPENDENCIES = $(top_builddir)/src/libharfbuzz.la \
 	$(am__DEPENDENCIES_1)
 am__hb_subset_SOURCES_DIST = batch.hh face-options.hh hb-subset.cc \
 	main-font-text.hh options.hh output-options.hh text-options.hh
-am__objects_4 = hb-subset.$(OBJEXT) $(am__objects_1)
-@HAVE_GLIB_TRUE@am_hb_subset_OBJECTS = $(am__objects_4)
+am__objects_5 = hb-subset.$(OBJEXT) $(am__objects_1)
+@HAVE_GLIB_TRUE@am_hb_subset_OBJECTS = $(am__objects_5)
 hb_subset_OBJECTS = $(am_hb_subset_OBJECTS)
-am__DEPENDENCIES_2 = $(top_builddir)/src/libharfbuzz.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @HAVE_GLIB_TRUE@hb_subset_DEPENDENCIES =  \
 @HAVE_GLIB_TRUE@	$(top_builddir)/src/libharfbuzz-subset.la \
 @HAVE_GLIB_TRUE@	$(am__DEPENDENCIES_2)
 am__hb_view_SOURCES_DIST = ansi-print.hh face-options.hh \
 	font-options.hh hb-view.cc helper-cairo-ansi.hh \
-	helper-cairo.hh main-font-text.hh options.hh output-options.hh \
-	shape-consumer.hh shape-options.hh text-options.hh \
-	view-cairo.hh view-options.hh
-am__objects_5 = hb-view.$(OBJEXT) $(am__objects_1)
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@am_hb_view_OBJECTS = $(am__objects_5)
+	helper-cairo-ft.hh helper-cairo.hh main-font-text.hh \
+	options.hh output-options.hh shape-consumer.hh \
+	shape-options.hh text-options.hh view-cairo.hh view-options.hh
+am__objects_6 = hb-view.$(OBJEXT) $(am__objects_1)
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@am_hb_view_OBJECTS =  \
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@	$(am__objects_6)
 hb_view_OBJECTS = $(am_hb_view_OBJECTS)
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@hb_view_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@	$(am__DEPENDENCIES_1) \
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@	$(am__DEPENDENCIES_1) \
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@	$(am__DEPENDENCIES_1) \
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@	$(am__DEPENDENCIES_1)
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@hb_view_DEPENDENCIES = $(top_builddir)/src/libharfbuzz-cairo.la \
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@	$(am__DEPENDENCIES_2) \
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@	$(am__DEPENDENCIES_1) \
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@	$(am__DEPENDENCIES_1) \
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@	$(am__DEPENDENCIES_1) \
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@	$(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -180,9 +203,9 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/hb-ot-shape-closure.Po \
-	./$(DEPDIR)/hb-shape.Po ./$(DEPDIR)/hb-subset.Po \
-	./$(DEPDIR)/hb-view.Po
+am__depfiles_remade = ./$(DEPDIR)/hb-info.Po \
+	./$(DEPDIR)/hb-ot-shape-closure.Po ./$(DEPDIR)/hb-shape.Po \
+	./$(DEPDIR)/hb-subset.Po ./$(DEPDIR)/hb-view.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -220,9 +243,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(hb_ot_shape_closure_SOURCES) $(hb_shape_SOURCES) \
-	$(hb_subset_SOURCES) $(hb_view_SOURCES)
-DIST_SOURCES = $(am__hb_ot_shape_closure_SOURCES_DIST) \
+SOURCES = $(hb_info_SOURCES) $(hb_ot_shape_closure_SOURCES) \
+	$(hb_shape_SOURCES) $(hb_subset_SOURCES) $(hb_view_SOURCES)
+DIST_SOURCES = $(am__hb_info_SOURCES_DIST) \
+	$(am__hb_ot_shape_closure_SOURCES_DIST) \
 	$(am__hb_shape_SOURCES_DIST) $(am__hb_subset_SOURCES_DIST) \
 	$(am__hb_view_SOURCES_DIST)
 am__can_run_installinfo = \
@@ -286,8 +310,6 @@ CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DIRECTWRITE_CXXFLAGS = @DIRECTWRITE_CXXFLAGS@
-DIRECTWRITE_LIBS = @DIRECTWRITE_LIBS@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -454,6 +476,7 @@ HB_VIEW_sources = \
 	font-options.hh \
 	hb-view.cc \
 	helper-cairo-ansi.hh \
+	helper-cairo-ft.hh \
 	helper-cairo.hh \
 	main-font-text.hh \
 	options.hh \
@@ -476,7 +499,16 @@ HB_SHAPE_sources = \
 	shape-consumer.hh \
 	shape-format.hh \
 	shape-options.hh \
+	shape-output.hh \
 	text-options.hh \
+	$(NULL)
+
+HB_INFO_sources = \
+	batch.hh \
+	face-options.hh \
+	font-options.hh \
+	hb-info.cc \
+	options.hh \
 	$(NULL)
 
 HB_SUBSET_CLI_sources = \
@@ -515,15 +547,19 @@ LDADD = \
 	$(FREETYPE_LIBS) \
 	$(NULL)
 
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@hb_view_SOURCES = $(HB_VIEW_sources)
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@hb_view_LDADD = \
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@	$(LDADD) \
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@	$(CAIRO_LIBS) \
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@	$(CAIRO_FT_LIBS) \
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@	$(CHAFA_LIBS) \
-@HAVE_CAIRO_FT_TRUE@@HAVE_FREETYPE_TRUE@@HAVE_GLIB_TRUE@	$(NULL)
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@hb_view_SOURCES = $(HB_VIEW_sources)
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@hb_view_LDADD = \
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@	$(top_builddir)/src/libharfbuzz-cairo.la \
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@	$(LDADD) \
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@	$(CAIRO_LIBS) \
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@	$(CAIRO_FT_LIBS) \
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@	$(CHAFA_LIBS) \
+@HAVE_CAIRO_TRUE@@HAVE_GLIB_TRUE@	$(NULL)
 
 @HAVE_GLIB_TRUE@hb_shape_SOURCES = $(HB_SHAPE_sources)
+@HAVE_GLIB_TRUE@hb_info_SOURCES = $(HB_INFO_sources)
+@HAVE_GLIB_TRUE@hb_info_LDADD = $(LDADD) $(NULL) $(am__append_3) \
+@HAVE_GLIB_TRUE@	$(am__append_4)
 @HAVE_GLIB_TRUE@hb_subset_SOURCES = $(HB_SUBSET_CLI_sources)
 @HAVE_GLIB_TRUE@hb_subset_LDADD = \
 @HAVE_GLIB_TRUE@	$(top_builddir)/src/libharfbuzz-subset.la \
@@ -630,6 +666,10 @@ installcheck-binPROGRAMS: $(bin_PROGRAMS)
 	  done; \
 	done; rm -f c$${pid}_.???; exit $$bad
 
+hb-info$(EXEEXT): $(hb_info_OBJECTS) $(hb_info_DEPENDENCIES) $(EXTRA_hb_info_DEPENDENCIES) 
+	@rm -f hb-info$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(hb_info_OBJECTS) $(hb_info_LDADD) $(LIBS)
+
 hb-ot-shape-closure$(EXEEXT): $(hb_ot_shape_closure_OBJECTS) $(hb_ot_shape_closure_DEPENDENCIES) $(EXTRA_hb_ot_shape_closure_DEPENDENCIES) 
 	@rm -f hb-ot-shape-closure$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(hb_ot_shape_closure_OBJECTS) $(hb_ot_shape_closure_LDADD) $(LIBS)
@@ -652,6 +692,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hb-info.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hb-ot-shape-closure.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hb-shape.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hb-subset.Po@am__quote@ # am--include-marker
@@ -820,7 +861,8 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/hb-ot-shape-closure.Po
+		-rm -f ./$(DEPDIR)/hb-info.Po
+	-rm -f ./$(DEPDIR)/hb-ot-shape-closure.Po
 	-rm -f ./$(DEPDIR)/hb-shape.Po
 	-rm -f ./$(DEPDIR)/hb-subset.Po
 	-rm -f ./$(DEPDIR)/hb-view.Po
@@ -869,7 +911,8 @@ install-ps-am:
 installcheck-am: installcheck-binPROGRAMS
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/hb-ot-shape-closure.Po
+		-rm -f ./$(DEPDIR)/hb-info.Po
+	-rm -f ./$(DEPDIR)/hb-ot-shape-closure.Po
 	-rm -f ./$(DEPDIR)/hb-shape.Po
 	-rm -f ./$(DEPDIR)/hb-subset.Po
 	-rm -f ./$(DEPDIR)/hb-view.Po

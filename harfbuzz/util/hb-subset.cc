@@ -32,6 +32,11 @@
 
 #include <hb-subset.h>
 
+static hb_face_t* preprocess_face(hb_face_t* face)
+{
+  return hb_subset_preprocess (face);
+}
+
 /*
  * Command line interface to the harfbuzz font subsetter.
  */
@@ -103,11 +108,15 @@ struct subset_main_t : option_parser_t, face_options_t, output_options_t<false>
   {
     parse (argc, argv);
 
+    hb_face_t* orig_face = face;
+    if (preprocess)
+      orig_face = preprocess_face (face);
+
     hb_face_t *new_face = nullptr;
     for (unsigned i = 0; i < num_iterations; i++)
     {
       hb_face_destroy (new_face);
-      new_face = hb_subset_or_fail (face, input);
+      new_face = hb_subset_or_fail (orig_face, input);
     }
 
     bool success = new_face;
@@ -119,6 +128,8 @@ struct subset_main_t : option_parser_t, face_options_t, output_options_t<false>
     }
 
     hb_face_destroy (new_face);
+    if (preprocess)
+      hb_face_destroy (orig_face);
 
     return success ? 0 : 1;
   }
@@ -160,6 +171,7 @@ struct subset_main_t : option_parser_t, face_options_t, output_options_t<false>
   public:
 
   unsigned num_iterations = 1;
+  gboolean preprocess = false;
   hb_subset_input_t *input = nullptr;
 };
 
@@ -516,6 +528,19 @@ parse_name_languages (const char *name,
   return true;
 }
 
+static gboolean
+_keep_everything (const char *name,
+		  const char *arg,
+		  gpointer    data,
+		  GError    **error G_GNUC_UNUSED)
+{
+  subset_main_t *subset_main = (subset_main_t *) data;
+
+  hb_subset_input_keep_everything (subset_main->input);
+
+  return true;
+}
+
 template <hb_subset_flags_t flag>
 static gboolean
 set_flag (const char *name,
@@ -532,30 +557,31 @@ set_flag (const char *name,
 }
 
 static gboolean
-parse_layout_features (const char *name,
-		       const char *arg,
-		       gpointer    data,
-		       GError    **error G_GNUC_UNUSED)
+parse_layout_tag_list (hb_subset_sets_t set_type,
+                       const char *name,
+                       const char *arg,
+                       gpointer    data,
+                       GError    **error G_GNUC_UNUSED)
 {
   subset_main_t *subset_main = (subset_main_t *) data;
   hb_bool_t is_remove = (name[strlen (name) - 1] == '-');
   hb_bool_t is_add = (name[strlen (name) - 1] == '+');
-  hb_set_t *layout_features = hb_subset_input_set (subset_main->input, HB_SUBSET_SETS_LAYOUT_FEATURE_TAG);
+  hb_set_t *layout_tags = hb_subset_input_set (subset_main->input, set_type);
 
-  if (!is_remove && !is_add) hb_set_clear (layout_features);
+  if (!is_remove && !is_add) hb_set_clear (layout_tags);
 
   if (0 == strcmp (arg, "*"))
   {
-    hb_set_clear (layout_features);
+    hb_set_clear (layout_tags);
     if (!is_remove)
-      hb_set_invert (layout_features);
+      hb_set_invert (layout_tags);
     return true;
   }
 
   char *s = strtok((char *) arg, ", ");
   while (s)
   {
-    if (strlen (s) > 4) // table tags are at most 4 bytes
+    if (strlen (s) > 4) // tags are at most 4 bytes
     {
       g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
                    "Failed parsing table tag at: '%s'", s);
@@ -565,14 +591,42 @@ parse_layout_features (const char *name,
     hb_tag_t tag = hb_tag_from_string (s, strlen (s));
 
     if (!is_remove)
-      hb_set_add (layout_features, tag);
+      hb_set_add (layout_tags, tag);
     else
-      hb_set_del (layout_features, tag);
+      hb_set_del (layout_tags, tag);
 
     s = strtok(nullptr, ", ");
   }
 
   return true;
+}
+
+static gboolean
+parse_layout_features (const char *name,
+		       const char *arg,
+		       gpointer    data,
+		       GError    **error)
+
+{
+  return parse_layout_tag_list (HB_SUBSET_SETS_LAYOUT_FEATURE_TAG,
+                                name,
+                                arg,
+                                data,
+                                error);
+}
+
+static gboolean
+parse_layout_scripts (const char *name,
+		       const char *arg,
+		       gpointer    data,
+		       GError    **error)
+
+{
+  return parse_layout_tag_list (HB_SUBSET_SETS_LAYOUT_SCRIPT_TAG,
+                                name,
+                                arg,
+                                data,
+                                error);
 }
 
 static gboolean
@@ -618,6 +672,75 @@ parse_drop_tables (const char *name,
 
   return true;
 }
+
+#ifndef HB_NO_VAR
+static gboolean
+parse_instance (const char *name,
+		const char *arg,
+		gpointer    data,
+		GError    **error)
+{
+  subset_main_t *subset_main = (subset_main_t *) data;
+  if (!subset_main->face) {
+    // There is no face, which is needed to set up instancing. Skip parsing these options.
+    return true;
+  }
+
+  char *s = strtok((char *) arg, "=");
+  while (s)
+  {
+    unsigned len = strlen (s);
+    if (len > 4)  //Axis tags are 4 bytes.
+    {
+      g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
+		   "Failed parsing axis tag at: '%s'", s);
+      return false;
+    }
+
+    hb_tag_t axis_tag = hb_tag_from_string (s, len);
+
+    s = strtok(nullptr, ", ");
+    if (!s)
+    {
+      g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
+		   "Value not specified for axis: %c%c%c%c", HB_UNTAG (axis_tag));
+      return false;
+    }
+
+    if (strcmp (s, "drop") == 0)
+    {
+      if (!hb_subset_input_pin_axis_to_default (subset_main->input, subset_main->face, axis_tag))
+      {
+        g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
+                     "Cannot pin axis: '%c%c%c%c', not present in fvar", HB_UNTAG (axis_tag));
+        return false;
+      }
+    }
+    else
+    {
+      errno = 0;
+      char *p;
+      float axis_value = strtof (s, &p);
+      if (errno || s == p)
+      {
+        g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
+                     "Failed parsing axis value at: '%s'", s);
+        return false;
+      }
+
+      if (!hb_subset_input_pin_axis_location (subset_main->input, subset_main->face, axis_tag, axis_value))
+      {
+        g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
+                     "Cannot pin axis: '%c%c%c%c', not present in fvar", HB_UNTAG (axis_tag));
+        return false;
+      }
+    }
+    s = strtok(nullptr, "=");
+  }
+
+  return true;
+}
+#endif
 
 template <GOptionArgFunc line_parser, bool allow_comments=true>
 static gboolean
@@ -728,9 +851,9 @@ subset_main_t::add_options ()
 
   GOptionEntry glyphset_entries[] =
   {
-    {"gids",		0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_gids,
+    {"gids",		'g', 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_gids,
      "Specify glyph IDs or ranges to include in the subset.\n"
-     "                                                       "
+     "                                                        "
      "Use --gids-=... to subtract codepoints from the current set.", "list of glyph indices/ranges or *"},
     {"gids-",		0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_gids,			"Specify glyph IDs or ranges to remove from the subset", "list of glyph indices/ranges or *"},
     {"gids+",		0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_gids,			"Specify glyph IDs or ranges to include in the subset", "list of glyph indices/ranges or *"},
@@ -740,21 +863,21 @@ subset_main_t::add_options ()
     {"glyphs-",		0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_glyphs,			"Specify glyph names to remove from the subset", "list of glyph names"},
 
 
-    {"glyphs-file",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_file_for<parse_glyphs>,	"Specify file to read glyph names fromt", "filename"},
+    {"glyphs-file",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_file_for<parse_glyphs>,	"Specify file to read glyph names from", "filename"},
 
-    {"text",		0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_text,			"Specify text to include in the subset. Use --text-=... to subtract codepoints from the current set.", "string"},
+    {"text",		't', 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_text,			"Specify text to include in the subset. Use --text-=... to subtract codepoints from the current set.", "string"},
     {"text-",		0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_text,			"Specify text to remove from the subset", "string"},
     {"text+",		0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_text,			"Specify text to include in the subset", "string"},
 
 
     {"text-file",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_file_for<parse_text, false>,"Specify file to read text from", "filename"},
-    {"unicodes",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_unicodes,
+    {"unicodes",	'u', 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_unicodes,
      "Specify Unicode codepoints or ranges to include in the subset. Use * to include all codepoints.\n"
-     "                                                       "
+     "                                                        "
      "--unicodes-=... can be used to subtract codepoints from the current set.\n"
-     "                                                       "
+     "                                                        "
      "For example: --unicodes=* --unicodes-=41,42,43 would create a subset with all codepoints\n"
-     "                                                       "
+     "                                                        "
      "except for 41, 42, 43.",
      "list of hex numbers/ranges or *"},
     {"unicodes-",	0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_unicodes, "Specify Unicode codepoints or ranges to remove from the subset", "list of hex numbers/ranges or *"},
@@ -771,18 +894,34 @@ subset_main_t::add_options ()
 
   GOptionEntry other_entries[] =
   {
-    {"name-IDs",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_nameids,		"Subset specified nameids. Use --name-IDs-=... to substract from the current set.", "list of int numbers or *"},
+    {"name-IDs",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_nameids,		"Subset specified nameids. Use --name-IDs-=... to subtract from the current set.", "list of int numbers or *"},
     {"name-IDs-",	0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_nameids,		"Subset specified nameids", "list of int numbers or *"},
     {"name-IDs+",	0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_nameids,		"Subset specified nameids", "list of int numbers or *"},
-    {"name-languages",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_name_languages,	"Subset nameRecords with specified language IDs. Use --name-languages-=... to substract from the current set.", "list of int numbers or *"},
+    {"name-languages",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_name_languages,	"Subset nameRecords with specified language IDs. Use --name-languages-=... to subtract from the current set.", "list of int numbers or *"},
     {"name-languages-",	0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_name_languages,	"Subset nameRecords with specified language IDs", "list of int numbers or *"},
     {"name-languages+",	0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_name_languages,	"Subset nameRecords with specified language IDs", "list of int numbers or *"},
-    {"layout-features",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_layout_features,	"Specify set of layout feature tags that will be preserved. Use --layout-features-=... to substract from the current set.", "list of string table tags or *"},
-    {"layout-features+",0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_layout_features,	"Specify set of layout feature tags that will be preserved", "list of string table tags or *"},
-    {"layout-features-",0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_layout_features,	"Specify set of layout feature tags that will be preserved", "list of string table tags or *"},
-    {"drop-tables",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_drop_tables,	"Drop the specified tables. Use --drop-tables-=... to substract from the current set.", "list of string table tags or *"},
+
+    {"layout-features",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_layout_features,	"Specify set of layout feature tags that will be preserved. Use --layout-features-=... to subtract from the current set.", "list of string table tags or *"},
+    {"layout-features+",0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_layout_features,	"Specify set of layout feature tags that will be preserved", "list of string tags or *"},
+    {"layout-features-",0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_layout_features,	"Specify set of layout feature tags that will be preserved", "list of string tags or *"},
+
+    {"layout-scripts",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_layout_scripts,	"Specify set of layout script tags that will be preserved. Use --layout-scripts-=... to subtract from the current set.", "list of string table tags or *"},
+    {"layout-scripts+",0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_layout_scripts,	"Specify set of layout script tags that will be preserved", "list of string tags or *"},
+    {"layout-scripts-",0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_layout_scripts,	"Specify set of layout script tags that will be preserved", "list of string tags or *"},
+
+    {"drop-tables",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_drop_tables,	"Drop the specified tables. Use --drop-tables-=... to subtract from the current set.", "list of string table tags or *"},
     {"drop-tables+",	0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_drop_tables,	"Drop the specified tables.", "list of string table tags or *"},
     {"drop-tables-",	0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_CALLBACK, (gpointer) &parse_drop_tables,	"Drop the specified tables.", "list of string table tags or *"},
+#ifndef HB_NO_VAR
+    {"instance",	0, 0, G_OPTION_ARG_CALLBACK, (gpointer) &parse_instance,
+     "(Partially|Fully) Instantiate a variable font. A location consists of the tag of a variation axis, followed by '=', followed by a\n"
+     "number or the literal string 'drop'\n"
+     "                                                        "
+     "For example: --instance=\"wdth=100 wght=200\" or --instance=\"wdth=drop\"\n"
+     "                                                        "
+     "Note: currently only fully instancing is supported\n",
+     "list of comma separated axis-locations"},
+#endif
     {nullptr}
   };
   add_group (other_entries,
@@ -793,6 +932,8 @@ subset_main_t::add_options ()
 
   GOptionEntry flag_entries[] =
   {
+    {"keep-everything",		0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &_keep_everything,
+     "Keep everything by default. Options after this can override the operation.", nullptr},
     {"no-hinting",		0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_NO_HINTING>,		"Whether to drop hints", nullptr},
     {"retain-gids",		0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_RETAIN_GIDS>,		"If set don't renumber glyph ids in the subset.", nullptr},
     {"desubroutinize",		0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_DESUBROUTINIZE>,		"Remove CFF/CFF2 use of subroutines", nullptr},
@@ -801,6 +942,11 @@ subset_main_t::add_options ()
     {"notdef-outline",		0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_NOTDEF_OUTLINE>,		"Keep the outline of \'.notdef\' glyph", nullptr},
     {"no-prune-unicode-ranges",	0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_NO_PRUNE_UNICODE_RANGES>,	"Don't change the 'OS/2 ulUnicodeRange*' bits.", nullptr},
     {"glyph-names",		0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_GLYPH_NAMES>,		"Keep PS glyph names in TT-flavored fonts. ", nullptr},
+    {"passthrough-tables",	0, G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, (gpointer) &set_flag<HB_SUBSET_FLAGS_PASSTHROUGH_UNRECOGNIZED>,	"Do not drop tables that the tool does not know how to subset.", nullptr},
+    {"preprocess-face",		0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_NONE, &this->preprocess,
+     "Alternative name for --preprocess.", nullptr},
+    {"preprocess",		0, 0, G_OPTION_ARG_NONE, &this->preprocess,
+     "If set preprocesses the face with the add accelerator option before actually subsetting.", nullptr},
     {nullptr}
   };
   add_group (flag_entries,

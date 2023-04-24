@@ -113,6 +113,22 @@
 <a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
 </td>
 <td class="function_name">
+<a class="link" href="harfbuzz-hb-ot-color.html#hb-ot-color-has-paint" title="hb_ot_color_has_paint ()">hb_ot_color_has_paint</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-ot-color.html#hb-ot-color-glyph-has-paint" title="hb_ot_color_glyph_has_paint ()">hb_ot_color_glyph_has_paint</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+</td>
+<td class="function_name">
 <a class="link" href="harfbuzz-hb-ot-color.html#hb-ot-color-has-palettes" title="hb_ot_color_has_palettes ()">hb_ot_color_has_palettes</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
@@ -421,9 +437,10 @@ Output = the actual number of layers returned (may be zero). </p></td>
 hb_ot_color_glyph_reference_png (<em class="parameter"><code><a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> *font</code></em>,
                                  <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-codepoint-t" title="hb_codepoint_t"><span class="type">hb_codepoint_t</span></a> glyph</code></em>);</pre>
 <p>Fetches the PNG image for a glyph. This function takes a font object, not a face object,
-as input. To get an optimally sized PNG blob, the UPEM value must be set on the <em class="parameter"><code>font</code></em>
+as input. To get an optimally sized PNG blob, the PPEM values must be set on the <em class="parameter"><code>font</code></em>
 
-object. If UPEM is unset, the blob returned will be the largest PNG available.</p>
+object. If PPEM is unset, the blob returned will be the largest PNG available.</p>
+<p>If the glyph has no PNG image, the singleton empty blob is returned.</p>
 <div class="refsect3">
 <a name="hb-ot-color-glyph-reference-png.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -460,6 +477,7 @@ object. If UPEM is unset, the blob returned will be the largest PNG available.</
 hb_ot_color_glyph_reference_svg (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
                                  <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-codepoint-t" title="hb_codepoint_t"><span class="type">hb_codepoint_t</span></a> glyph</code></em>);</pre>
 <p>Fetches the SVG document for a glyph. The blob may be either plain text or gzip-encoded.</p>
+<p>If the glyph has no SVG document, the singleton empty blob is returned.</p>
 <div class="refsect3">
 <a name="hb-ot-color-glyph-reference-svg.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -494,7 +512,8 @@ hb_ot_color_glyph_reference_svg (<em class="parameter"><code><a class="link" hre
 <a name="hb-ot-color-has-layers"></a><h3>hb_ot_color_has_layers ()</h3>
 <pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
 hb_ot_color_has_layers (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>);</pre>
-<p>Tests whether a face includes any <code class="literal">COLR</code> color layers.</p>
+<p>Tests whether a face includes a <code class="literal">COLR</code> table
+with data according to COLRv0.</p>
 <div class="refsect3">
 <a name="hb-ot-color-has-layers.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -515,6 +534,71 @@ hb_ot_color_has_layers (<em class="parameter"><code><a class="link" href="harfbu
 <p> <code class="literal">true</code> if data found, <code class="literal">false</code> otherwise</p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-2-1-0.html#api-index-2.1.0">2.1.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-ot-color-has-paint"></a><h3>hb_ot_color_has_paint ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+hb_ot_color_has_paint (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>);</pre>
+<p>Tests where a face includes a <code class="literal">COLR</code> table
+with data according to COLRv1.</p>
+<div class="refsect3">
+<a name="hb-ot-color-has-paint.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>face</p></td>
+<td class="parameter_description"><p><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> to work upon</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-ot-color-has-paint.returns"></a><h4>Returns</h4>
+<p> <code class="literal">true</code> if data found, <code class="literal">false</code> otherwise</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-7-0-0.html#api-index-7.0.0">7.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-ot-color-glyph-has-paint"></a><h3>hb_ot_color_glyph_has_paint ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+hb_ot_color_glyph_has_paint (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
+                             <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-codepoint-t" title="hb_codepoint_t"><span class="type">hb_codepoint_t</span></a> glyph</code></em>);</pre>
+<p>Tests where a face includes COLRv1 paint
+data for <em class="parameter"><code>glyph</code></em>
+.</p>
+<div class="refsect3">
+<a name="hb-ot-color-glyph-has-paint.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>face</p></td>
+<td class="parameter_description"><p><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> to work upon</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>glyph</p></td>
+<td class="parameter_description"><p>The glyph index to query</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-ot-color-glyph-has-paint.returns"></a><h4>Returns</h4>
+<p> <code class="literal">true</code> if data found, <code class="literal">false</code> otherwise</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-7-0-0.html#api-index-7.0.0">7.0.0</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -604,7 +688,7 @@ hb_ot_color_has_svg (<em class="parameter"><code><a class="link" href="harfbuzz-
 hb_ot_color_palette_color_get_name_id (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
                                        <em class="parameter"><code>unsigned <span class="type">int</span> color_index</code></em>);</pre>
 <p>Fetches the <code class="literal">name</code> table Name ID that provides display names for
-the specificed color in a face's <code class="literal">CPAL</code> color palette. </p>
+the specified color in a face's <code class="literal">CPAL</code> color palette.</p>
 <p>Display names can be generic (e.g., "Background") or specific
 (e.g., "Eye color").</p>
 <div class="refsect3">
@@ -652,6 +736,9 @@ colors. If <em class="parameter"><code>colors</code></em>
 of total colors without storing any actual colors; this can be used
 for allocating a buffer of suitable size before calling
 <a class="link" href="harfbuzz-hb-ot-color.html#hb-ot-color-palette-get-colors" title="hb_ot_color_palette_get_colors ()"><code class="function">hb_ot_color_palette_get_colors()</code></a> a second time.</p>
+<p>The RGBA values in the palette are unpremultiplied. See the
+OpenType spec <a class="ulink" href="https://learn.microsoft.com/en-us/typography/opentype/spec/cpal" target="_top">CPAL</a>
+section for details.</p>
 <div class="refsect3">
 <a name="hb-ot-color-palette-get-colors.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -765,7 +852,7 @@ hb_ot_color_palette_get_flags (<em class="parameter"><code><a class="link" href=
 hb_ot_color_palette_get_name_id (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
                                  <em class="parameter"><code>unsigned <span class="type">int</span> palette_index</code></em>);</pre>
 <p>Fetches the <code class="literal">name</code> table Name ID that provides display names for
-a <code class="literal">CPAL</code> color palette. </p>
+a <code class="literal">CPAL</code> color palette.</p>
 <p>Palette display names can be generic (e.g., "Default") or provide
 specific, themed names (e.g., "Spring", "Summer", "Fall", and "Winter").</p>
 <div class="refsect3">
@@ -784,7 +871,7 @@ specific, themed names (e.g., "Spring", "Summer", "Fall", and "Winter").</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>palette_index</p></td>
-<td class="parameter_description"><p>The index of the color palette </p></td>
+<td class="parameter_description"><p>The index of the color palette</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 </tbody>
@@ -793,7 +880,7 @@ specific, themed names (e.g., "Spring", "Summer", "Fall", and "Winter").</p>
 <div class="refsect3">
 <a name="hb-ot-color-palette-get-name-id.returns"></a><h4>Returns</h4>
 <p> the Named ID found for the palette.
-If the requested palette has no name the result is <span class="type">HB_OT_NAME_ID_INVALID</span>.</p>
+If the requested palette has no name the result is <a class="link" href="harfbuzz-hb-ot-name.html#HB-OT-NAME-ID-INVALID:CAPS"><span class="type">HB_OT_NAME_ID_INVALID</span></a>.</p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-2-1-0.html#api-index-2.1.0">2.1.0</a></p>
 </div>
@@ -817,6 +904,9 @@ channel RGB plus alpha transparency.</p>
 } hb_ot_color_layer_t;
 </pre>
 <p>Pairs of glyph and color index.</p>
+<p>A color index of 0xFFFF does not refer to a palette
+color, but indicates that the foreground color should
+be used.</p>
 <div class="refsect3">
 <a name="hb-ot-color-layer-t.members"></a><h4>Members</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">

@@ -125,10 +125,26 @@
 </tr>
 <tr>
 <td class="function_type">
+<a class="link" href="harfbuzz-hb-ot-layout.html#hb-ot-layout-baseline-tag-t" title="enum hb_ot_layout_baseline_tag_t"><span class="returnvalue">hb_ot_layout_baseline_tag_t</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-ot-layout.html#hb-ot-layout-get-horizontal-baseline-tag-for-script" title="hb_ot_layout_get_horizontal_baseline_tag_for_script ()">hb_ot_layout_get_horizontal_baseline_tag_for_script</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
 </td>
 <td class="function_name">
 <a class="link" href="harfbuzz-hb-ot-layout.html#hb-ot-layout-get-baseline" title="hb_ot_layout_get_baseline ()">hb_ot_layout_get_baseline</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-ot-layout.html#hb-ot-layout-get-baseline-with-fallback" title="hb_ot_layout_get_baseline_with_fallback ()">hb_ot_layout_get_baseline_with_fallback</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -234,6 +250,14 @@
 </tr>
 <tr>
 <td class="function_type">
+<a class="link" href="harfbuzz-hb-common.html#hb-position-t" title="hb_position_t"><span class="returnvalue">hb_position_t</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-ot-layout.html#hb-ot-layout-lookup-get-optical-bound" title="hb_ot_layout_lookup_get_optical_bound ()">hb_ot_layout_lookup_get_optical_bound</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <span class="returnvalue">void</span>
 </td>
 <td class="function_name">
@@ -257,6 +281,14 @@
 </td>
 </tr>
 <tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-ot-layout.html#hb-ot-layout-script-find-language" title="hb_ot_layout_script_find_language ()">hb_ot_layout_script_find_language</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
 <td class="function_type">unsigned <span class="returnvalue">int</span>
 </td>
 <td class="function_name">
@@ -269,6 +301,14 @@
 </td>
 <td class="function_name">
 <a class="link" href="harfbuzz-hb-ot-layout.html#hb-ot-layout-script-select-language" title="hb_ot_layout_script_select_language ()">hb_ot_layout_script_select_language</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-ot-layout.html#hb-ot-layout-script-select-language2" title="hb_ot_layout_script_select_language2 ()">hb_ot_layout_script_select_language2</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -609,18 +649,21 @@ list of features is provided, all features will be queried.</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>scripts</p></td>
-<td class="parameter_description"><p>The array of scripts to collect lookups for</p></td>
-<td class="parameter_annotations"> </td>
+<td class="parameter_description"><p>The array of scripts to collect lookups for,
+terminated by <a class="link" href="harfbuzz-hb-common.html#HB-TAG-NONE:CAPS" title="HB_TAG_NONE"><code class="literal">HB_TAG_NONE</code></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>languages</p></td>
-<td class="parameter_description"><p>The array of languages to collect lookups for</p></td>
-<td class="parameter_annotations"> </td>
+<td class="parameter_description"><p>The array of languages to collect lookups for,
+terminated by <a class="link" href="harfbuzz-hb-common.html#HB-TAG-NONE:CAPS" title="HB_TAG_NONE"><code class="literal">HB_TAG_NONE</code></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>features</p></td>
-<td class="parameter_description"><p>The array of features to collect lookups for</p></td>
-<td class="parameter_annotations"> </td>
+<td class="parameter_description"><p>The array of features to collect lookups for,
+terminated by <a class="link" href="harfbuzz-hb-common.html#HB-TAG-NONE:CAPS" title="HB_TAG_NONE"><code class="literal">HB_TAG_NONE</code></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>lookup_indexes</p></td>
@@ -668,18 +711,21 @@ features is provided, all features will be queried.</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>scripts</p></td>
-<td class="parameter_description"><p>The array of scripts to collect features for</p></td>
-<td class="parameter_annotations"> </td>
+<td class="parameter_description"><p>The array of scripts to collect features for,
+terminated by <a class="link" href="harfbuzz-hb-common.html#HB-TAG-NONE:CAPS" title="HB_TAG_NONE"><code class="literal">HB_TAG_NONE</code></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>languages</p></td>
-<td class="parameter_description"><p>The array of languages to collect features for</p></td>
-<td class="parameter_annotations"> </td>
+<td class="parameter_description"><p>The array of languages to collect features for,
+terminated by <a class="link" href="harfbuzz-hb-common.html#HB-TAG-NONE:CAPS" title="HB_TAG_NONE"><code class="literal">HB_TAG_NONE</code></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>features</p></td>
-<td class="parameter_description"><p>The array of features to collect</p></td>
-<td class="parameter_annotations"> </td>
+<td class="parameter_description"><p>The array of features to collect,
+terminated by <a class="link" href="harfbuzz-hb-common.html#HB-TAG-NONE:CAPS" title="HB_TAG_NONE"><code class="literal">HB_TAG_NONE</code></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>feature_indexes</p></td>
@@ -961,6 +1007,7 @@ Output = the actual number of lookups returned (may be zero). </p></td>
 <a name="hb-ot-layout-feature-with-variations-get-lookups.returns"></a><h4>Returns</h4>
 <p> Total number of lookups.</p>
 </div>
+<p class="since">Since: <a class="link" href="api-index-1-4-0.html#api-index-1.4.0">1.4.0</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1020,6 +1067,36 @@ Output = the actual number of attachment points returned (may be zero). </p></td
 </div>
 <hr>
 <div class="refsect2">
+<a name="hb-ot-layout-get-horizontal-baseline-tag-for-script"></a><h3>hb_ot_layout_get_horizontal_baseline_tag_for_script ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-ot-layout.html#hb-ot-layout-baseline-tag-t" title="enum hb_ot_layout_baseline_tag_t"><span class="returnvalue">hb_ot_layout_baseline_tag_t</span></a>
+hb_ot_layout_get_horizontal_baseline_tag_for_script
+                               (<em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-script-t" title="enum hb_script_t"><span class="type">hb_script_t</span></a> script</code></em>);</pre>
+<p>Fetches the dominant horizontal baseline tag used by <em class="parameter"><code>script</code></em>
+.</p>
+<div class="refsect3">
+<a name="hb-ot-layout-get-horizontal-baseline-tag-for-script.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>script</p></td>
+<td class="parameter_description"><p>a script tag.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-ot-layout-get-horizontal-baseline-tag-for-script.returns"></a><h4>Returns</h4>
+<p> dominant baseline tag for the <em class="parameter"><code>script</code></em>
+.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-4-0-0.html#api-index-4.0.0">4.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="hb-ot-layout-get-baseline"></a><h3>hb_ot_layout_get_baseline ()</h3>
 <pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
 hb_ot_layout_get_baseline (<em class="parameter"><code><a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> *font</code></em>,
@@ -1066,7 +1143,7 @@ hb_ot_layout_get_baseline (<em class="parameter"><code><a class="link" href="har
 <tr>
 <td class="parameter_name"><p>coord</p></td>
 <td class="parameter_description"><p>baseline value if found. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1076,6 +1153,63 @@ hb_ot_layout_get_baseline (<em class="parameter"><code><a class="link" href="har
 <p> <code class="literal">true</code> if found baseline value in the font.</p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-2-6-0.html#api-index-2.6.0">2.6.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-ot-layout-get-baseline-with-fallback"></a><h3>hb_ot_layout_get_baseline_with_fallback ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+hb_ot_layout_get_baseline_with_fallback
+                               (<em class="parameter"><code><a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> *font</code></em>,
+                                <em class="parameter"><code><a class="link" href="harfbuzz-hb-ot-layout.html#hb-ot-layout-baseline-tag-t" title="enum hb_ot_layout_baseline_tag_t"><span class="type">hb_ot_layout_baseline_tag_t</span></a> baseline_tag</code></em>,
+                                <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-direction-t" title="enum hb_direction_t"><span class="type">hb_direction_t</span></a> direction</code></em>,
+                                <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> script_tag</code></em>,
+                                <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> language_tag</code></em>,
+                                <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-position-t" title="hb_position_t"><span class="type">hb_position_t</span></a> *coord</code></em>);</pre>
+<p>Fetches a baseline value from the face, and synthesizes
+it if the font does not have it.</p>
+<div class="refsect3">
+<a name="hb-ot-layout-get-baseline-with-fallback.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>font</p></td>
+<td class="parameter_description"><p>a font</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>baseline_tag</p></td>
+<td class="parameter_description"><p>a baseline tag</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>direction</p></td>
+<td class="parameter_description"><p>text direction.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>script_tag</p></td>
+<td class="parameter_description"><p>script tag.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>language_tag</p></td>
+<td class="parameter_description"><p>language tag, currently unused.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>coord</p></td>
+<td class="parameter_description"><p>baseline value if found. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-4-0-0.html#api-index-4.0.0">4.0.0</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1164,6 +1298,11 @@ hb_ot_layout_get_ligature_carets (<em class="parameter"><code><a class="link" hr
                                   <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-position-t" title="hb_position_t"><span class="type">hb_position_t</span></a> *caret_array</code></em>);</pre>
 <p>Fetches a list of the caret positions defined for a ligature glyph in the GDEF
 table of the font. The list returned will begin at the offset provided.</p>
+<p>Note that a ligature that is formed from n characters will have n-1
+caret positions. The first character is not represented in the array,
+since its caret position is the glyph position.</p>
+<p>The positions returned by this function are 'unshaped', and will have to
+be fixed up for kerning that may be applied to the ligature glyph.</p>
 <div class="refsect3">
 <a name="hb-ot-layout-get-ligature-carets.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1354,6 +1493,7 @@ hb_ot_layout_has_substitution (<em class="parameter"><code><a class="link" href=
 <a name="hb-ot-layout-has-substitution.returns"></a><h4>Returns</h4>
 <p> <code class="literal">true</code> if data found, <code class="literal">false</code> otherwise</p>
 </div>
+<p class="since">Since: <a class="link" href="api-index-0-6-0.html#api-index-0.6.0">0.6.0</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1413,6 +1553,7 @@ or GPOS table, underneath the specified script and language.</p>
 <a name="hb-ot-layout-language-find-feature.returns"></a><h4>Returns</h4>
 <p> <code class="literal">true</code> if the feature is found, <code class="literal">false</code> otherwise</p>
 </div>
+<p class="since">Since: <a class="link" href="api-index-0-6-0.html#api-index-0.6.0">0.6.0</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1481,6 +1622,7 @@ Output: the actual number of feature tags returned (may be zero). </p></td>
 <a name="hb-ot-layout-language-get-feature-indexes.returns"></a><h4>Returns</h4>
 <p> Total number of features.</p>
 </div>
+<p class="since">Since: <a class="link" href="api-index-0-6-0.html#api-index-0.6.0">0.6.0</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1549,6 +1691,7 @@ Output = the actual number of feature tags returned (may be zero). </p></td>
 <a name="hb-ot-layout-language-get-feature-tags.returns"></a><h4>Returns</h4>
 <p> Total number of feature tags.</p>
 </div>
+<p class="since">Since: <a class="link" href="api-index-0-6-0.html#api-index-0.6.0">0.6.0</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1737,6 +1880,54 @@ Alternate glyphs associated with the glyph id. </p></td>
 </div>
 <hr>
 <div class="refsect2">
+<a name="hb-ot-layout-lookup-get-optical-bound"></a><h3>hb_ot_layout_lookup_get_optical_bound ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-position-t" title="hb_position_t"><span class="returnvalue">hb_position_t</span></a>
+hb_ot_layout_lookup_get_optical_bound (<em class="parameter"><code><a class="link" href="harfbuzz-hb-font.html#hb-font-t" title="hb_font_t"><span class="type">hb_font_t</span></a> *font</code></em>,
+                                       <em class="parameter"><code><span class="type">unsigned </span> lookup_index</code></em>,
+                                       <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-direction-t" title="enum hb_direction_t"><span class="type">hb_direction_t</span></a> direction</code></em>,
+                                       <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-codepoint-t" title="hb_codepoint_t"><span class="type">hb_codepoint_t</span></a> glyph</code></em>);</pre>
+<p>Fetches the optical bound of a glyph positioned at the margin of text.
+The direction identifies which edge of the glyph to query.</p>
+<div class="refsect3">
+<a name="hb-ot-layout-lookup-get-optical-bound.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>font</p></td>
+<td class="parameter_description"><p>a font.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>lookup_index</p></td>
+<td class="parameter_description"><p>index of the feature lookup to query.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>direction</p></td>
+<td class="parameter_description"><p>edge of the glyph to query.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>glyph</p></td>
+<td class="parameter_description"><p>a glyph id.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-ot-layout-lookup-get-optical-bound.returns"></a><h4>Returns</h4>
+<p> Adjustment value. Negative values mean the glyph will stick out of the margin.</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-5-3-0.html#api-index-5.3.0">5.3.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="hb-ot-layout-lookup-substitute-closure"></a><h3>hb_ot_layout_lookup_substitute_closure ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 hb_ot_layout_lookup_substitute_closure
@@ -1870,6 +2061,61 @@ in substitutions</p></td>
 </div>
 <hr>
 <div class="refsect2">
+<a name="hb-ot-layout-script-find-language"></a><h3>hb_ot_layout_script_find_language ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+hb_ot_layout_script_find_language (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
+                                   <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> table_tag</code></em>,
+                                   <em class="parameter"><code>unsigned <span class="type">int</span> script_index</code></em>,
+                                   <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> language_tag</code></em>,
+                                   <em class="parameter"><code>unsigned <span class="type">int</span> *language_index</code></em>);</pre>
+<div class="warning"><p><code class="literal">hb_ot_layout_script_find_language</code> has been deprecated since version 2.0.0 and should not be used in newly-written code.</p></div>
+<p>Fetches the index of a given language tag in the specified face's GSUB table
+or GPOS table, underneath the specified script tag.</p>
+<div class="refsect3">
+<a name="hb-ot-layout-script-find-language.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>face</p></td>
+<td class="parameter_description"><p><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> to work upon</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>table_tag</p></td>
+<td class="parameter_description"><p><a class="link" href="harfbuzz-hb-ot-layout.html#HB-OT-TAG-GSUB:CAPS" title="HB_OT_TAG_GSUB"><span class="type">HB_OT_TAG_GSUB</span></a> or <a class="link" href="harfbuzz-hb-ot-layout.html#HB-OT-TAG-GPOS:CAPS" title="HB_OT_TAG_GPOS"><span class="type">HB_OT_TAG_GPOS</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>script_index</p></td>
+<td class="parameter_description"><p>The index of the requested script tag</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>language_tag</p></td>
+<td class="parameter_description"><p>The <a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> of the requested language</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>language_index</p></td>
+<td class="parameter_description"><p>The index of the requested language</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-ot-layout-script-find-language.returns"></a><h4>Returns</h4>
+<p> <code class="literal">true</code> if the language tag is found, <code class="literal">false</code> otherwise</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-0-6-0.html#api-index-0.6.0">0.6.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="hb-ot-layout-script-get-language-tags"></a><h3>hb_ot_layout_script_get_language_tags ()</h3>
 <pre class="programlisting">unsigned <span class="returnvalue">int</span>
 hb_ot_layout_script_get_language_tags (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
@@ -1927,6 +2173,7 @@ Output = the actual number of language tags returned (may be zero). </p></td>
 <a name="hb-ot-layout-script-get-language-tags.returns"></a><h4>Returns</h4>
 <p> Total number of language tags.</p>
 </div>
+<p class="since">Since: <a class="link" href="api-index-0-6-0.html#api-index-0.6.0">0.6.0</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1995,6 +2242,79 @@ index.</p>
 </div>
 <hr>
 <div class="refsect2">
+<a name="hb-ot-layout-script-select-language2"></a><h3>hb_ot_layout_script_select_language2 ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+hb_ot_layout_script_select_language2 (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
+                                      <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> table_tag</code></em>,
+                                      <em class="parameter"><code>unsigned <span class="type">int</span> script_index</code></em>,
+                                      <em class="parameter"><code>unsigned <span class="type">int</span> language_count</code></em>,
+                                      <em class="parameter"><code>const <a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> *language_tags</code></em>,
+                                      <em class="parameter"><code>unsigned <span class="type">int</span> *language_index</code></em>,
+                                      <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> *chosen_language</code></em>);</pre>
+<p>Fetches the index of the first language tag fom <em class="parameter"><code>language_tags</code></em>
+ that is present
+in the specified face's GSUB or GPOS table, underneath the specified script
+index.</p>
+<p>If none of the given language tags is found, <code class="literal">false</code> is returned and
+<em class="parameter"><code>language_index</code></em>
+ is set to <a class="link" href="harfbuzz-hb-ot-layout.html#HB-OT-LAYOUT-DEFAULT-LANGUAGE-INDEX:CAPS" title="HB_OT_LAYOUT_DEFAULT_LANGUAGE_INDEX"><span class="type">HB_OT_LAYOUT_DEFAULT_LANGUAGE_INDEX</span></a> and
+<em class="parameter"><code>chosen_language</code></em>
+ is set to <a class="link" href="harfbuzz-hb-common.html#HB-TAG-NONE:CAPS" title="HB_TAG_NONE"><span class="type">HB_TAG_NONE</span></a>.</p>
+<div class="refsect3">
+<a name="hb-ot-layout-script-select-language2.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>face</p></td>
+<td class="parameter_description"><p><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> to work upon</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>table_tag</p></td>
+<td class="parameter_description"><p><a class="link" href="harfbuzz-hb-ot-layout.html#HB-OT-TAG-GSUB:CAPS" title="HB_OT_TAG_GSUB"><span class="type">HB_OT_TAG_GSUB</span></a> or <a class="link" href="harfbuzz-hb-ot-layout.html#HB-OT-TAG-GPOS:CAPS" title="HB_OT_TAG_GPOS"><span class="type">HB_OT_TAG_GPOS</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>script_index</p></td>
+<td class="parameter_description"><p>The index of the requested script tag</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>language_count</p></td>
+<td class="parameter_description"><p>The number of languages in the specified script</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>language_tags</p></td>
+<td class="parameter_description"><p>The array of language tags</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>language_index</p></td>
+<td class="parameter_description"><p>The index of the chosen language. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>chosen_language</p></td>
+<td class="parameter_description"><p><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> of the chosen language. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="hb-ot-layout-script-select-language2.returns"></a><h4>Returns</h4>
+<p> <code class="literal">true</code> if one of the given language tags is found, <code class="literal">false</code> otherwise</p>
+</div>
+<p class="since">Since: <a class="link" href="api-index-7-0-0.html#api-index-7.0.0">7.0.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="hb-ot-layout-table-find-feature-variations"></a><h3>hb_ot_layout_table_find_feature_variations ()</h3>
 <pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
 hb_ot_layout_table_find_feature_variations
@@ -2046,6 +2366,7 @@ or GPOS table, at the specified variation coordinates.</p>
 <a name="hb-ot-layout-table-find-feature-variations.returns"></a><h4>Returns</h4>
 <p> <code class="literal">true</code> if feature variations were found, <code class="literal">false</code> otherwise.</p>
 </div>
+<p class="since">Since: <a class="link" href="api-index-1-4-0.html#api-index-1.4.0">1.4.0</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -2056,7 +2377,9 @@ hb_ot_layout_table_get_feature_tags (<em class="parameter"><code><a class="link"
                                      <em class="parameter"><code>unsigned <span class="type">int</span> start_offset</code></em>,
                                      <em class="parameter"><code>unsigned <span class="type">int</span> *feature_count</code></em>,
                                      <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> *feature_tags</code></em>);</pre>
-<p>Fetches a list of all feature tags in the given face's GSUB or GPOS table.</p>
+<p>Fetches a list of all feature tags in the given face's GSUB or GPOS table.
+Note that there might be duplicate feature tags, belonging to different
+script/language-system pairs of the table.</p>
 <div class="refsect3">
 <a name="hb-ot-layout-table-get-feature-tags.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -2099,6 +2422,7 @@ Output = the actual number of feature tags returned (may be zero). </p></td>
 <a name="hb-ot-layout-table-get-feature-tags.returns"></a><h4>Returns</h4>
 <p> Total number of feature tags.</p>
 </div>
+<p class="since">Since: <a class="link" href="api-index-0-6-0.html#api-index-0.6.0">0.6.0</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -2206,9 +2530,9 @@ hb_ot_layout_table_select_script (<em class="parameter"><code><a class="link" hr
 <p>If the table does not have any of the requested scripts, then <code class="literal">DFLT</code>,
 <code class="literal">dflt</code>, and <code class="literal">latn</code> tags are tried in that order. If the table still does not
 have any of these scripts, <em class="parameter"><code>script_index</code></em>
- and <em class="parameter"><code>chosen_script</code></em>
- are set to
-<a class="link" href="harfbuzz-hb-ot-layout.html#HB-OT-LAYOUT-NO-SCRIPT-INDEX:CAPS" title="HB_OT_LAYOUT_NO_SCRIPT_INDEX"><span class="type">HB_OT_LAYOUT_NO_SCRIPT_INDEX</span></a>.</p>
+ is set to
+<a class="link" href="harfbuzz-hb-ot-layout.html#HB-OT-LAYOUT-NO-SCRIPT-INDEX:CAPS" title="HB_OT_LAYOUT_NO_SCRIPT_INDEX"><span class="type">HB_OT_LAYOUT_NO_SCRIPT_INDEX</span></a> and <em class="parameter"><code>chosen_script</code></em>
+ is set to <a class="link" href="harfbuzz-hb-common.html#HB-TAG-NONE:CAPS" title="HB_TAG_NONE"><span class="type">HB_TAG_NONE</span></a>.</p>
 <div class="refsect3">
 <a name="hb-ot-layout-table-select-script.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -2350,6 +2674,7 @@ underneath the specified script and language.</p>
 <a name="hb-ot-layout-language-get-required-feature-index.returns"></a><h4>Returns</h4>
 <p> <code class="literal">true</code> if the feature is found, <code class="literal">false</code> otherwise</p>
 </div>
+<p class="since">Since: <a class="link" href="api-index-0-6-0.html#api-index-0.6.0">0.6.0</a></p>
 </div>
 </div>
 <div class="refsect1">
@@ -2496,6 +2821,13 @@ if the direction is horizontal or vertical, respectively.</p>
 <td class="enum_member_annotations"> </td>
 </tr>
 <tr>
+<td class="enum_member_name"><p><a name="HB-OT-LAYOUT-BASELINE-TAG-IDEO-FACE-CENTRAL:CAPS"></a>HB_OT_LAYOUT_BASELINE_TAG_IDEO_FACE_CENTRAL</p></td>
+<td class="enum_member_description">
+<p>The center of the ideographic character face. Since: 4.0.0</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
 <td class="enum_member_name"><p><a name="HB-OT-LAYOUT-BASELINE-TAG-IDEO-EMBOX-BOTTOM-OR-LEFT:CAPS"></a>HB_OT_LAYOUT_BASELINE_TAG_IDEO_EMBOX_BOTTOM_OR_LEFT</p></td>
 <td class="enum_member_description">
 <p>Ideographic em-box bottom or left edge,
@@ -2506,7 +2838,14 @@ if the direction is horizontal or vertical, respectively.</p>
 <tr>
 <td class="enum_member_name"><p><a name="HB-OT-LAYOUT-BASELINE-TAG-IDEO-EMBOX-TOP-OR-RIGHT:CAPS"></a>HB_OT_LAYOUT_BASELINE_TAG_IDEO_EMBOX_TOP_OR_RIGHT</p></td>
 <td class="enum_member_description">
-<p>Ideographic em-box top or right edge baseline,
+<p>Ideographic em-box top or right edge baseline,</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="HB-OT-LAYOUT-BASELINE-TAG-IDEO-EMBOX-CENTRAL:CAPS"></a>HB_OT_LAYOUT_BASELINE_TAG_IDEO_EMBOX_CENTRAL</p></td>
+<td class="enum_member_description">
+<p>The center of the ideographic em-box. Since: 4.0.0
 if the direction is horizontal or vertical, respectively.</p>
 </td>
 <td class="enum_member_annotations"> </td>

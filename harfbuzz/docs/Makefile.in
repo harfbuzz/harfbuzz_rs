@@ -187,8 +187,6 @@ CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DIRECTWRITE_CXXFLAGS = @DIRECTWRITE_CXXFLAGS@
-DIRECTWRITE_LIBS = @DIRECTWRITE_LIBS@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -374,7 +372,7 @@ SCANGOBJ_OPTIONS =
 # Extra options to supply to gtkdoc-scan.
 # e.g. SCAN_OPTIONS=--deprecated-guards="GTK_DISABLE_DEPRECATED"
 SCAN_OPTIONS = --rebuild-types --deprecated-guards="HB_DISABLE_DEPRECATED" \
-	--ignore-decorators='HB_EXTERN|HB_DEPRECATED'
+	--ignore-decorators='HB_EXTERN|HB_DEPRECATED|HB_DEPRECATED_FOR()'
 
 
 # Header files or dirs to ignore when scanning. Use base file/dir names
@@ -432,7 +430,7 @@ content_files = \
 	version.xml
 
 
-# SGML files where gtk-doc abbrevations (#GtkWidget) are expanded
+# SGML files where gtk-doc abbreviations (#GtkWidget) are expanded
 # These files must be listed here *and* in content_files
 # e.g. expand_content_files=running.sgml
 expand_content_files = 

@@ -65,7 +65,7 @@
 <dt><span class="chapter"><a href="shaping-concepts.html">Shaping concepts</a></span></dt>
 <dd><dl>
 <dt><span class="section"><a href="shaping-concepts.html#text-shaping-concepts">Text shaping</a></span></dt>
-<dt><span class="section"><a href="complex-scripts.html">Complex scripts</a></span></dt>
+<dt><span class="section"><a href="script-specific-shaping.html">Script-specific shaping</a></span></dt>
 <dt><span class="section"><a href="shaping-operations.html">Shaping operations</a></span></dt>
 <dt><span class="section"><a href="unicode-character-categories.html">Unicode character categories</a></span></dt>
 <dt><span class="section"><a href="text-runs.html">Text runs</a></span></dt>
@@ -94,6 +94,7 @@
 <dt><span class="section"><a href="fonts-and-faces-custom-functions.html">Customizing font functions</a></span></dt>
 <dt><span class="section"><a href="fonts-and-faces-native-opentype.html">Font objects and HarfBuzz's native OpenType implementation</a></span></dt>
 <dt><span class="section"><a href="fonts-and-faces-variable.html">Working with OpenType Variable Fonts</a></span></dt>
+<dt><span class="section"><a href="glyphs-and-rendering.html">Glyphs and rendering</a></span></dt>
 </dl></dd>
 <dt><span class="chapter"><a href="shaping-and-shape-plans.html">Shaping and shape plans</a></span></dt>
 <dd><dl>
@@ -130,6 +131,7 @@
 <dd><dl>
 <dt><span class="section"><a href="integration.html#integration-glib">GNOME integration, GLib, and GObject</a></span></dt>
 <dt><span class="section"><a href="integration-freetype.html">FreeType integration</a></span></dt>
+<dt><span class="section"><a href="integration-cairo.html">Cairo integration</a></span></dt>
 <dt><span class="section"><a href="integration-uniscribe.html">Uniscribe integration</a></span></dt>
 <dt><span class="section"><a href="integration-coretext.html">Core Text integration</a></span></dt>
 <dt><span class="section"><a href="integration-icu.html">ICU integration</a></span></dt>
@@ -148,6 +150,15 @@
 </dt>
 <dt>
 <span class="refentrytitle"><a href="harfbuzz-hb-common.html">hb-common</a></span><span class="refpurpose"> — Common data types</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="harfbuzz-hb-features.html">hb-features</a></span><span class="refpurpose"> — Feature detection</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="harfbuzz-hb-draw.html">hb-draw</a></span><span class="refpurpose"> — Glyph drawing</span>
+</dt>
+<dt>
+<span class="refentrytitle"><a href="harfbuzz-hb-paint.html">hb-paint</a></span><span class="refpurpose"> — Glyph painting</span>
 </dt>
 <dt>
 <span class="refentrytitle"><a href="harfbuzz-hb-deprecated.html">hb-deprecated</a></span><span class="refpurpose"> — Deprecated API</span>
@@ -237,6 +248,9 @@
 <dt>
 <span class="refentrytitle"><a href="harfbuzz-hb-directwrite.html">hb-directwrite</a></span><span class="refpurpose"> — DirectWrite integration</span>
 </dt>
+<dt>
+<span class="refentrytitle"><a href="harfbuzz-hb-cairo.html">hb-cairo</a></span><span class="refpurpose"> — Cairo integration</span>
+</dt>
 </dl></dd>
 <dt><span class="chapter"><a href="style-api.html">Style API</a></span></dt>
 <dd><dl><dt>
@@ -248,6 +262,18 @@
 </dt></dl></dd>
 <dt><span class="index"><a href="api-index-full.html">API Index</a></span></dt>
 <dt><span class="index"><a href="deprecated-api-index.html">Index of deprecated API</a></span></dt>
+<dt><span class="index"><a href="api-index-7-1-0.html">Index of new symbols in 7.1.0</a></span></dt>
+<dt><span class="index"><a href="api-index-7-0-0.html">Index of new symbols in 7.0.0</a></span></dt>
+<dt><span class="index"><a href="api-index-6-0-0.html">Index of new symbols in 6.0.0</a></span></dt>
+<dt><span class="index"><a href="api-index-5-3-0.html">Index of new symbols in 5.3.0</a></span></dt>
+<dt><span class="index"><a href="api-index-5-0-0.html">Index of new symbols in 5.0.0</a></span></dt>
+<dt><span class="index"><a href="api-index-4-4-0.html">Index of new symbols in 4.4.0</a></span></dt>
+<dt><span class="index"><a href="api-index-4-3-0.html">Index of new symbols in 4.3.0</a></span></dt>
+<dt><span class="index"><a href="api-index-4-2-0.html">Index of new symbols in 4.2.0</a></span></dt>
+<dt><span class="index"><a href="api-index-4-1-0.html">Index of new symbols in 4.1.0</a></span></dt>
+<dt><span class="index"><a href="api-index-4-0-0.html">Index of new symbols in 4.0.0</a></span></dt>
+<dt><span class="index"><a href="api-index-3-4-0.html">Index of new symbols in 3.4.0</a></span></dt>
+<dt><span class="index"><a href="api-index-3-3-0.html">Index of new symbols in 3.3.0</a></span></dt>
 <dt><span class="index"><a href="api-index-3-1-0.html">Index of new symbols in 3.1.0</a></span></dt>
 <dt><span class="index"><a href="api-index-3-0-0.html">Index of new symbols in 3.0.0</a></span></dt>
 <dt><span class="index"><a href="api-index-2-9-1.html">Index of new symbols in 2.9.1</a></span></dt>
@@ -270,7 +296,6 @@
 <dt><span class="index"><a href="api-index-1-8-1.html">Index of new symbols in 1.8.1</a></span></dt>
 <dt><span class="index"><a href="api-index-1-8-0.html">Index of new symbols in 1.8.0</a></span></dt>
 <dt><span class="index"><a href="api-index-1-7-7.html">Index of new symbols in 1.7.7</a></span></dt>
-<dt><span class="index"><a href="api-index-1-7-5.html">Index of new symbols in 1.7.5</a></span></dt>
 <dt><span class="index"><a href="api-index-1-7-2.html">Index of new symbols in 1.7.2</a></span></dt>
 <dt><span class="index"><a href="api-index-1-6-0.html">Index of new symbols in 1.6.0</a></span></dt>
 <dt><span class="index"><a href="api-index-1-5-0.html">Index of new symbols in 1.5.0</a></span></dt>
@@ -306,7 +331,7 @@
 </dl></div>
 <div class="note">
 <p>
-      The current HarfBuzz codebase is versioned 2.x.x and is stable
+      The current HarfBuzz codebase is stable
       and under active maintenance. This is what is used in latest
       versions of Firefox, GNOME, ChromeOS, Chrome, LibreOffice,
       XeTeX, Android, and KDE, among other places.

@@ -102,19 +102,19 @@ HB_INTERNAL void
 hb_ot_layout_substitute_start (hb_font_t    *font,
 			       hb_buffer_t  *buffer);
 
-HB_INTERNAL void
-hb_ot_layout_delete_glyphs_inplace (hb_buffer_t *buffer,
-				    bool (*filter) (const hb_glyph_info_t *info));
-
 namespace OT {
   struct hb_ot_apply_context_t;
-  struct SubstLookup;
   struct hb_ot_layout_lookup_accelerator_t;
+namespace Layout {
+namespace GSUB_impl {
+  struct SubstLookup;
+}
+}
 }
 
 HB_INTERNAL void
 hb_ot_layout_substitute_lookup (OT::hb_ot_apply_context_t *c,
-				const OT::SubstLookup &lookup,
+				const OT::Layout::GSUB_impl::SubstLookup &lookup,
 				const OT::hb_ot_layout_lookup_accelerator_t &accel);
 
 
@@ -166,17 +166,6 @@ _hb_next_syllable (hb_buffer_t *buffer, unsigned int start)
     ;
 
   return start;
-}
-
-static inline void
-_hb_clear_syllables (const hb_ot_shape_plan_t *plan HB_UNUSED,
-		     hb_font_t *font HB_UNUSED,
-		     hb_buffer_t *buffer)
-{
-  hb_glyph_info_t *info = buffer->info;
-  unsigned int count = buffer->len;
-  for (unsigned int i = 0; i < count; i++)
-    info[i].syllable() = 0;
 }
 
 
@@ -482,7 +471,8 @@ _hb_glyph_info_get_lig_num_comps (const hb_glyph_info_t *info)
 }
 
 static inline uint8_t
-_hb_allocate_lig_id (hb_buffer_t *buffer) {
+_hb_allocate_lig_id (hb_buffer_t *buffer)
+{
   uint8_t lig_id = buffer->next_serial () & 0x07;
   if (unlikely (!lig_id))
     lig_id = _hb_allocate_lig_id (buffer); /* in case of overflow */
@@ -558,7 +548,7 @@ _hb_glyph_info_clear_substituted (hb_glyph_info_t *info)
   info->glyph_props() &= ~(HB_OT_LAYOUT_GLYPH_PROPS_SUBSTITUTED);
 }
 
-static inline void
+static inline bool
 _hb_clear_substitution_flags (const hb_ot_shape_plan_t *plan HB_UNUSED,
 			      hb_font_t *font HB_UNUSED,
 			      hb_buffer_t *buffer)
@@ -567,6 +557,7 @@ _hb_clear_substitution_flags (const hb_ot_shape_plan_t *plan HB_UNUSED,
   unsigned int count = buffer->len;
   for (unsigned int i = 0; i < count; i++)
     _hb_glyph_info_clear_substituted (&info[i]);
+  return false;
 }
 
 
@@ -595,13 +586,11 @@ _hb_buffer_allocate_gsubgpos_vars (hb_buffer_t *buffer)
 {
   HB_BUFFER_ALLOCATE_VAR (buffer, glyph_props);
   HB_BUFFER_ALLOCATE_VAR (buffer, lig_props);
-  HB_BUFFER_ALLOCATE_VAR (buffer, syllable);
 }
 
 static inline void
 _hb_buffer_deallocate_gsubgpos_vars (hb_buffer_t *buffer)
 {
-  HB_BUFFER_DEALLOCATE_VAR (buffer, syllable);
   HB_BUFFER_DEALLOCATE_VAR (buffer, lig_props);
   HB_BUFFER_DEALLOCATE_VAR (buffer, glyph_props);
 }
@@ -611,7 +600,6 @@ _hb_buffer_assert_gsubgpos_vars (hb_buffer_t *buffer)
 {
   HB_BUFFER_ASSERT_VAR (buffer, glyph_props);
   HB_BUFFER_ASSERT_VAR (buffer, lig_props);
-  HB_BUFFER_ASSERT_VAR (buffer, syllable);
 }
 
 /* Make sure no one directly touches our props... */

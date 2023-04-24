@@ -6,7 +6,7 @@
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="index.html" title="HarfBuzz Manual">
 <link rel="up" href="core-api.html" title="Core API">
-<link rel="prev" href="harfbuzz-hb-common.html" title="hb-common">
+<link rel="prev" href="harfbuzz-hb-paint.html" title="hb-paint">
 <link rel="next" href="harfbuzz-hb-face.html" title="hb-face">
 <meta name="generator" content="GTK-Doc V1.32 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
@@ -19,7 +19,7 @@
 </td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
 <td><a accesskey="u" href="core-api.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
-<td><a accesskey="p" href="harfbuzz-hb-common.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="p" href="harfbuzz-hb-paint.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
 <td><a accesskey="n" href="harfbuzz-hb-face.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
 </tr></table>
 <div class="refentry">
@@ -41,6 +41,14 @@
 <tbody>
 <tr>
 <td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-deprecated.html#hb-font-funcs-set-glyph-func" title="hb_font_funcs_set_glyph_func ()">hb_font_funcs_set_glyph_func</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
 </td>
 <td class="function_name">
@@ -52,7 +60,46 @@
 <a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
 </td>
 <td class="function_name">
+<a class="link" href="harfbuzz-hb-deprecated.html#hb-ot-layout-table-choose-script" title="hb_ot_layout_table_choose_script ()">hb_ot_layout_table_choose_script</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+</td>
+<td class="function_name">
 <a class="link" href="harfbuzz-hb-deprecated.html#hb-ot-layout-table-find-script" title="hb_ot_layout_table_find_script ()">hb_ot_layout_table_find_script</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="returnvalue">hb_tag_t</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-deprecated.html#hb-ot-tag-from-language" title="hb_ot_tag_from_language ()">hb_ot_tag_from_language</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-deprecated.html#hb-ot-tags-from-script" title="hb_ot_tags_from_script ()">hb_ot_tags_from_script</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-deprecated.html#hb-ot-var-find-axis" title="hb_ot_var_find_axis ()">hb_ot_var_find_axis</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">unsigned <span class="returnvalue">int</span>
+</td>
+<td class="function_name">
+<a class="link" href="harfbuzz-hb-deprecated.html#hb-ot-var-get-axes" title="hb_ot_var_get_axes ()">hb_ot_var_get_axes</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -144,6 +191,10 @@
 </tr>
 <tr>
 <td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="harfbuzz-hb-deprecated.html#HB-OT-MATH-SCRIPT:CAPS" title="HB_OT_MATH_SCRIPT">HB_OT_MATH_SCRIPT</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
 <td class="function_name"><a class="link" href="harfbuzz-hb-deprecated.html#HB-OT-VAR-NO-AXIS-INDEX:CAPS" title="HB_OT_VAR_NO_AXIS_INDEX">HB_OT_VAR_NO_AXIS_INDEX</a></td>
 </tr>
 <tr>
@@ -173,6 +224,53 @@ were deemed unnecessary.</p>
 </div>
 <div class="refsect1">
 <a name="harfbuzz-hb-deprecated.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="hb-font-funcs-set-glyph-func"></a><h3>hb_font_funcs_set_glyph_func ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+hb_font_funcs_set_glyph_func (<em class="parameter"><code><a class="link" href="harfbuzz-hb-font.html#hb-font-funcs-t" title="hb_font_funcs_t"><span class="type">hb_font_funcs_t</span></a> *ffuncs</code></em>,
+                              <em class="parameter"><code><a class="link" href="harfbuzz-hb-deprecated.html#hb-font-get-glyph-func-t" title="hb_font_get_glyph_func_t ()"><span class="type">hb_font_get_glyph_func_t</span></a> func</code></em>,
+                              <em class="parameter"><code><span class="type">void</span> *user_data</code></em>,
+                              <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-destroy-func-t" title="hb_destroy_func_t ()"><span class="type">hb_destroy_func_t</span></a> destroy</code></em>);</pre>
+<div class="warning"><p><code class="literal">hb_font_funcs_set_glyph_func</code> has been deprecated since version 1.2.3 and should not be used in newly-written code.</p></div>
+<p>Deprecated.  Use <a class="link" href="harfbuzz-hb-font.html#hb-font-funcs-set-nominal-glyph-func" title="hb_font_funcs_set_nominal_glyph_func ()"><code class="function">hb_font_funcs_set_nominal_glyph_func()</code></a> and
+<a class="link" href="harfbuzz-hb-font.html#hb-font-funcs-set-variation-glyph-func" title="hb_font_funcs_set_variation_glyph_func ()"><code class="function">hb_font_funcs_set_variation_glyph_func()</code></a> instead.</p>
+<div class="refsect3">
+<a name="hb-font-funcs-set-glyph-func.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>ffuncs</p></td>
+<td class="parameter_description"><p>The font-functions structure</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>func</p></td>
+<td class="parameter_description"><p>callback function. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="This parameter is a 'user_data', for callbacks; many bindings can pass NULL here."><span class="acronym">closure</span></acronym> user_data][<acronym title="This parameter is a 'destroy_data', for callbacks."><span class="acronym">destroy</span></acronym> destroy][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>user_data</p></td>
+<td class="parameter_description"><p>data to pass to <em class="parameter"><code>func</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>destroy</p></td>
+<td class="parameter_description"><p>function to call when <em class="parameter"><code>user_data</code></em>
+is not needed anymore. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-0-9-2.html#api-index-0.9.2">0.9.2</a></p>
+</div>
+<hr>
 <div class="refsect2">
 <a name="hb-font-get-glyph-func-t"></a><h3>hb_font_get_glyph_func_t ()</h3>
 <pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
@@ -236,6 +334,55 @@ user data pointer</p></td>
 </div>
 <hr>
 <div class="refsect2">
+<a name="hb-ot-layout-table-choose-script"></a><h3>hb_ot_layout_table_choose_script ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+hb_ot_layout_table_choose_script (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
+                                  <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> table_tag</code></em>,
+                                  <em class="parameter"><code>const <a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> *script_tags</code></em>,
+                                  <em class="parameter"><code>unsigned <span class="type">int</span> *script_index</code></em>,
+                                  <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> *chosen_script</code></em>);</pre>
+<div class="warning"><p><code class="literal">hb_ot_layout_table_choose_script</code> is deprecated and should not be used in newly-written code.</p></div>
+<p>Deprecated since 2.0.0</p>
+<div class="refsect3">
+<a name="hb-ot-layout-table-choose-script.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>face</p></td>
+<td class="parameter_description"><p><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> to work upon</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>table_tag</p></td>
+<td class="parameter_description"><p><a class="link" href="harfbuzz-hb-ot-layout.html#HB-OT-TAG-GSUB:CAPS" title="HB_OT_TAG_GSUB"><span class="type">HB_OT_TAG_GSUB</span></a> or <a class="link" href="harfbuzz-hb-ot-layout.html#HB-OT-TAG-GPOS:CAPS" title="HB_OT_TAG_GPOS"><span class="type">HB_OT_TAG_GPOS</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>script_tags</p></td>
+<td class="parameter_description"><p>Array of <a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> script tags</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>script_index</p></td>
+<td class="parameter_description"><p>The index of the chosen script. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>chosen_script</p></td>
+<td class="parameter_description"><p><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> of the chosen script. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="hb-ot-layout-table-find-script"></a><h3>hb_ot_layout_table_find_script ()</h3>
 <pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
 hb_ot_layout_table_find_script (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
@@ -280,6 +427,171 @@ or GPOS table.</p>
 <a name="hb-ot-layout-table-find-script.returns"></a><h4>Returns</h4>
 <p> <code class="literal">true</code> if the script is found, <code class="literal">false</code> otherwise</p>
 </div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-ot-tag-from-language"></a><h3>hb_ot_tag_from_language ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="returnvalue">hb_tag_t</span></a>
+hb_ot_tag_from_language (<em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-language-t" title="hb_language_t"><span class="type">hb_language_t</span></a> language</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">hb_ot_tag_from_language</code> has been deprecated since version 2.0.0 and should not be used in newly-written code.</p>
+<p>use <a class="link" href="harfbuzz-hb-ot-layout.html#hb-ot-tags-from-script-and-language" title="hb_ot_tags_from_script_and_language ()"><code class="function">hb_ot_tags_from_script_and_language()</code></a> instead</p>
+</div>
+<p>Converts an <a class="link" href="harfbuzz-hb-common.html#hb-language-t" title="hb_language_t"><span class="type">hb_language_t</span></a> to an <a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a>.</p>
+<div class="refsect3">
+<a name="hb-ot-tag-from-language.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>language</p></td>
+<td class="parameter_description"><p>an <a class="link" href="harfbuzz-hb-common.html#hb-language-t" title="hb_language_t"><span class="type">hb_language_t</span></a> to convert.</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-0-6-0.html#api-index-0.6.0">0.6.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-ot-tags-from-script"></a><h3>hb_ot_tags_from_script ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+hb_ot_tags_from_script (<em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-script-t" title="enum hb_script_t"><span class="type">hb_script_t</span></a> script</code></em>,
+                        <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> *script_tag_1</code></em>,
+                        <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> *script_tag_2</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">hb_ot_tags_from_script</code> has been deprecated since version 2.0.0 and should not be used in newly-written code.</p>
+<p>use <a class="link" href="harfbuzz-hb-ot-layout.html#hb-ot-tags-from-script-and-language" title="hb_ot_tags_from_script_and_language ()"><code class="function">hb_ot_tags_from_script_and_language()</code></a> instead</p>
+</div>
+<p>Converts an <a class="link" href="harfbuzz-hb-common.html#hb-script-t" title="enum hb_script_t"><span class="type">hb_script_t</span></a> to script tags.</p>
+<div class="refsect3">
+<a name="hb-ot-tags-from-script.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>script</p></td>
+<td class="parameter_description"><p>an <a class="link" href="harfbuzz-hb-common.html#hb-script-t" title="enum hb_script_t"><span class="type">hb_script_t</span></a> to convert.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>script_tag_1</p></td>
+<td class="parameter_description"><p>output <a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>script_tag_2</p></td>
+<td class="parameter_description"><p>output <a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-0-6-0.html#api-index-0.6.0">0.6.0</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-ot-var-find-axis"></a><h3>hb_ot_var_find_axis ()</h3>
+<pre class="programlisting"><a class="link" href="harfbuzz-hb-common.html#hb-bool-t" title="hb_bool_t"><span class="returnvalue">hb_bool_t</span></a>
+hb_ot_var_find_axis (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
+                     <em class="parameter"><code><a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> axis_tag</code></em>,
+                     <em class="parameter"><code>unsigned <span class="type">int</span> *axis_index</code></em>,
+                     <em class="parameter"><code><a class="link" href="harfbuzz-hb-deprecated.html#hb-ot-var-axis-t" title="hb_ot_var_axis_t"><span class="type">hb_ot_var_axis_t</span></a> *axis_info</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">hb_ot_var_find_axis</code> has been deprecated since version 2.2.0 and should not be used in newly-written code.</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>use <a class="link" href="harfbuzz-hb-ot-var.html#hb-ot-var-find-axis-info" title="hb_ot_var_find_axis_info ()"><code class="function">hb_ot_var_find_axis_info()</code></a> instead</p></li></ul></div>
+</div>
+<p>Fetches the variation-axis information corresponding to the specified axis tag
+in the specified face.</p>
+<div class="refsect3">
+<a name="hb-ot-var-find-axis.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>face</p></td>
+<td class="parameter_description"><p><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> to work upon</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>axis_tag</p></td>
+<td class="parameter_description"><p>The <a class="link" href="harfbuzz-hb-common.html#hb-tag-t" title="hb_tag_t"><span class="type">hb_tag_t</span></a> of the variation axis to query</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>axis_index</p></td>
+<td class="parameter_description"><p>The index of the variation axis</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>axis_info</p></td>
+<td class="parameter_description"><p>The <a class="link" href="harfbuzz-hb-ot-var.html#hb-ot-var-axis-info-t" title="hb_ot_var_axis_info_t"><span class="type">hb_ot_var_axis_info_t</span></a> of the axis tag queried. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-1-4-2.html#api-index-1.4.2">1.4.2</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="hb-ot-var-get-axes"></a><h3>hb_ot_var_get_axes ()</h3>
+<pre class="programlisting">unsigned <span class="returnvalue">int</span>
+hb_ot_var_get_axes (<em class="parameter"><code><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> *face</code></em>,
+                    <em class="parameter"><code>unsigned <span class="type">int</span> start_offset</code></em>,
+                    <em class="parameter"><code>unsigned <span class="type">int</span> *axes_count</code></em>,
+                    <em class="parameter"><code><a class="link" href="harfbuzz-hb-deprecated.html#hb-ot-var-axis-t" title="hb_ot_var_axis_t"><span class="type">hb_ot_var_axis_t</span></a> *axes_array</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">hb_ot_var_get_axes</code> has been deprecated since version 2.2.0 and should not be used in newly-written code.</p>
+<p>use <a class="link" href="harfbuzz-hb-ot-var.html#hb-ot-var-get-axis-infos" title="hb_ot_var_get_axis_infos ()"><code class="function">hb_ot_var_get_axis_infos()</code></a> instead</p>
+</div>
+<p>Fetches a list of all variation axes in the specified face. The list returned will begin
+at the offset provided.</p>
+<div class="refsect3">
+<a name="hb-ot-var-get-axes.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>face</p></td>
+<td class="parameter_description"><p><a class="link" href="harfbuzz-hb-face.html#hb-face-t" title="hb_face_t"><span class="type">hb_face_t</span></a> to work upon</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>start_offset</p></td>
+<td class="parameter_description"><p>offset of the first lookup to retrieve</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>axes_count</p></td>
+<td class="parameter_description"><p>Input = the maximum number of variation axes to return;
+Output = the actual number of variation axes returned (may be zero). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for input and for returning results. Default is transfer full."><span class="acronym">inout</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>axes_array</p></td>
+<td class="parameter_description"><p>The array of variation axes found. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Out parameter, where caller must allocate storage."><span class="acronym">out caller-allocates</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=axes_count]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: <a class="link" href="api-index-1-4-2.html#api-index-1.4.2">1.4.2</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -672,6 +984,18 @@ the specified font, for vertical text segments.</p>
 </pre>
 <div class="warning"><p><code class="literal">HB_MATH_GLYPH_PART_FLAG_EXTENDER</code> has been deprecated since version 2.5.1 and should not be used in newly-written code.</p></div>
 <p>Use <a class="link" href="harfbuzz-hb-ot-math.html#HB-OT-MATH-GLYPH-PART-FLAG-EXTENDER:CAPS"><span class="type">HB_OT_MATH_GLYPH_PART_FLAG_EXTENDER</span></a> instead.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="HB-OT-MATH-SCRIPT:CAPS"></a><h3>HB_OT_MATH_SCRIPT</h3>
+<pre class="programlisting">#define HB_OT_MATH_SCRIPT HB_OT_TAG_MATH_SCRIPT
+</pre>
+<div class="warning"><p><code class="literal">HB_OT_MATH_SCRIPT</code> has been deprecated since version 3.4.0 and should not be used in newly-written code.</p></div>
+<p>Use <a class="link" href="harfbuzz-hb-common.html#HB-SCRIPT-MATH:CAPS"><span class="type">HB_SCRIPT_MATH</span></a> or <a class="link" href="harfbuzz-hb-ot-math.html#HB-OT-TAG-MATH-SCRIPT:CAPS" title="HB_OT_TAG_MATH_SCRIPT"><span class="type">HB_OT_TAG_MATH_SCRIPT</span></a> instead.</p>
+<div class="note">Previous versions of this documentation recommended passing
+<a class="link" href="harfbuzz-hb-deprecated.html#HB-OT-MATH-SCRIPT:CAPS" title="HB_OT_MATH_SCRIPT"><span class="type">HB_OT_MATH_SCRIPT</span></a> to <a class="link" href="harfbuzz-hb-buffer.html#hb-buffer-set-script" title="hb_buffer_set_script ()"><code class="function">hb_buffer_set_script()</code></a> to enable math shaping, but this
+usage is no longer supported. Use <a class="link" href="harfbuzz-hb-common.html#HB-SCRIPT-MATH:CAPS"><span class="type">HB_SCRIPT_MATH</span></a> instead.</div>
+<p class="since">Since: <a class="link" href="api-index-1-3-3.html#api-index-1.3.3">1.3.3</a></p>
 </div>
 <hr>
 <div class="refsect2">

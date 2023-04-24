@@ -89,10 +89,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-TESTS = tests/basics.tests tests/cbdt.tests tests/cff-full-font.tests \
+TESTS = tests/32bit_var_store.tests tests/basics.tests \
+	tests/cbdt.tests tests/cff-full-font.tests \
 	tests/cff-japanese.tests tests/cff.notoserifmyanmar.tests \
 	tests/cmap.tests tests/cmap14.tests tests/colr.tests \
 	tests/colr_glyphs.tests tests/colrv1.tests \
+	tests/colrv1_copy_varstore.tests \
 	tests/colr_with_components.tests tests/full-font.tests \
 	tests/glyf_bug_3131.tests tests/japanese.tests \
 	tests/layout.context.tests tests/layout.context_format2.tests \
@@ -107,12 +109,19 @@ TESTS = tests/basics.tests tests/cbdt.tests tests/cff-full-font.tests \
 	tests/layout.gsub5_format2.tests tests/layout.gsub6.tests \
 	tests/layout.gsub8.tests tests/layout.khmer.tests \
 	tests/layout.notonastaliqurdu.tests tests/layout.tests \
-	tests/layout.tinos.tests tests/layout.default_features.tests \
-	tests/layout.duplicate_features.tests \
+	tests/layout.tinos.tests tests/layout.duplicate_features.tests \
 	tests/layout.unsorted_featurelist.tests \
 	tests/layout.drop_feature.tests tests/sbix.tests \
 	tests/variable.tests tests/glyph_names.tests tests/math.tests \
 	tests/math_coverage_offset.tests tests/post.tests \
+	tests/full_instance.tests \
+	tests/instance_feature_variations.tests \
+	tests/instantiate_glyf.tests tests/instantiate_cff2.tests \
+	tests/pin_all_at_default.tests \
+	tests/instance_no_double_free.tests \
+	tests/mvar_full_instance.tests \
+	tests/instance_comp_glyph_empty_child.tests \
+	tests/post_apply_mvar_delta.tests tests/apply_cvar_delta.tests \
 	$(am__EXEEXT_1)
 XFAIL_TESTS = $(am__EXEEXT_1)
 subdir = test/subset/data
@@ -449,8 +458,6 @@ CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DIRECTWRITE_CXXFLAGS = @DIRECTWRITE_CXXFLAGS@
-DIRECTWRITE_LIBS = @DIRECTWRITE_LIBS@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -607,9 +614,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 NULL = 
-EXTRA_DIST = $(TESTS) expected/basics expected/full-font \
-	expected/glyf_bug_3131 expected/cff-full-font \
-	expected/japanese expected/cff-japanese \
+EXTRA_DIST = $(TESTS) $(DISABLED_TESTS) expected/32bit_var_store \
+	expected/basics expected/full-font expected/glyf_bug_3131 \
+	expected/cff-full-font expected/japanese expected/cff-japanese \
 	expected/cff.notoserifmyanmar expected/layout \
 	expected/layout.gpos expected/layout.gpos2 \
 	expected/layout.gpos3 expected/layout.gpos4 \
@@ -623,19 +630,27 @@ EXTRA_DIST = $(TESTS) expected/basics expected/full-font \
 	expected/layout.context_format2 expected/layout.gdef-varstore \
 	expected/layout.gdef-attachlist \
 	expected/layout.notonastaliqurdu expected/layout.tinos \
-	expected/layout.default_features \
 	expected/layout.duplicate_features \
 	expected/layout.unsorted_featurelist \
 	expected/layout.drop_feature expected/cmap expected/cmap14 \
 	expected/sbix expected/colr expected/colr_glyphs \
-	expected/colrv1 expected/colr_with_components expected/cbdt \
-	expected/variable expected/glyph_names expected/math \
-	expected/math_coverage_offset expected/post fonts profiles \
-	$(NULL)
+	expected/colrv1 expected/colrv1_copy_varstore \
+	expected/colr_with_components expected/cbdt expected/variable \
+	expected/glyph_names expected/math \
+	expected/math_coverage_offset expected/post \
+	expected/full_instance expected/instance_feature_variations \
+	expected/instantiate_glyf expected/instantiate_cff2 \
+	expected/pin_all_at_default expected/instance_no_double_free \
+	expected/mvar_full_instance \
+	expected/instance_comp_glyph_empty_child \
+	expected/post_apply_mvar_delta expected/apply_cvar_delta fonts \
+	profiles $(NULL)
 CLEANFILES = 
 SUBDIRS = repack_tests
 TEST_EXTENSIONS = .tests
 TESTS_LOG_COMPILER = $(srcdir)/../run-tests.py $(top_builddir)/util/hb-subset$(EXEEXT)
+
+# Disabled because instancing is only available w/ experimental API on.
 DISABLED_TESTS = \
 	$(NULL)
 
