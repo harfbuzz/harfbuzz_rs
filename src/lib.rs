@@ -84,6 +84,7 @@ mod bindings;
 mod blob;
 mod buffer;
 mod common;
+pub mod draw_funcs;
 mod face;
 mod font;
 pub mod font_funcs;

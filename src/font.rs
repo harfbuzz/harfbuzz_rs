@@ -4,16 +4,18 @@ use std::ptr::NonNull;
 use std::os::raw::c_void;
 
 use crate::bindings::{
-    hb_font_create, hb_font_create_sub_font, hb_font_destroy, hb_font_extents_t, hb_font_get_empty,
-    hb_font_get_face, hb_font_get_glyph_contour_point, hb_font_get_glyph_extents,
-    hb_font_get_glyph_from_name, hb_font_get_glyph_h_advance, hb_font_get_glyph_h_origin,
-    hb_font_get_glyph_name, hb_font_get_glyph_v_advance, hb_font_get_glyph_v_origin,
-    hb_font_get_h_extents, hb_font_get_nominal_glyph, hb_font_get_parent, hb_font_get_ppem,
-    hb_font_get_scale, hb_font_get_v_extents, hb_font_get_variation_glyph, hb_font_reference,
-    hb_font_set_funcs, hb_font_set_ppem, hb_font_set_scale, hb_font_set_variations, hb_font_t,
-    hb_glyph_extents_t, hb_position_t,
+    hb_font_create, hb_font_create_sub_font, hb_font_destroy, hb_font_draw_glyph,
+    hb_font_extents_t, hb_font_get_empty, hb_font_get_face, hb_font_get_glyph_contour_point,
+    hb_font_get_glyph_extents, hb_font_get_glyph_from_name, hb_font_get_glyph_h_advance,
+    hb_font_get_glyph_h_origin, hb_font_get_glyph_name, hb_font_get_glyph_v_advance,
+    hb_font_get_glyph_v_origin, hb_font_get_h_extents, hb_font_get_nominal_glyph,
+    hb_font_get_parent, hb_font_get_ppem, hb_font_get_scale, hb_font_get_v_extents,
+    hb_font_get_variation_glyph, hb_font_reference, hb_font_set_funcs, hb_font_set_ppem,
+    hb_font_set_scale, hb_font_set_variations, hb_font_t, hb_glyph_extents_t, hb_position_t,
 };
 use crate::common::{HarfbuzzObject, Owned, Shared};
+pub use crate::draw_funcs::DrawFuncs;
+use crate::draw_funcs::DrawFuncsImpl;
 use crate::face::Face;
 pub use crate::font_funcs::FontFuncs;
 use crate::font_funcs::FontFuncsImpl;
@@ -453,6 +455,21 @@ impl<'a> Font<'a> {
                 None
             }
         }
+    }
+
+    pub fn draw_glyph<FuncsType>(&self, glyph: Glyph, drawfuncs: &FuncsType)
+    where
+        FuncsType: 'a + Send + Sync + DrawFuncs + std::fmt::Debug,
+    {
+        let funcs_impl: Owned<DrawFuncsImpl<FuncsType>> = DrawFuncsImpl::from_trait_impl();
+        unsafe {
+            hb_font_draw_glyph(
+                self.as_raw(),
+                glyph,
+                funcs_impl.as_raw(),
+                drawfuncs as *const _ as *mut std::ffi::c_void,
+            )
+        };
     }
 
     /// Set font variation settings.
