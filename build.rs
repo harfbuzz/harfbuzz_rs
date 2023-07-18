@@ -21,12 +21,7 @@ fn main() {
         .flag("-std=c++11")
         .warnings(false)
         .include("harfbuzz/src")
-        .files(
-            std::fs::read_dir("harfbuzz/src")
-                .expect("Could not find harfbuzz source files.")
-                .map(|direntry| direntry.unwrap().path())
-                .filter(|name| name.ends_with(".cc")),
-        );
+        .file("harfbuzz/src/harfbuzz.cc");
 
     if !target.contains("windows") {
         cfg.define("HAVE_PTHREAD", "1");
