@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="7.1.0"
+VERSION="8.0.1"
 
 wget https://github.com/harfbuzz/harfbuzz/releases/download/$VERSION/harfbuzz-$VERSION.tar.xz
 rm -rf harfbuzz

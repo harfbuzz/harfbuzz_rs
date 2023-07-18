@@ -103,7 +103,7 @@ impl GlyphPosition {
             y_advance,
             x_offset,
             y_offset,
-            var: hb_var_int_t { u32: 0 },
+            var: hb_var_int_t { u32_: 0 },
         }
     }
 }

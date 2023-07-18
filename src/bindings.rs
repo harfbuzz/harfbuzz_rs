@@ -11,12 +11,12 @@ pub type hb_mask_t = u32;
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union _hb_var_int_t {
-    pub u32: u32,
-    pub i32: i32,
-    pub u16: [u16; 2usize],
-    pub i16: [i16; 2usize],
-    pub u8: [u8; 4usize],
-    pub i8: [i8; 4usize],
+    pub u32_: u32,
+    pub i32_: i32,
+    pub u16_: [u16; 2usize],
+    pub i16_: [i16; 2usize],
+    pub u8_: [u8; 4usize],
+    pub i8_: [i8; 4usize],
 }
 #[test]
 fn bindgen_test_layout__hb_var_int_t() {
@@ -33,7 +33,7 @@ fn bindgen_test_layout__hb_var_int_t() {
         concat!("Alignment of ", stringify!(_hb_var_int_t))
     );
     assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).u32) as usize - ptr as usize },
+        unsafe { ::std::ptr::addr_of!((*ptr).u32_) as usize - ptr as usize },
         0usize,
         concat!(
             "Offset of field: ",
@@ -43,7 +43,7 @@ fn bindgen_test_layout__hb_var_int_t() {
         )
     );
     assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).i32) as usize - ptr as usize },
+        unsafe { ::std::ptr::addr_of!((*ptr).i32_) as usize - ptr as usize },
         0usize,
         concat!(
             "Offset of field: ",
@@ -53,7 +53,7 @@ fn bindgen_test_layout__hb_var_int_t() {
         )
     );
     assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).u16) as usize - ptr as usize },
+        unsafe { ::std::ptr::addr_of!((*ptr).u16_) as usize - ptr as usize },
         0usize,
         concat!(
             "Offset of field: ",
@@ -63,7 +63,7 @@ fn bindgen_test_layout__hb_var_int_t() {
         )
     );
     assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).i16) as usize - ptr as usize },
+        unsafe { ::std::ptr::addr_of!((*ptr).i16_) as usize - ptr as usize },
         0usize,
         concat!(
             "Offset of field: ",
@@ -73,7 +73,7 @@ fn bindgen_test_layout__hb_var_int_t() {
         )
     );
     assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).u8) as usize - ptr as usize },
+        unsafe { ::std::ptr::addr_of!((*ptr).u8_) as usize - ptr as usize },
         0usize,
         concat!(
             "Offset of field: ",
@@ -83,7 +83,7 @@ fn bindgen_test_layout__hb_var_int_t() {
         )
     );
     assert_eq!(
-        unsafe { ::std::ptr::addr_of!((*ptr).i8) as usize - ptr as usize },
+        unsafe { ::std::ptr::addr_of!((*ptr).i8_) as usize - ptr as usize },
         0usize,
         concat!(
             "Offset of field: ",
@@ -840,7 +840,7 @@ pub const HB_UNICODE_COMBINING_CLASS_CCC118: hb_unicode_combining_class_t = 118;
 pub const HB_UNICODE_COMBINING_CLASS_CCC122: hb_unicode_combining_class_t = 122;
 pub const HB_UNICODE_COMBINING_CLASS_CCC129: hb_unicode_combining_class_t = 129;
 pub const HB_UNICODE_COMBINING_CLASS_CCC130: hb_unicode_combining_class_t = 130;
-pub const HB_UNICODE_COMBINING_CLASS_CCC133: hb_unicode_combining_class_t = 132;
+pub const HB_UNICODE_COMBINING_CLASS_CCC132: hb_unicode_combining_class_t = 132;
 pub const HB_UNICODE_COMBINING_CLASS_ATTACHED_BELOW_LEFT: hb_unicode_combining_class_t = 200;
 pub const HB_UNICODE_COMBINING_CLASS_ATTACHED_BELOW: hb_unicode_combining_class_t = 202;
 pub const HB_UNICODE_COMBINING_CLASS_ATTACHED_ABOVE: hb_unicode_combining_class_t = 214;
@@ -857,7 +857,7 @@ pub const HB_UNICODE_COMBINING_CLASS_DOUBLE_BELOW: hb_unicode_combining_class_t 
 pub const HB_UNICODE_COMBINING_CLASS_DOUBLE_ABOVE: hb_unicode_combining_class_t = 234;
 pub const HB_UNICODE_COMBINING_CLASS_IOTA_SUBSCRIPT: hb_unicode_combining_class_t = 240;
 pub const HB_UNICODE_COMBINING_CLASS_INVALID: hb_unicode_combining_class_t = 255;
-#[doc = " hb_unicode_combining_class_t:\n @HB_UNICODE_COMBINING_CLASS_NOT_REORDERED: Spacing and enclosing marks; also many vowel and consonant signs, even if nonspacing\n @HB_UNICODE_COMBINING_CLASS_OVERLAY: Marks which overlay a base letter or symbol\n @HB_UNICODE_COMBINING_CLASS_NUKTA: Diacritic nukta marks in Brahmi-derived scripts\n @HB_UNICODE_COMBINING_CLASS_KANA_VOICING: Hiragana/Katakana voicing marks\n @HB_UNICODE_COMBINING_CLASS_VIRAMA: Viramas\n @HB_UNICODE_COMBINING_CLASS_CCC10: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC11: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC12: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC13: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC14: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC15: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC16: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC17: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC18: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC19: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC20: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC21: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC22: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC23: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC24: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC25: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC26: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC27: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC28: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC29: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC30: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC31: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC32: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC33: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC34: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC35: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC36: [Syriac]\n @HB_UNICODE_COMBINING_CLASS_CCC84: [Telugu]\n @HB_UNICODE_COMBINING_CLASS_CCC91: [Telugu]\n @HB_UNICODE_COMBINING_CLASS_CCC103: [Thai]\n @HB_UNICODE_COMBINING_CLASS_CCC107: [Thai]\n @HB_UNICODE_COMBINING_CLASS_CCC118: [Lao]\n @HB_UNICODE_COMBINING_CLASS_CCC122: [Lao]\n @HB_UNICODE_COMBINING_CLASS_CCC129: [Tibetan]\n @HB_UNICODE_COMBINING_CLASS_CCC130: [Tibetan]\n @HB_UNICODE_COMBINING_CLASS_CCC133: [Tibetan]\n @HB_UNICODE_COMBINING_CLASS_ATTACHED_BELOW_LEFT: Marks attached at the bottom left\n @HB_UNICODE_COMBINING_CLASS_ATTACHED_BELOW: Marks attached directly below\n @HB_UNICODE_COMBINING_CLASS_ATTACHED_ABOVE: Marks attached directly above\n @HB_UNICODE_COMBINING_CLASS_ATTACHED_ABOVE_RIGHT: Marks attached at the top right\n @HB_UNICODE_COMBINING_CLASS_BELOW_LEFT: Distinct marks at the bottom left\n @HB_UNICODE_COMBINING_CLASS_BELOW: Distinct marks directly below\n @HB_UNICODE_COMBINING_CLASS_BELOW_RIGHT: Distinct marks at the bottom right\n @HB_UNICODE_COMBINING_CLASS_LEFT: Distinct marks to the left\n @HB_UNICODE_COMBINING_CLASS_RIGHT: Distinct marks to the right\n @HB_UNICODE_COMBINING_CLASS_ABOVE_LEFT: Distinct marks at the top left\n @HB_UNICODE_COMBINING_CLASS_ABOVE: Distinct marks directly above\n @HB_UNICODE_COMBINING_CLASS_ABOVE_RIGHT: Distinct marks at the top right\n @HB_UNICODE_COMBINING_CLASS_DOUBLE_BELOW: Distinct marks subtending two bases\n @HB_UNICODE_COMBINING_CLASS_DOUBLE_ABOVE: Distinct marks extending above two bases\n @HB_UNICODE_COMBINING_CLASS_IOTA_SUBSCRIPT: Greek iota subscript only\n @HB_UNICODE_COMBINING_CLASS_INVALID: Invalid combining class\n\n Data type for the Canonical_Combining_Class (ccc) property\n from the Unicode Character Database.\n\n <note>Note: newer versions of Unicode may add new values.\n Client programs should be ready to handle any value in the 0..254 range\n being returned from hb_unicode_combining_class().</note>\n"]
+#[doc = " hb_unicode_combining_class_t:\n @HB_UNICODE_COMBINING_CLASS_NOT_REORDERED: Spacing and enclosing marks; also many vowel and consonant signs, even if nonspacing\n @HB_UNICODE_COMBINING_CLASS_OVERLAY: Marks which overlay a base letter or symbol\n @HB_UNICODE_COMBINING_CLASS_NUKTA: Diacritic nukta marks in Brahmi-derived scripts\n @HB_UNICODE_COMBINING_CLASS_KANA_VOICING: Hiragana/Katakana voicing marks\n @HB_UNICODE_COMBINING_CLASS_VIRAMA: Viramas\n @HB_UNICODE_COMBINING_CLASS_CCC10: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC11: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC12: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC13: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC14: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC15: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC16: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC17: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC18: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC19: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC20: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC21: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC22: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC23: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC24: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC25: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC26: [Hebrew]\n @HB_UNICODE_COMBINING_CLASS_CCC27: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC28: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC29: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC30: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC31: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC32: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC33: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC34: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC35: [Arabic]\n @HB_UNICODE_COMBINING_CLASS_CCC36: [Syriac]\n @HB_UNICODE_COMBINING_CLASS_CCC84: [Telugu]\n @HB_UNICODE_COMBINING_CLASS_CCC91: [Telugu]\n @HB_UNICODE_COMBINING_CLASS_CCC103: [Thai]\n @HB_UNICODE_COMBINING_CLASS_CCC107: [Thai]\n @HB_UNICODE_COMBINING_CLASS_CCC118: [Lao]\n @HB_UNICODE_COMBINING_CLASS_CCC122: [Lao]\n @HB_UNICODE_COMBINING_CLASS_CCC129: [Tibetan]\n @HB_UNICODE_COMBINING_CLASS_CCC130: [Tibetan]\n @HB_UNICODE_COMBINING_CLASS_CCC132: [Tibetan] Since: 7.2.0\n @HB_UNICODE_COMBINING_CLASS_ATTACHED_BELOW_LEFT: Marks attached at the bottom left\n @HB_UNICODE_COMBINING_CLASS_ATTACHED_BELOW: Marks attached directly below\n @HB_UNICODE_COMBINING_CLASS_ATTACHED_ABOVE: Marks attached directly above\n @HB_UNICODE_COMBINING_CLASS_ATTACHED_ABOVE_RIGHT: Marks attached at the top right\n @HB_UNICODE_COMBINING_CLASS_BELOW_LEFT: Distinct marks at the bottom left\n @HB_UNICODE_COMBINING_CLASS_BELOW: Distinct marks directly below\n @HB_UNICODE_COMBINING_CLASS_BELOW_RIGHT: Distinct marks at the bottom right\n @HB_UNICODE_COMBINING_CLASS_LEFT: Distinct marks to the left\n @HB_UNICODE_COMBINING_CLASS_RIGHT: Distinct marks to the right\n @HB_UNICODE_COMBINING_CLASS_ABOVE_LEFT: Distinct marks at the top left\n @HB_UNICODE_COMBINING_CLASS_ABOVE: Distinct marks directly above\n @HB_UNICODE_COMBINING_CLASS_ABOVE_RIGHT: Distinct marks at the top right\n @HB_UNICODE_COMBINING_CLASS_DOUBLE_BELOW: Distinct marks subtending two bases\n @HB_UNICODE_COMBINING_CLASS_DOUBLE_ABOVE: Distinct marks extending above two bases\n @HB_UNICODE_COMBINING_CLASS_IOTA_SUBSCRIPT: Greek iota subscript only\n @HB_UNICODE_COMBINING_CLASS_INVALID: Invalid combining class\n\n Data type for the Canonical_Combining_Class (ccc) property\n from the Unicode Character Database.\n\n <note>Note: newer versions of Unicode may add new values.\n Client programs should be ready to handle any value in the 0..254 range\n being returned from hb_unicode_combining_class().</note>\n"]
 pub type hb_unicode_combining_class_t = ::std::os::raw::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2769,17 +2769,6 @@ pub type hb_font_get_glyph_from_name_func_t = ::std::option::Option<
         user_data: *mut ::std::os::raw::c_void,
     ) -> hb_bool_t,
 >;
-#[doc = " hb_font_get_glyph_shape_func_t:\n @font: #hb_font_t to work upon\n @font_data: @font user data pointer\n @glyph: The glyph ID to query\n @draw_funcs: The draw functions to send the shape data to\n @draw_data: The data accompanying the draw functions\n @user_data: User data pointer passed by the caller\n\n A virtual method for the #hb_font_funcs_t of an #hb_font_t object.\n\n Since: 4.0.0\n Deprecated: 7.0.0: Use #hb_font_draw_glyph_func_t instead"]
-pub type hb_font_get_glyph_shape_func_t = ::std::option::Option<
-    unsafe extern "C" fn(
-        font: *mut hb_font_t,
-        font_data: *mut ::std::os::raw::c_void,
-        glyph: hb_codepoint_t,
-        draw_funcs: *mut hb_draw_funcs_t,
-        draw_data: *mut ::std::os::raw::c_void,
-        user_data: *mut ::std::os::raw::c_void,
-    ),
->;
 #[doc = " hb_font_draw_glyph_func_t:\n @font: #hb_font_t to work upon\n @font_data: @font user data pointer\n @glyph: The glyph ID to query\n @draw_funcs: The draw functions to send the shape data to\n @draw_data: The data accompanying the draw functions\n @user_data: User data pointer passed by the caller\n\n A virtual method for the #hb_font_funcs_t of an #hb_font_t object.\n\n Since: 7.0.0\n"]
 pub type hb_font_draw_glyph_func_t = ::std::option::Option<
     unsafe extern "C" fn(
@@ -2949,16 +2938,7 @@ extern "C" {
     );
 }
 extern "C" {
-    #[doc = " hb_font_funcs_set_glyph_shape_func:\n @ffuncs: A font-function structure\n @func: (closure user_data) (destroy destroy) (scope notified): The callback function to assign\n @user_data: Data to pass to @func\n @destroy: (nullable): The function to call when @user_data is not needed anymore\n\n Sets the implementation function for #hb_font_get_glyph_shape_func_t,\n which is the same as #hb_font_draw_glyph_func_t.\n\n Since: 4.0.0\n Deprecated: 7.0.0: Use hb_font_funcs_set_draw_glyph_func() instead"]
-    pub fn hb_font_funcs_set_glyph_shape_func(
-        ffuncs: *mut hb_font_funcs_t,
-        func: hb_font_get_glyph_shape_func_t,
-        user_data: *mut ::std::os::raw::c_void,
-        destroy: hb_destroy_func_t,
-    );
-}
-extern "C" {
-    #[doc = " hb_font_funcs_set_draw_glyph_func:\n @ffuncs: A font-function structure\n @func: (closure user_data) (destroy destroy) (scope notified): The callback function to assign\n @user_data: Data to pass to @func\n @destroy: (nullable): The function to call when @user_data is not needed anymore\n\n Sets the implementation function for #hb_font_draw_glyph_func_t,\n which is the same as #hb_font_get_glyph_shape_func_t.\n\n Since: 7.0.0"]
+    #[doc = " hb_font_funcs_set_draw_glyph_func:\n @ffuncs: A font-function structure\n @func: (closure user_data) (destroy destroy) (scope notified): The callback function to assign\n @user_data: Data to pass to @func\n @destroy: (nullable): The function to call when @user_data is not needed anymore\n\n Sets the implementation function for #hb_font_draw_glyph_func_t.\n\n Since: 7.0.0"]
     pub fn hb_font_funcs_set_draw_glyph_func(
         ffuncs: *mut hb_font_funcs_t,
         func: hb_font_draw_glyph_func_t,
@@ -3098,14 +3078,6 @@ extern "C" {
         len: ::std::os::raw::c_int,
         glyph: *mut hb_codepoint_t,
     ) -> hb_bool_t;
-}
-extern "C" {
-    pub fn hb_font_get_glyph_shape(
-        font: *mut hb_font_t,
-        glyph: hb_codepoint_t,
-        dfuncs: *mut hb_draw_funcs_t,
-        draw_data: *mut ::std::os::raw::c_void,
-    );
 }
 extern "C" {
     pub fn hb_font_draw_glyph(
@@ -4119,6 +4091,34 @@ extern "C" {
         bottom_glyph: hb_codepoint_t,
     ) -> hb_position_t;
 }
+#[doc = " hb_font_get_glyph_shape_func_t:\n @font: #hb_font_t to work upon\n @font_data: @font user data pointer\n @glyph: The glyph ID to query\n @draw_funcs: The draw functions to send the shape data to\n @draw_data: The data accompanying the draw functions\n @user_data: User data pointer passed by the caller\n\n A virtual method for the #hb_font_funcs_t of an #hb_font_t object.\n\n Since: 4.0.0\n Deprecated: 7.0.0: Use #hb_font_draw_glyph_func_t instead"]
+pub type hb_font_get_glyph_shape_func_t = ::std::option::Option<
+    unsafe extern "C" fn(
+        font: *mut hb_font_t,
+        font_data: *mut ::std::os::raw::c_void,
+        glyph: hb_codepoint_t,
+        draw_funcs: *mut hb_draw_funcs_t,
+        draw_data: *mut ::std::os::raw::c_void,
+        user_data: *mut ::std::os::raw::c_void,
+    ),
+>;
+extern "C" {
+    #[doc = " hb_font_funcs_set_glyph_shape_func:\n @ffuncs: A font-function structure\n @func: (closure user_data) (destroy destroy) (scope notified): The callback function to assign\n @user_data: Data to pass to @func\n @destroy: (nullable): The function to call when @user_data is not needed anymore\n\n Sets the implementation function for #hb_font_get_glyph_shape_func_t,\n which is the same as #hb_font_draw_glyph_func_t.\n\n Since: 4.0.0\n Deprecated: 7.0.0: Use hb_font_funcs_set_draw_glyph_func() instead"]
+    pub fn hb_font_funcs_set_glyph_shape_func(
+        ffuncs: *mut hb_font_funcs_t,
+        func: hb_font_get_glyph_shape_func_t,
+        user_data: *mut ::std::os::raw::c_void,
+        destroy: hb_destroy_func_t,
+    );
+}
+extern "C" {
+    pub fn hb_font_get_glyph_shape(
+        font: *mut hb_font_t,
+        glyph: hb_codepoint_t,
+        dfuncs: *mut hb_draw_funcs_t,
+        draw_data: *mut ::std::os::raw::c_void,
+    );
+}
 extern "C" {
     pub fn hb_shape(
         font: *mut hb_font_t,
@@ -4949,6 +4949,24 @@ extern "C" {
         characters: *mut hb_codepoint_t,
     ) -> ::std::os::raw::c_uint;
 }
+extern "C" {
+    pub fn hb_ot_layout_get_font_extents(
+        font: *mut hb_font_t,
+        direction: hb_direction_t,
+        script_tag: hb_tag_t,
+        language_tag: hb_tag_t,
+        extents: *mut hb_font_extents_t,
+    ) -> hb_bool_t;
+}
+extern "C" {
+    pub fn hb_ot_layout_get_font_extents2(
+        font: *mut hb_font_t,
+        direction: hb_direction_t,
+        script: hb_script_t,
+        language: hb_language_t,
+        extents: *mut hb_font_extents_t,
+    ) -> hb_bool_t;
+}
 pub const HB_OT_LAYOUT_BASELINE_TAG_ROMAN: hb_ot_layout_baseline_tag_t = 1919905134;
 pub const HB_OT_LAYOUT_BASELINE_TAG_HANGING: hb_ot_layout_baseline_tag_t = 1751215719;
 pub const HB_OT_LAYOUT_BASELINE_TAG_IDEO_FACE_BOTTOM_OR_LEFT: hb_ot_layout_baseline_tag_t =
@@ -4981,12 +4999,32 @@ extern "C" {
     ) -> hb_bool_t;
 }
 extern "C" {
+    pub fn hb_ot_layout_get_baseline2(
+        font: *mut hb_font_t,
+        baseline_tag: hb_ot_layout_baseline_tag_t,
+        direction: hb_direction_t,
+        script: hb_script_t,
+        language: hb_language_t,
+        coord: *mut hb_position_t,
+    ) -> hb_bool_t;
+}
+extern "C" {
     pub fn hb_ot_layout_get_baseline_with_fallback(
         font: *mut hb_font_t,
         baseline_tag: hb_ot_layout_baseline_tag_t,
         direction: hb_direction_t,
         script_tag: hb_tag_t,
         language_tag: hb_tag_t,
+        coord: *mut hb_position_t,
+    );
+}
+extern "C" {
+    pub fn hb_ot_layout_get_baseline_with_fallback2(
+        font: *mut hb_font_t,
+        baseline_tag: hb_ot_layout_baseline_tag_t,
+        direction: hb_direction_t,
+        script: hb_script_t,
+        language: hb_language_t,
         coord: *mut hb_position_t,
     );
 }
