@@ -159,8 +159,9 @@ impl GlyphInfo {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum ClusterLevel {
+    #[default]
     MonotoneGraphemes,
     MonotoneCharacters,
     Characters,
@@ -182,12 +183,6 @@ impl ClusterLevel {
             ClusterLevel::MonotoneCharacters => HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS,
             ClusterLevel::Characters => HB_BUFFER_CLUSTER_LEVEL_CHARACTERS,
         }
-    }
-}
-
-impl Default for ClusterLevel {
-    fn default() -> Self {
-        ClusterLevel::MonotoneGraphemes
     }
 }
 
