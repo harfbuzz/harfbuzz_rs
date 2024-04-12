@@ -1,4 +1,3 @@
-use std;
 use std::ptr::NonNull;
 
 use std::os::raw::c_void;
@@ -58,7 +57,7 @@ impl FontExtents {
 pub type GlyphExtents = hb_glyph_extents_t;
 
 pub(crate) extern "C" fn destroy_box<U>(ptr: *mut c_void) {
-    unsafe { Box::from_raw(ptr as *mut U) };
+    _ = unsafe { Box::from_raw(ptr as *mut U) };
 }
 
 /// A type representing a single font (i.e. a specific combination of typeface,

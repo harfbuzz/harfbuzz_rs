@@ -1,6 +1,5 @@
 use std::os::raw::c_void;
 
-use std;
 use std::marker::PhantomData;
 
 use std::fmt;
@@ -89,7 +88,7 @@ impl<'a> Blob<'a> {
         let data = Box::into_raw(boxxed);
 
         extern "C" fn destroy<U>(ptr: *mut c_void) {
-            unsafe { Box::from_raw(ptr as *mut U) };
+            _ = unsafe { Box::from_raw(ptr as *mut U) };
         }
 
         let hb_blob = unsafe {

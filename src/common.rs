@@ -112,7 +112,6 @@ pub enum TagFromStrErr {
     ZeroLengthString,
 }
 
-use std;
 use std::str::FromStr;
 
 impl FromStr for Tag {

@@ -1,4 +1,3 @@
-use std;
 use std::os::raw::c_void;
 use std::ptr::NonNull;
 
@@ -56,7 +55,7 @@ impl<'a> Face<'a> {
 
     /// Create a face from the bytes of a given slice and an index specifying
     /// which font to read from an OpenType font collection.
-    pub fn from_bytes<'b>(bytes: &'b [u8], index: u32) -> Owned<Face<'b>> {
+    pub fn from_bytes(bytes: &[u8], index: u32) -> Owned<Face<'_>> {
         let blob = Blob::with_bytes(bytes);
         Face::new(blob, index)
     }
@@ -68,7 +67,7 @@ impl<'a> Face<'a> {
         F: 'b + Send + Sync + FnMut(Tag) -> Option<Shared<Blob<'b>>>,
     {
         extern "C" fn destroy_box<U>(ptr: *mut c_void) {
-            unsafe { Box::from_raw(ptr as *mut U) };
+            _ = unsafe { Box::from_raw(ptr as *mut U) };
         }
         extern "C" fn table_func<'b, F>(
             _: *mut hb_face_t,
