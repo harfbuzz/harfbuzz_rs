@@ -17,8 +17,8 @@ use crate::bindings::hb_blob_is_immutable;
 use crate::bindings::hb_blob_make_immutable;
 use crate::bindings::hb_blob_reference;
 use crate::bindings::hb_blob_t;
-use crate::bindings::HB_MEMORY_MODE_READONLY;
-use crate::bindings::HB_MEMORY_MODE_WRITABLE;
+use crate::bindings::hb_memory_mode_t_HB_MEMORY_MODE_READONLY as HB_MEMORY_MODE_READONLY;
+use crate::bindings::hb_memory_mode_t_HB_MEMORY_MODE_WRITABLE as HB_MEMORY_MODE_WRITABLE;
 use crate::common::{HarfbuzzObject, Owned, Shared};
 
 /// A `Blob` manages raw data like e.g. file contents. It refers to a slice of
