@@ -110,7 +110,7 @@ pub(crate) fn start_end_range(range: impl RangeBounds<usize>) -> (c_uint, c_uint
     // We have to do careful bounds checking since c_uint may be of
     // different sizes on different platforms. We do assume that
     // sizeof(usize) >= sizeof(c_uint).
-    const MAX_UINT: usize = c_uint::max_value() as usize;
+    const MAX_UINT: usize = c_uint::MAX as usize;
     let start = match range.start_bound() {
         Bound::Included(&included) => included.min(MAX_UINT) as c_uint,
         Bound::Excluded(&excluded) => excluded.min(MAX_UINT - 1) as c_uint + 1,
@@ -119,7 +119,7 @@ pub(crate) fn start_end_range(range: impl RangeBounds<usize>) -> (c_uint, c_uint
     let end = match range.end_bound() {
         Bound::Included(&included) => included.saturating_add(1).min(MAX_UINT) as c_uint,
         Bound::Excluded(&excluded) => excluded.min(MAX_UINT) as c_uint,
-        Bound::Unbounded => c_uint::max_value(),
+        Bound::Unbounded => c_uint::MAX,
     };
     (start, end)
 }
@@ -289,7 +289,7 @@ mod tests {
     #[test]
     fn feature_new() {
         let tag = b"abcd".into();
-        const UINT_MAX: usize = std::os::raw::c_uint::max_value() as usize;
+        const UINT_MAX: usize = std::os::raw::c_uint::MAX as usize;
 
         let feature = Feature::new(tag, 100, 2..100);
         assert_feature(feature, tag, 100, 2, 100);

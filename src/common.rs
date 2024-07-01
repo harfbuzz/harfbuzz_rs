@@ -230,7 +230,7 @@ pub struct InvalidLanguage;
 impl FromStr for Language {
     type Err = InvalidLanguage;
     fn from_str(s: &str) -> Result<Language, InvalidLanguage> {
-        let len = std::cmp::min(s.len(), std::i32::MAX as _) as i32;
+        let len = std::cmp::min(s.len(), i32::MAX as _) as i32;
         let lang = unsafe { hb_language_from_string(s.as_ptr() as *mut _, len) };
         if lang.is_null() {
             Err(InvalidLanguage {})

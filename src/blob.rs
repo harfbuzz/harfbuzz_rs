@@ -272,7 +272,7 @@ mod tests {
     #[test]
     fn test_arc_vec_to_blob_conversion() {
         let rc_slice: Arc<Vec<u8>> = Arc::new(vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
-        let blob: Owned<Blob<'static>> = Blob::with_bytes_owned(rc_slice.clone(), |t| &*t);
+        let blob: Owned<Blob<'static>> = Blob::with_bytes_owned(rc_slice.clone(), |t| t);
         assert_eq!(Arc::strong_count(&rc_slice), 2);
 
         assert_eq!(blob.len(), 11);

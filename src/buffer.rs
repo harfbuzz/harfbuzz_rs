@@ -297,7 +297,7 @@ impl GenericBuffer {
     }
 
     pub(crate) fn pre_allocate(&mut self, size: usize) {
-        let size = size.min(std::os::raw::c_uint::max_value() as usize);
+        let size = size.min(std::os::raw::c_uint::MAX as usize);
         unsafe { hb_buffer_pre_allocate(self.as_raw(), size as _) };
     }
 
@@ -647,7 +647,7 @@ impl UnicodeBuffer {
     /// ```
     ///
     pub fn append(mut self, other: &UnicodeBuffer) -> UnicodeBuffer {
-        self.0.append(&other.0, 0, c_uint::max_value());
+        self.0.append(&other.0, 0, c_uint::MAX);
         self
     }
 
