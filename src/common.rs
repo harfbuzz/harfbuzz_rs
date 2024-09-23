@@ -200,14 +200,10 @@ impl Debug for Language {
 use std::ffi::CStr;
 
 use crate::bindings::{
-    hb_direction_t, hb_direction_t_HB_DIRECTION_BTT as HB_DIRECTION_BTT,
-    hb_direction_t_HB_DIRECTION_INVALID as HB_DIRECTION_INVALID,
-    hb_direction_t_HB_DIRECTION_LTR as HB_DIRECTION_LTR,
-    hb_direction_t_HB_DIRECTION_RTL as HB_DIRECTION_RTL,
-    hb_direction_t_HB_DIRECTION_TTB as HB_DIRECTION_TTB, hb_language_from_string,
-    hb_language_get_default, hb_language_t, hb_language_to_string, hb_script_from_iso15924_tag,
-    hb_script_get_horizontal_direction, hb_script_t, hb_script_to_iso15924_tag, hb_tag_from_string,
-    hb_tag_t, hb_tag_to_string,
+    hb_direction_t, hb_language_from_string, hb_language_get_default, hb_language_t,
+    hb_language_to_string, hb_script_from_iso15924_tag, hb_script_get_horizontal_direction,
+    hb_script_t, hb_script_to_iso15924_tag, hb_tag_from_string, hb_tag_t, hb_tag_to_string,
+    HB_DIRECTION_BTT, HB_DIRECTION_INVALID, HB_DIRECTION_LTR, HB_DIRECTION_RTL, HB_DIRECTION_TTB,
 };
 impl Display for Language {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
