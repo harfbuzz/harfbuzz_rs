@@ -3,22 +3,21 @@ name = "harfbuzz_rs"
 version = "2.0.2-alpha.0"
 authors = ["Manuel Reinhardt <manuel.rhdt@gmail.com>"]
 description = "A high-level interface to HarfBuzz, exposing its most important functionality in a safe manner using Rust."
-repository = "https://github.com/manuel-rhdt/harfbuzz_rs"
+repository = "https://github.com/harfbuzz/harfbuzz_rs"
 readme = "README.md"
 keywords = ["text", "ffi", "textlayout", "shaping", "harfbuzz"]
 categories = [
     "api-bindings",
     "external-ffi-bindings",
     "internationalization",
-    "text-processing"
+    "text-processing",
 ]
 license = "MIT"
 edition = "2018"
 links = "harfbuzz"
 
 [badges]
-travis-ci = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master" }
-appveyor = { repository = "manuel-rhdt/harfbuzz_rs", branch = "master", service = "github" }
+maintainence = { status = "passively-maintained" }
 
 [features]
 default = ["build-native-harfbuzz"]
