@@ -2,8 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/harfbuzz_rs.svg)](https://crates.io/crates/harfbuzz_rs)
 [![Documentation](https://docs.rs/harfbuzz_rs/badge.svg)](https://docs.rs/harfbuzz_rs)
-[![Build Status](https://travis-ci.org/manuel-rhdt/harfbuzz_rs.svg?branch=master)](https://travis-ci.org/manuel-rhdt/harfbuzz_rs)
-[![Build status](https://ci.appveyor.com/api/projects/status/tg2xpx3am2iw7nxr?svg=true)](https://ci.appveyor.com/project/manuel-rhdt/harfbuzz-rs)
+[![Build status](https://github.com/harfbuzz/harfbuzz_rs/actions/workflows/rust.yml/badge.svg)](https://github.com/harfbuzz/harfbuzz_rs/actions/workflows/rust.yml)
 
 `harfbuzz_rs` is a high-level interface to HarfBuzz, exposing its most important
 functionality in a safe manner using Rust.
