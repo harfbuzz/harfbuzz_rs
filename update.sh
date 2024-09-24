@@ -1,10 +1,10 @@
 #!/bin/bash
 
-VERSION="8.0.1"
+VERSION="10.0.0"
 
-wget https://github.com/harfbuzz/harfbuzz/releases/download/$VERSION/harfbuzz-$VERSION.tar.xz
-rm -rf harfbuzz
-tar xvf harfbuzz-$VERSION.tar.xz
-rm harfbuzz-$VERSION.tar.xz
-mv harfbuzz-$VERSION harfbuzz
+pushd harfbuzz
+git fetch
+git checkout $VERSION
+popd
+
 bindgen --no-prepend-enum-name --allowlist-function hb_.\* --allowlist-type hb_.\* wrapper.h > src/bindings.rs
