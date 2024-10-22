@@ -90,6 +90,9 @@ mod face;
 mod font;
 pub mod font_funcs;
 
+#[cfg(feature = "freetype")]
+pub mod freetype;
+
 #[cfg(feature = "rusttype")]
 pub mod rusttype;
 
