@@ -18,7 +18,7 @@ fn main() {
 
     let mut cfg = cc::Build::new();
     cfg.cpp(true)
-        .flag("-std=c++11 -O2")
+        .flag("-std=c++11")
         .warnings(false)
         .include("harfbuzz/src")
         .file("harfbuzz/src/harfbuzz.cc");
