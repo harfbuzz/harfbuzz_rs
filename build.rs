@@ -40,4 +40,6 @@ fn main() {
 }
 
 #[cfg(not(feature = "build-native-harfbuzz"))]
-fn main() {}
+fn main() {
+    pkg_config::probe_library("harfbuzz").unwrap();
+}
