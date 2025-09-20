@@ -22,11 +22,15 @@ maintainence = { status = "passively-maintained" }
 [features]
 default = ["build-native-harfbuzz"]
 build-native-harfbuzz = []
+freetype = ["dep:freetype-rs", "dep:freetype-sys"]
 
 [dependencies]
 rusttype = { version = "0.9", optional = true }
+freetype-rs = { version = "0.36", optional = true }
+freetype-sys = { version = "0.20.1", optional = true }
 bitflags = "^1"
 
 [build-dependencies]
 cc = "1.0"
 pkg-config = "0.3.24"
+
