@@ -373,7 +373,7 @@ impl From<SerializeFormat> for hb_buffer_serialize_format_t {
 
 bitflags! {
     /// Flags used for serialization with a `BufferSerializer`.
-    #[derive(Default)]
+    #[derive(Debug, Default)]
     pub struct SerializeFlags: u32 {
         /// Do not serialize glyph cluster.
         const NO_CLUSTERS = HB_BUFFER_SERIALIZE_FLAG_NO_CLUSTERS;
