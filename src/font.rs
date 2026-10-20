@@ -26,6 +26,8 @@ use std::marker::PhantomData;
 pub type Glyph = u32;
 pub type Position = hb_position_t;
 
+const MAX_SCALE: i32 = 1 << 20;
+
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct FontExtents {
@@ -232,6 +234,10 @@ impl<'a> Font<'a> {
 
     /// Sets the EM scale of the font.
     pub fn set_scale(&mut self, x: i32, y: i32) {
+        // set a max scale to prevent potential signed integer overflow in hb
+        // see issue #51
+        let x = x.clamp(-MAX_SCALE, MAX_SCALE);
+        let y = y.clamp(-MAX_SCALE, MAX_SCALE);
         unsafe { hb_font_set_scale(self.as_raw_mut(), x, y) };
     }
 
