@@ -122,6 +122,11 @@ impl<'a> Blob<'a> {
         unsafe {
             let mut length = hb_blob_get_length(self.as_raw());
             let data_ptr = hb_blob_get_data(self.as_raw(), &mut length as *mut _);
+            if data_ptr.is_null() || length == 0 {
+                // HarfBuzz returns a null pointer for empty blobs, which is not
+                // a valid pointer for `from_raw_parts`.
+                return &[];
+            }
             std::slice::from_raw_parts(data_ptr as *const u8, length as usize)
         }
     }
@@ -285,5 +290,45 @@ mod tests {
 
         std::mem::drop(blob);
         assert_eq!(Arc::strong_count(&rc_slice), 1);
+    }
+
+    #[test]
+    fn test_empty_blob_data() {
+        let blob = Blob::with_bytes(&[]);
+        assert_eq!(blob.len(), 0);
+        assert!(blob.get_data().is_empty());
+        assert!(blob.is_empty());
+
+        let blob: Shared<Blob<'static>> = Vec::<u8>::new().into();
+        assert!(blob.get_data().is_empty());
+        assert_eq!(&**blob, &[] as &[u8]);
+    }
+
+    #[test]
+    fn test_empty_blob_mut_data() {
+        // HarfBuzz hands out its immutable empty blob for zero-length data, so
+        // there is never writable data. Accessing it must not be UB or panic.
+        let mut buf: [u8; 0] = [];
+        let mut blob = Blob::with_bytes_mut(&mut buf);
+        match blob.try_get_mut_data() {
+            None => {}
+            Some(data) => assert!(data.is_empty()),
+        }
+
+        let mut vec_blob = Blob::with_bytes(&[]);
+        match vec_blob.try_get_mut_data() {
+            None => {}
+            Some(data) => assert!(data.is_empty()),
+        }
+    }
+
+    #[test]
+    fn test_zero_length_sub_blob() {
+        let data = [1u8, 2, 3];
+        let blob = Blob::with_bytes(&data);
+        let sub = blob.create_sub_blob(1, 0);
+        assert!(sub.get_data().is_empty());
+        let sub = blob.create_sub_blob(3, 0);
+        assert!(sub.get_data().is_empty());
     }
 }
