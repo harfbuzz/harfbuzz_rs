@@ -1,6 +1,6 @@
 [package]
 name = "harfbuzz_rs"
-version = "2.0.2-alpha.0"
+version = "3.0.0"
 authors = ["Manuel Reinhardt <manuel.rhdt@gmail.com>"]
 description = "A high-level interface to HarfBuzz, exposing its most important functionality in a safe manner using Rust."
 repository = "https://github.com/harfbuzz/harfbuzz_rs"
@@ -15,6 +15,17 @@ categories = [
 license = "MIT"
 edition = "2018"
 links = "harfbuzz"
+include = [
+    "/src/**",
+    "/harfbuzz/src/**",
+    "/harfbuzz/COPYING",
+    "/build.rs",
+    "/wrapper.h",
+    "/examples/**",
+    "/README.md",
+    "/LICENSE",
+    "/CHANGELOG.md",
+]
 
 [badges]
 maintainence = { status = "passively-maintained" }

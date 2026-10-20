@@ -76,7 +76,7 @@ Note that harfbuzz internally supports scaling fonts itself as well (using `font
 
 # Bundled harfbuzz
 
-By default this crate compiles the harfbuzz version bundled with it (currently 11.3.3) and links it statically. This needs a C++ compiler.
+By default this crate compiles the harfbuzz version bundled with it (currently 14.6.0) and links it statically. This needs a C++ compiler.
 
 To link against a system harfbuzz instead, set the environment variable `HARFBUZZ_RS_USE_PKG_CONFIG=1` when building. Alternatively, disable the default features:
 
