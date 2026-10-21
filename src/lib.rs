@@ -69,10 +69,6 @@
 //! ```
 #![deny(missing_debug_implementations)]
 
-/// Reexported `harfbuzz_sys` crate to directly access the C API whenever no
-/// adequate wrapper is provided.
-// This will hopefully not cause backwards compability concerns since harfbuzz
-// tries to be backwards compatible.
 #[macro_use]
 extern crate bitflags;
 
@@ -81,7 +77,19 @@ extern crate bitflags;
 #[allow(non_upper_case_globals)]
 #[allow(deref_nullptr)]
 #[allow(dead_code)]
+#[allow(missing_debug_implementations)]
 mod bindings;
+
+/// Raw bindings to the HarfBuzz C API, for functionality that has no adequate
+/// wrapper yet.
+///
+/// Available with the `sys` cargo feature. These bindings are generated from
+/// the bundled HarfBuzz headers.
+#[cfg(feature = "sys")]
+pub mod sys {
+    pub use crate::bindings::*;
+}
+
 mod blob;
 mod buffer;
 mod common;

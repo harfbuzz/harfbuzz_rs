@@ -1,6 +1,6 @@
 [package]
 name = "harfbuzz_rs"
-version = "3.0.0"
+version = "3.0.1"
 authors = ["Manuel Reinhardt <manuel.rhdt@gmail.com>"]
 description = "A high-level interface to HarfBuzz, exposing its most important functionality in a safe manner using Rust."
 repository = "https://github.com/harfbuzz/harfbuzz_rs"
@@ -33,6 +33,7 @@ maintainence = { status = "passively-maintained" }
 [features]
 default = ["build-native-harfbuzz"]
 build-native-harfbuzz = []
+sys = []
 
 [dependencies]
 rusttype = { version = "0.9", optional = true }
