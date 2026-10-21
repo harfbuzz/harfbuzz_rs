@@ -74,9 +74,18 @@ In this example, to convert a value, say `x_advance`, from font-units to points,
 
 Note that harfbuzz internally supports scaling fonts itself as well (using `font.set_scale(...)`, etc.) but in my opinion it is easier to scale the results oneself as described in the paragraph above.
 
-# Supported HarfBuzz versions
+# Bundled harfbuzz
 
-This crate is tested to work with harfbuzz versions 2.0 and higher. Older versions may work as well. I recommend statically linking the harfbuzz library provided by the `harfbuzz-sys` crate which is always up-to-date.
+By default this crate compiles the harfbuzz version bundled with it (currently 11.3.3) and links it statically. This needs a C++ compiler.
+
+To link against a system harfbuzz instead, set the environment variable `HARFBUZZ_RS_USE_PKG_CONFIG=1` when building. Alternatively, disable the default features:
+
+```toml
+[dependencies]
+harfbuzz_rs = { version = "3", default-features = false }
+```
+
+In both cases the build script locates harfbuzz using `pkg-config` and fails if it cannot be found. The harfbuzz development files must be installed, e.g. `libharfbuzz-dev` on Debian/Ubuntu, `harfbuzz-devel` on Fedora, or `brew install harfbuzz` on macOS.
 
 # Optional Features
 
