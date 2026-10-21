@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="10.0.0"
+VERSION="14.6.0"
 
 pushd harfbuzz
 git fetch
